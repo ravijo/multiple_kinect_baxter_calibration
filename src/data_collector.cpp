@@ -1,3 +1,9 @@
+/**
+* data_collector.cpp: class file for collecting data
+* Author: Ravi Joshi
+* Date: 2018/02/17
+*/
+
 #include <vector>
 #include <ros/ros.h>
 #include <csvfile.h>
@@ -14,7 +20,7 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
-// baxter arm motion state moving:0, stop:1, finished:2
+// baxter arm motion state (moving:0, stop:1, finished:2)
 #define MOVING 0
 #define STOP 1
 #define FINISHED 2
@@ -22,7 +28,7 @@
 class DataCollector
 {
   private:
-    int baxter_arm_motion_state; //  moving:0, stop:1, finished:2
+    int baxter_arm_motion_state; // moving:0, stop:1, finished:2
     Eigen::Matrix4d t_ball_wrt_ee;
     std_msgs::Bool still_processing;
     std::string pc_topic, ee_topic, data_dir;
@@ -191,8 +197,7 @@ void DataCollector::recordBallPositionWrtBaxter(baxter_core_msgs::EndpointStateC
 
     std::vector<float> baxter;
     for (int i = 0; i < 3; i++)
-        //baxter.push_back(t(i, 3));
-        baxter.push_back(t_ee_wrt_base(i, 3));
+        baxter.push_back(t(i, 3));
 
     position_wrt_baxter.push_back(baxter);
 }
@@ -246,23 +251,23 @@ void DataCollector::callback(const baxter_core_msgs::EndpointStateConstPtr& ee_m
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
     getPointCloudFromMsg(pc_msg, cloud);
 
-    pcl::ModelCoefficients sphere_coefficients;
-    bool success = sphere_detector->segmentSphere(cloud, sphere_coefficients);
-
+    pcl::ModelCoefficients sphere_coff;
+    bool success = sphere_detector->segmentSphere(cloud, sphere_coff);
+    
     if (success)
     {
         ROS_DEBUG("Sphere detection successfull");
-
+    
         recordBallPositionWrtBaxter(ee_msg);
-        recordBallPositionWrtKinect(sphere_coefficients);
-
+        recordBallPositionWrtKinect(sphere_coff);
+    
         if (!pc_viewer->updatePointCloud(cloud, "cloud"))
             pc_viewer->addPointCloud(cloud, "cloud");
-
-        pcl::PointXYZ detectedSphere(sphere_coefficients.values[0], sphere_coefficients.values[1], sphere_coefficients.values[2]);
-        if (!pc_viewer->updateSphere(detectedSphere, sphere_coefficients.values[3], 51, 255, 87, "detected_sphere"))
-            pc_viewer->addSphere(detectedSphere, sphere_coefficients.values[3], 51, 255, 87, "detected_sphere");
-
+    
+        pcl::PointXYZ detected_sphere(sphere_coff.values[0], sphere_coff.values[1], sphere_coff.values[2]);
+        if (!pc_viewer->updateSphere(detected_sphere, sphere_coff.values[3], 51, 255, 87, "detected_sphere"))
+            pc_viewer->addSphere(detected_sphere, sphere_coff.values[3], 51, 255, 87, "detected_sphere");
+    
         pc_viewer->spinOnce();
     }
     else
@@ -351,6 +356,8 @@ std::vector<float> DataCollector::stringToArray(std::string str)
 {
     // remove spaces
     str.erase(std::remove_if(str.begin(), str.end(), ::isspace), str.end());
+    
+    // split string by comma
     std::vector<std::string> str_array;
     boost::split(str_array, str, boost::is_any_of(","));
 
@@ -358,6 +365,7 @@ std::vector<float> DataCollector::stringToArray(std::string str)
     str_array[0] = str_array[0].substr(1);
     str_array[2] = str_array[2].substr(0, str_array[2].size() -1);
 
+    // convert all string to float
     std::vector<float> float_array(str_array.size());
     for (int i = 0; i < str_array.size(); i++)
         float_array[i] = atof(str_array[i].c_str());
