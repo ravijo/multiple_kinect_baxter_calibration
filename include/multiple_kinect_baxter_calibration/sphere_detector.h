@@ -50,7 +50,7 @@ namespace pcl_project
       * Constructor of SphereDetector class
       * Input:
       *   float sphere_radius = radius of the sphere in m
-      *   std::vector<float>* min_hsv= minimum HSV values
+      *   std::vector<float>* min_hsv = minimum HSV values
       *   std::vector<float>* max_hsv = maximum HSV values
       *   RansacParams* ransac_params = Ransac params
       */
