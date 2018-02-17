@@ -20,7 +20,6 @@ class BaxterController():
         baxter_status_pub = rospy.Publisher('baxter_arm_motion_status', Int8, queue_size=10)
         rospy.Subscriber('is_data_collection_happening', Bool, self.callback)
 
-        #rospy.sleep(wait_time)
         while not rospy.is_shutdown():
             if trajectory_index >= trajectory.shape[0]:
                 baxter_moving = 2  # moving:0, stop:1, finished:2
