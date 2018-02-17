@@ -22,19 +22,19 @@ Date: 2018/02/16
   <arg name="max_hsv" default="[64, 0.8, 1.0]"/>
 
   <!--
-  ################################################################################
-  # FOLLOWING CONFIGURATIONS ARE USED IN SAC_RANSAC USING SACMODEL_NORMAL_SPHERE #
-  # SEE BELOW URL FOR MORE INFO-                                                 #
-  # http://docs.pointclouds.org/1.7.0/group__sample__consensus.html              #
-  ################################################################################
+  ###################################################################
+  # FOLLOWING CONFIGURATIONS ARE USED IN 'SAC_RANSAC' USING         #
+  # 'SACMODEL_NORMAL_SPHERE'. SEE BELOW URL FOR MORE INFO-          #
+  # http://docs.pointclouds.org/1.7.0/group__sample__consensus.html #
+  ###################################################################
   -->
   <!-- radius of sphere (in meter) -->
   <arg name="radius" default="0.034"/>
   <!-- length of stick to hold the sphere (in meter) -->
   <arg name="offset" default="0.051"/>
-    <!-- number of 'k' nearest neighbors to use for feature estimation -->
+  <!-- number of 'k' nearest neighbors to use for feature estimation -->
   <arg name="k_neighbors" default="10"/>
-    <!-- normal angular distance weight -->
+  <!-- normal angular distance weight -->
   <arg name="weight" default="0.05"/>
   <!-- maximum number of iterations before giving up -->
   <arg name="max_itr" default="1000"/>
