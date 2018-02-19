@@ -7,8 +7,8 @@ Date: 2018/02/16
 <launch>
   <!-- make sure it matches with argument 'ee_topic' provided to 'data_collector' below -->
   <arg name="limb" default="right"/>
-  <!-- wait time to stablize arm before capturing point cloud -->
-  <arg name="wait_time" default="2"/>
+  <!-- wait time to stablize arm before capturing point cloud (seconds)-->
+  <arg name="wait_time" default="4"/>
   <!-- baxter arm pre-defined trajectory -->
   <arg name="trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
   <node name="baxter_controller" pkg="multiple_kinect_baxter_calibration" type="baxter_controller.py" output="screen">
@@ -18,8 +18,8 @@ Date: 2018/02/16
   </node>
 
   <!-- minimum and maximum HSV values for sphere segmentation -->
-  <arg name="min_hsv" default="[60, 0.6, 0.3]"/>
-  <arg name="max_hsv" default="[64, 0.8, 1.0]"/>
+  <arg name="min_hsv" default="[55, 0.3, 0.6]"/>
+  <arg name="max_hsv" default="[65, 1.0, 1.0]"/>
 
   <!--
   ###################################################################
@@ -52,9 +52,9 @@ Date: 2018/02/16
   provided to 'baxter_controller' above  -->
   <arg name="ee_topic" default="/robot/limb/right/endpoint_state"/>
   <!-- rostopic for receving point cloud -->
-  <arg name="pc_topic" default="/kinect2/sd/points"/>
+  <arg name="pc_topic" default="/kinect_anywhere/point_cloud/points2"/>
   <!-- directory for saving collected data -->
-  <arg name="data_dir" default="$(find multiple_kinect_baxter_calibration)/files/"/>
+  <arg name="data_dir" default="$(find multiple_kinect_baxter_calibration)/files"/>
   <node name="data_collector" pkg="multiple_kinect_baxter_calibration" type="data_collector" output="screen">
     <param name="min_hsv" value="$(arg min_hsv)"/>
     <param name="max_hsv" value="$(arg max_hsv)"/>

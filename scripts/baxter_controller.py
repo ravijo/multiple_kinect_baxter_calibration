@@ -17,8 +17,11 @@ class BaxterController():
         joint_names = arm.joint_names()
         trajectory = np.loadtxt(file_name, delimiter=',', skiprows=1)
 
-        baxter_status_pub = rospy.Publisher('baxter_arm_motion_status', Int8, queue_size=10)
-        rospy.Subscriber('is_data_collection_happening', Bool, self.callback)
+        data_collection_progress_topic = '/multiple_kinect_baxter_calibration/is_data_collection_happening'
+        baxter_arm_motion_status_topic = '/multiple_kinect_baxter_calibration/baxter_arm_motion_status'
+
+        rospy.Subscriber(data_collection_progress_topic, Bool, self.callback)
+        baxter_status_pub = rospy.Publisher(baxter_arm_motion_status_topic, Int8, queue_size=10)
 
         while not rospy.is_shutdown():
             if trajectory_index >= trajectory.shape[0]:

@@ -5,18 +5,37 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 
+
+int file_index = 0;
 std::string pointCloudTopic = "/kinect_anywhere/point_cloud/points2";
 std::string saveDir = "/home/baxterpc/ros_ws/src/multiple_kinect_baxter_calibration/files/captured_pcd";
 
-int file_index = 0;
+inline void PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out)
+{
+  out.width   = in.width;
+  out.height  = in.height;
+  out.points.resize(in.points.size());
+  for (size_t i = 0; i < in.points.size (); i++)
+  {
+    out.points[i].x = in.points[i].x;
+    out.points[i].y = in.points[i].y;
+    out.points[i].z = in.points[i].z;
+    out.points[i].r = in.points[i].r;
+    out.points[i].g = in.points[i].g;
+    out.points[i].b = in.points[i].b;
+  }
+}
+
 void chatterCallback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& msg)
 {
   ROS_INFO("Point Cloud Received.");
 
   pcl::PCLPointCloud2 pcl_pc2;
-  pcl_conversions::toPCL(*msg, pcl_pc2);
   pcl::PointCloud<pcl::PointXYZRGB> cloud;
-  pcl::fromPCLPointCloud2(pcl_pc2, cloud);
+  pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
+  pcl_conversions::toPCL(*msg, pcl_pc2);
+  pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
+  PointCloudXYZRGBAtoXYZRGB(temp_cloud, cloud);
 
   std::stringstream filename;
   filename << "/file_" << (file_index++) << ".pcd";

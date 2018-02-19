@@ -5,7 +5,7 @@ float minH = 60, minS = 0.6, minV = 0.3;
 float maxH = 64, maxS = 0.8, maxV = 1.0;
 float radius = 0.034; // m
 
-std::string pcdFileName = "/home/baxterpc/ros_ws/src/multiple_kinect_baxter_calibration/files/sample.pcd";
+std::string pcdFileName = "/home/baxterpc/ros_ws/src/multiple_kinect_baxter_calibration/files/captured_pcd/file_0.pcd";
 
 int main(int argc, char** argv)
 {

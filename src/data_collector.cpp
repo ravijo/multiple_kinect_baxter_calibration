@@ -49,6 +49,7 @@ class DataCollector
     void writeCSV(const std::string file_name, const std::string header, std::vector<std::vector<float> > data);
     void getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
     void callback(const baxter_core_msgs::EndpointStateConstPtr& ee_msg, const sensor_msgs::PointCloud2ConstPtr& pc_msg);
+    inline void PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out);
   public:
     DataCollector();
 };
@@ -219,8 +220,26 @@ void DataCollector::baxterArmMotionStatusCallback(const std_msgs::Int8::ConstPtr
 void DataCollector::getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 {
     pcl::PCLPointCloud2 pcl_pc2;
+    pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
     pcl_conversions::toPCL(*msg, pcl_pc2);
-    pcl::fromPCLPointCloud2(pcl_pc2, *cloud);
+    pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
+    PointCloudXYZRGBAtoXYZRGB(temp_cloud, *cloud); //TODO: make separate utility class for PCL functions
+}
+
+inline void DataCollector::PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out)
+{
+  out.width   = in.width;
+  out.height  = in.height;
+  out.points.resize(in.points.size());
+  for (size_t i = 0; i < in.points.size (); i++)
+  {
+    out.points[i].x = in.points[i].x;
+    out.points[i].y = in.points[i].y;
+    out.points[i].z = in.points[i].z;
+    out.points[i].r = in.points[i].r;
+    out.points[i].g = in.points[i].g;
+    out.points[i].b = in.points[i].b;
+  }
 }
 
 void DataCollector::callback(const baxter_core_msgs::EndpointStateConstPtr& ee_msg, const sensor_msgs::PointCloud2ConstPtr& pc_msg)
@@ -253,21 +272,21 @@ void DataCollector::callback(const baxter_core_msgs::EndpointStateConstPtr& ee_m
 
     pcl::ModelCoefficients sphere_coff;
     bool success = sphere_detector->segmentSphere(cloud, sphere_coff);
-    
+
     if (success)
     {
         ROS_DEBUG("Sphere detection successfull");
-    
+
         recordBallPositionWrtBaxter(ee_msg);
         recordBallPositionWrtKinect(sphere_coff);
-    
+
         if (!pc_viewer->updatePointCloud(cloud, "cloud"))
             pc_viewer->addPointCloud(cloud, "cloud");
-    
+
         pcl::PointXYZ detected_sphere(sphere_coff.values[0], sphere_coff.values[1], sphere_coff.values[2]);
-        if (!pc_viewer->updateSphere(detected_sphere, sphere_coff.values[3], 51, 255, 87, "detected_sphere"))
-            pc_viewer->addSphere(detected_sphere, sphere_coff.values[3], 51, 255, 87, "detected_sphere");
-    
+        if (!pc_viewer->updateSphere(detected_sphere, sphere_coff.values[3], 0.2, 1.0, 0.3, "detected_sphere"))
+            pc_viewer->addSphere(detected_sphere, sphere_coff.values[3], 0.2, 1.0, 0.3, "detected_sphere");
+
         pc_viewer->spinOnce();
     }
     else
@@ -331,9 +350,6 @@ void DataCollector::init(ros::NodeHandle nh)
     std::vector<float> min_hsv_values = stringToArray(min_hsv);
     std::vector<float> max_hsv_values = stringToArray(max_hsv);
 
-    std::cout << "\n\n value of min_hsv "<< min_hsv << std::endl;
-    std::cout << "radius " << radius <<", offset " << offset << "\n\n";
-
     // initialize sphere detector
     pcl_project::RansacParams ransac_params(k_neighbors, max_itr, weight, d_thresh, prob, tolerance, epsilon);
     sphere_detector = new pcl_project::SphereDetector(radius, &min_hsv_values, &max_hsv_values, &ransac_params);
@@ -356,7 +372,7 @@ std::vector<float> DataCollector::stringToArray(std::string str)
 {
     // remove spaces
     str.erase(std::remove_if(str.begin(), str.end(), ::isspace), str.end());
-    
+
     // split string by comma
     std::vector<std::string> str_array;
     boost::split(str_array, str, boost::is_any_of(","));
@@ -375,7 +391,7 @@ std::vector<float> DataCollector::stringToArray(std::string str)
 
 DataCollector::DataCollector()
 {
-    ros::NodeHandle nh("~");;
+    ros::NodeHandle nh("~");
     init(nh);
 
     message_filters::Subscriber<baxter_core_msgs::EndpointState> baxter_arm_sub(nh, ee_topic, 1);
@@ -386,8 +402,11 @@ DataCollector::DataCollector()
     message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(10), baxter_arm_sub, point_cloud_sub);
     sync.registerCallback(boost::bind(&DataCollector::callback, this, _1, _2));
 
-    data_collection_progress_pub = nh.advertise<std_msgs::Bool>("is_data_collection_happening", 10);
-    baxter_arm_motion_status_sub = nh.subscribe("baxter_arm_motion_status", 10, &DataCollector::baxterArmMotionStatusCallback, this);
+    std::string data_collection_progress_topic = "/multiple_kinect_baxter_calibration/is_data_collection_happening";
+    std::string baxter_arm_motion_status_topic = "/multiple_kinect_baxter_calibration/baxter_arm_motion_status";
+
+    data_collection_progress_pub = nh.advertise<std_msgs::Bool>(data_collection_progress_topic, 10);
+    baxter_arm_motion_status_sub = nh.subscribe(baxter_arm_motion_status_topic, 10, &DataCollector::baxterArmMotionStatusCallback, this);
     ros::spin();
 }
 
