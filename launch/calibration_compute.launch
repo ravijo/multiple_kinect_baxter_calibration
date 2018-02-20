@@ -2,7 +2,7 @@
 <!--
 calibration_compute.launch: ROS launch file to compute absolute orientation calibration
 Requirements: No requirements needed
-Author: Nishanth Koganti
+Author: Nishanth Koganti, Ravi Joshi
 Date: 2016/6/16
 -->
 <launch>
