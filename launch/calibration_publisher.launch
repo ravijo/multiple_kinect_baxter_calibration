@@ -3,7 +3,7 @@
 calibration_publisher.launch: ROS launch file to publish calibration matrix between Kinect and Baxter
 Note: Keep running this file in a separate tab forever
 Requirements: No requirements needed
-Author: Nishanth Koganti
+Author: Nishanth Koganti, Ravi Joshi
 Date: 2016/6/15
 -->
 <launch>
