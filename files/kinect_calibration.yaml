@@ -1,6 +1,6 @@
-calibration error (m): '0.0073'
+calibration error (m): 0.0073
 child: /kinect2_link
-created on: 20 February 2018 02:07:22 PM
+created on: 20 February 2018 02:22:38 PM
 parent: /base
 rot: [0.6087297627518257, 0.6030324988583118, 0.3397355665006854, 0.387788120131683]
 rot_euler: [2.059052776656826, 0.05410977714803553, 1.5288595755580734]
