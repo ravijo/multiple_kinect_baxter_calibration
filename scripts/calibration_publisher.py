@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # calibration_publisher.py: Code to publish calibration matrix
-# Author: Ravi Joshi, Nishanth Koganti
+# Author: Nishanth Koganti, Ravi Joshi
 # Date: 2017/11/07
 # Source: https://github.com/osrf/baxter_demos/blob/master/scripts/get_ar_calib.py
 
