@@ -68,3 +68,9 @@ target_link_libraries(save_pcd
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )
+
+add_executable(view_cloud_realtime src/view_cloud_realtime.cpp)
+target_link_libraries(view_cloud_realtime
+  ${PCL_LIBRARIES}
+  ${catkin_LIBRARIES}
+)

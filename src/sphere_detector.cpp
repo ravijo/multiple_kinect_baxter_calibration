@@ -1,3 +1,9 @@
+/**
+* sphere_detector.cpp: class file for sphere_detector
+* Author: Ravi Joshi
+* Date: 2018/02/20
+*/
+
 #include <sphere_detector.h>
 
 namespace pcl_project

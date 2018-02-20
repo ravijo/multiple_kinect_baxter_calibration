@@ -1,5 +1,5 @@
 /**
-* save_pcd.cpp: utility to save point cloud data to file
+* view_cloud_realtime.cpp: utility to view point cloud data in realtime
 * Author: Ravi Joshi
 * Date: 2018/02/20
 */
@@ -10,11 +10,11 @@
 #include <pcl_ros/point_cloud.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/visualization/pcl_visualizer.h>
 
-
-int file_index = 0;
 std::string pointCloudTopic = "/kinect_anywhere/point_cloud/points2";
-std::string saveDir = "/home/baxterpc/ros_ws/src/multiple_kinect_baxter_calibration/files/captured_pcd";
+
+pcl::visualization::PCLVisualizer viewer("Cloud Viewer");
 
 inline void PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out)
 {
@@ -34,8 +34,6 @@ inline void PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pc
 
 void chatterCallback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& msg)
 {
-  ROS_INFO("Point Cloud Received.");
-
   pcl::PCLPointCloud2 pcl_pc2;
   pcl::PointCloud<pcl::PointXYZRGB> cloud;
   pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
@@ -43,18 +41,22 @@ void chatterCallback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& ms
   pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
   PointCloudXYZRGBAtoXYZRGB(temp_cloud, cloud);
 
-  std::stringstream filename;
-  filename << "/file_" << (file_index++) << ".pcd";
-  std::string full_path = saveDir + filename.str();
-  pcl::io::savePCDFileASCII (full_path, cloud);
-  ROS_INFO_STREAM("Point Cloud Converted. Points: " << (cloud.width * cloud.height));
+  if (!viewer.>updatePointCloud(cloud, "cloud"))
+      viewer.addPointCloud(cloud, "cloud");
+
+  viewer.spinOnce();
 }
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "save_pcd", ros::init_options::AnonymousName);
+  ros::init(argc, argv, "view_cloud_realtime_node", ros::init_options::AnonymousName);
+
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe(pointCloudTopic, 1, chatterCallback);
+
+  viewer.initCameraParameters();
+  viewer.getCameraParameters(argc, argv);
+
   ros::spin();
   return 0;
 }
