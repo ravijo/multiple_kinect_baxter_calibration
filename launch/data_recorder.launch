@@ -8,7 +8,7 @@ Date: 2018/02/16
   <!-- make sure it matches with argument 'ee_topic' provided to 'data_collector' below -->
   <arg name="limb" default="right"/>
   <!-- wait time to stablize arm before capturing point cloud (seconds)-->
-  <arg name="wait_time" default="4"/>
+  <arg name="wait_time" default="2"/>
   <!-- baxter arm pre-defined trajectory -->
   <arg name="trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
   <node name="baxter_controller" pkg="multiple_kinect_baxter_calibration" type="baxter_controller.py" output="screen">

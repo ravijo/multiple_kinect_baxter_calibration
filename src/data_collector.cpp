@@ -39,6 +39,7 @@ class DataCollector
     std::vector<std::vector<float> > position_wrt_baxter;
     std::vector<std::vector<float> > position_wrt_kinect;
 
+    void saveData();
     void init(ros::NodeHandle nh);
     std::vector<float> stringToArray(std::string str);
     bool loadCameraParametersPCL(const std::string &file);
@@ -242,19 +243,27 @@ inline void DataCollector::PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointX
   }
 }
 
+void DataCollector::saveData()
+{
+    std::string baxter = data_dir + "/position_wrt_baxter.csv";
+    std::string kinect = data_dir + "/position_wrt_kinect.csv";
+    std::string header = "position_x,position_y,position_z";
+
+    ROS_INFO_STREAM("Saving collected data in following files: " << baxter << " and " << kinect);
+
+    writeCSV(baxter, header, position_wrt_baxter);
+    writeCSV(kinect, header, position_wrt_kinect);
+}
+
 void DataCollector::callback(const baxter_core_msgs::EndpointStateConstPtr& ee_msg, const sensor_msgs::PointCloud2ConstPtr& pc_msg)
 {
     // exit and save the data
     if (baxter_arm_motion_state == FINISHED)
     {
-      std::string baxter = data_dir + "/position_wrt_baxter.csv";
-      std::string kinect = data_dir + "/position_wrt_kinect.csv";
-      std::string header = "position_x,position_y,position_z";
-
-      ROS_INFO_STREAM("Saving collected data in following files: " << baxter << " and " << kinect);
-
-      writeCSV(baxter, header, position_wrt_baxter);
-      writeCSV(kinect, header, position_wrt_kinect);
+      if(position_wrt_kinect.empty())
+        ROS_ERROR_STREAM("Couldn't record any data. Run the program again.");
+      else
+        saveData();
 
       ROS_INFO_STREAM("Exiting now...");
       ros::shutdown();
