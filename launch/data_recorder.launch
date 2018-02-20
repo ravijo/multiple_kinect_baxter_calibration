@@ -47,12 +47,12 @@ Date: 2018/02/16
   <!-- angle epsilon (delta) threshold (in degree) -->
   <arg name="epsilon" default="15"/>
   <!-- camera file for point cloud visualization -->
-  <arg name="cam_file" default="$(find multiple_kinect_baxter_calibration)/files/camera_parameters.cam"/>
+  <arg name="cam" default="$(find multiple_kinect_baxter_calibration)/files/kinect_anywhere.cam"/>
   <!-- rostopic for receving baxter ee pose. make sure it matches with argument 'limb'
   provided to 'baxter_controller' above  -->
   <arg name="ee_topic" default="/robot/limb/right/endpoint_state"/>
   <!-- rostopic for receving point cloud -->
-  <arg name="pc_topic" default="/kinect_anywhere/point_cloud/points2"/>
+  <arg name="pc" default="/kinect_anywhere/point_cloud/points2"/>
   <!-- directory for saving collected data -->
   <arg name="data_dir" default="$(find multiple_kinect_baxter_calibration)/files"/>
   <node name="data_collector" pkg="multiple_kinect_baxter_calibration" type="data_collector" output="screen">
@@ -67,9 +67,9 @@ Date: 2018/02/16
     <param name="prob" value="$(arg prob)"/>
     <param name="tolerance" value="$(arg tolerance)"/>
     <param name="epsilon" value="$(arg epsilon)"/>
-    <param name="cam_file" value="$(arg cam_file)"/>
+    <param name="cam_file" value="$(arg cam)"/>
     <param name="ee_topic" value="$(arg ee_topic)"/>
-    <param name="pc_topic" value="$(arg pc_topic)"/>
+    <param name="pc_topic" value="$(arg pc)"/>
     <param name="data_dir" value="$(arg data_dir)"/>
   </node>
 </launch>

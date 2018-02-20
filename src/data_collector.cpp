@@ -221,10 +221,17 @@ void DataCollector::baxterArmMotionStatusCallback(const std_msgs::Int8::ConstPtr
 void DataCollector::getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 {
     pcl::PCLPointCloud2 pcl_pc2;
-    pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
     pcl_conversions::toPCL(*msg, pcl_pc2);
-    pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
-    PointCloudXYZRGBAtoXYZRGB(temp_cloud, *cloud); //TODO: make separate utility class for PCL functions
+
+    if(msg->fields[3].name == "rgb")
+      pcl::fromPCLPointCloud2(pcl_pc2, *cloud); // for libfreenect
+    else
+    {
+      // for kinect_anywhere
+      pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
+      pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
+      PointCloudXYZRGBAtoXYZRGB(temp_cloud, *cloud); //TODO: make separate utility class for PCL functions
+    }
 }
 
 inline void DataCollector::PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out)
@@ -257,6 +264,13 @@ void DataCollector::saveData()
 
 void DataCollector::callback(const baxter_core_msgs::EndpointStateConstPtr& ee_msg, const sensor_msgs::PointCloud2ConstPtr& pc_msg)
 {
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+    getPointCloudFromMsg(pc_msg, cloud);
+
+    // show caputed point cloud
+    if (!pc_viewer->updatePointCloud(cloud, "cloud"))
+        pc_viewer->addPointCloud(cloud, "cloud");
+
     // exit and save the data
     if (baxter_arm_motion_state == FINISHED)
     {
@@ -276,9 +290,6 @@ void DataCollector::callback(const baxter_core_msgs::EndpointStateConstPtr& ee_m
     still_processing.data = true; // we are about to start processing
     data_collection_progress_pub.publish(still_processing);
 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-    getPointCloudFromMsg(pc_msg, cloud);
-
     pcl::ModelCoefficients sphere_coff;
     bool success = sphere_detector->segmentSphere(cloud, sphere_coff);
 
@@ -288,9 +299,6 @@ void DataCollector::callback(const baxter_core_msgs::EndpointStateConstPtr& ee_m
 
         recordBallPositionWrtBaxter(ee_msg);
         recordBallPositionWrtKinect(sphere_coff);
-
-        if (!pc_viewer->updatePointCloud(cloud, "cloud"))
-            pc_viewer->addPointCloud(cloud, "cloud");
 
         pcl::PointXYZ detected_sphere(sphere_coff.values[0], sphere_coff.values[1], sphere_coff.values[2]);
         if (!pc_viewer->updateSphere(detected_sphere, sphere_coff.values[3], 0.2, 1.0, 0.3, "detected_sphere"))

@@ -12,7 +12,8 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
-std::string pointCloudTopic = "/kinect_anywhere/point_cloud/points2";
+//std::string pointCloudTopic = "/kinect_anywhere/point_cloud/points2";
+std::string pointCloudTopic = "/kinect2/sd/points";
 
 pcl::visualization::PCLVisualizer viewer("Cloud Viewer");
 
@@ -31,17 +32,23 @@ inline void PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pc
     out.points[i].b = in.points[i].b;
   }
 }
-
 void chatterCallback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& msg)
 {
   pcl::PCLPointCloud2 pcl_pc2;
-  pcl::PointCloud<pcl::PointXYZRGB> cloud;
-  pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
   pcl_conversions::toPCL(*msg, pcl_pc2);
-  pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
-  PointCloudXYZRGBAtoXYZRGB(temp_cloud, cloud);
 
-  if (!viewer.>updatePointCloud(cloud, "cloud"))
+  if(msg->fields[3].name == "rgb")
+    pcl::fromPCLPointCloud2(pcl_pc2, *cloud); // for libfreenect
+  else
+  {
+    // for kinect_anywhere
+    pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
+    pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
+    PointCloudXYZRGBAtoXYZRGB(temp_cloud, *cloud);
+  }
+
+  if (!viewer.updatePointCloud(cloud, "cloud"))
       viewer.addPointCloud(cloud, "cloud");
 
   viewer.spinOnce();
@@ -56,6 +63,13 @@ int main(int argc, char **argv)
 
   viewer.initCameraParameters();
   viewer.getCameraParameters(argc, argv);
+
+  /*
+  std::vector<pcl::visualization::Camera> cameras;
+  viewer.getCameras(cameras);
+  cameras[0].view[1] = -1;
+  viewer.setCameraParameters(cameras[0]);
+  */
 
   ros::spin();
   return 0;
