@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # calibration_compute.py: Code to compute absolute orientation from collected points
-# Author: Nishanth Koganti
+# Author: Nishanth Koganti, Ravi Joshi
 # Date: 2016/06/16
 # Source: http://math.stackexchange.com/questions/745234/calculate-rotation-translation-matrix-to-match-measurement-points-to-nominal-poi
 
