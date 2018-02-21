@@ -13,7 +13,7 @@
 
 
 int file_index = 0;
-std::string pointCloudTopic = "/kinect_anywhere/point_cloud/points2";
+std::string pointCloudTopic = "/kinect1/sd/points";
 std::string saveDir = "/home/baxterpc/ros_ws/src/multiple_kinect_baxter_calibration/files/captured_pcd";
 
 inline void PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out)
@@ -37,17 +37,24 @@ void chatterCallback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& ms
   ROS_INFO("Point Cloud Received.");
 
   pcl::PCLPointCloud2 pcl_pc2;
-  pcl::PointCloud<pcl::PointXYZRGB> cloud;
-  pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
   pcl_conversions::toPCL(*msg, pcl_pc2);
-  pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
-  PointCloudXYZRGBAtoXYZRGB(temp_cloud, cloud);
+
+  if(msg->fields[3].name == "rgb")
+    pcl::fromPCLPointCloud2(pcl_pc2, *cloud); // for libfreenect
+  else
+  {
+    // for kinect_anywhere
+    pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
+    pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
+    PointCloudXYZRGBAtoXYZRGB(temp_cloud, *cloud);
+  }
 
   std::stringstream filename;
   filename << "/file_" << (file_index++) << ".pcd";
   std::string full_path = saveDir + filename.str();
-  pcl::io::savePCDFileASCII (full_path, cloud);
-  ROS_INFO_STREAM("Point Cloud Converted. Points: " << (cloud.width * cloud.height));
+  pcl::io::savePCDFileASCII (full_path, *cloud);
+  ROS_INFO_STREAM("Point Cloud Converted. Points: " << (cloud->width * cloud->height));
 }
 
 int main(int argc, char **argv)
