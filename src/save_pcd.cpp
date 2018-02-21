@@ -5,16 +5,19 @@
 */
 
 #include <ros/ros.h>
+#include <ros/package.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <boost/filesystem.hpp>
 #include <pcl_ros/point_cloud.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 
 
 int file_index = 0;
+std::string fullPath;
+std::string saveDir = "/files/captured_pcd";
 std::string pointCloudTopic = "/kinect1/sd/points";
-std::string saveDir = "/home/baxterpc/ros_ws/src/multiple_kinect_baxter_calibration/files/captured_pcd";
 
 inline void PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out)
 {
@@ -52,14 +55,18 @@ void chatterCallback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& ms
 
   std::stringstream filename;
   filename << "/file_" << (file_index++) << ".pcd";
-  std::string full_path = saveDir + filename.str();
+  std::string full_path = fullPath + filename.str();
+  ROS_INFO_STREAM("Saving point cloud to directory: " << fullPath);
   pcl::io::savePCDFileASCII (full_path, *cloud);
-  ROS_INFO_STREAM("Point Cloud Converted. Points: " << (cloud->width * cloud->height));
+  ROS_INFO_STREAM("Point Cloud saved. Points: " << (cloud->width * cloud->height));
 }
 
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "save_pcd", ros::init_options::AnonymousName);
+
+  fullPath = ros::package::getPath("multiple_kinect_baxter_calibration") + saveDir;
+
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe(pointCloudTopic, 1, chatterCallback);
   ros::spin();

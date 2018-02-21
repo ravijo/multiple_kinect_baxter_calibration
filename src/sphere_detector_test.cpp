@@ -4,19 +4,20 @@
 * Date: 2018/02/20
 */
 
-#include <sphere_detector.h>
 #include <ros/ros.h>
+#include <ros/package.h>
+#include <sphere_detector.h>
 
 float minH = 60, minS = 0.6, minV = 0.3;
 float maxH = 64, maxS = 0.8, maxV = 1.0;
 float radius = 0.034; // m
 
-std::string pcdFileName = "/home/baxterpc/ros_ws/src/multiple_kinect_baxter_calibration/files/captured_pcd/file_0.pcd";
-
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "sphere_detector_test", ros::init_options::AnonymousName);
   ros::NodeHandle n;
+
+  std::string pcdFileName = ros::package::getPath("multiple_kinect_baxter_calibration") + "/files/captured_pcd/file_0.pcd";
 
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgbCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
   pcl::io::loadPCDFile(pcdFileName, *rgbCloud);
