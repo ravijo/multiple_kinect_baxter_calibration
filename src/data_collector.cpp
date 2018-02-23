@@ -6,18 +6,16 @@
 
 #include <vector>
 #include <ros/ros.h>
-#include <csvfile.h>
+#include <utility.h>
 #include <Eigen/Geometry>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int8.h>
 #include <sphere_detector.h>
 #include <sensor_msgs/Image.h>
-#include <pcl/filters/filter.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <message_filters/subscriber.h>
 #include <baxter_core_msgs/EndpointState.h>
-#include <pcl_conversions/pcl_conversions.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
@@ -42,148 +40,13 @@ class DataCollector
 
     void saveData();
     void init(ros::NodeHandle nh);
-    std::vector<float> stringToArray(std::string str);
-    bool loadCameraParametersPCL(const std::string &file);
-    bool getCameraParametersPCL(const std::vector<std::string> &camera);
     void baxterArmMotionStatusCallback(const std_msgs::Int8::ConstPtr& msg);
     void recordBallPositionWrtKinect(pcl::ModelCoefficients& sphere_coefficients);
     void recordBallPositionWrtBaxter(baxter_core_msgs::EndpointStateConstPtr ee_msg);
-    void writeCSV(const std::string file_name, const std::string header, std::vector<std::vector<float> > data);
-    void getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
     void callback(const baxter_core_msgs::EndpointStateConstPtr& ee_msg, const sensor_msgs::PointCloud2ConstPtr& pc_msg);
-    inline void PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out);
   public:
     DataCollector();
 };
-
-//src: https://github.com/PointCloudLibrary/pcl/blob/master/visualization/src/interactor_style.cpp
-bool DataCollector::loadCameraParametersPCL(const std::string &file)
-{
-  std::ifstream fs;
-  std::string line;
-  std::vector<std::string> camera;
-  bool ret;
-
-  fs.open (file.c_str());
-  if (!fs.is_open ())
-    return false;
-
-  while (!fs.eof ())
-  {
-    getline (fs, line);
-    if (line == "")
-      continue;
-
-    boost::split (camera, line, boost::is_any_of ("/"), boost::token_compress_on);
-    break;
-  }
-  fs.close ();
-
-  return getCameraParametersPCL (camera);
-}
-
-bool DataCollector::getCameraParametersPCL(const std::vector<std::string> &camera)
-{
-  pcl::visualization::Camera camera_temp;
-
-  // look for '/' as a separator
-  if (camera.size () != 7)
-  {
-    pcl::console::print_error("[PCLVisualizer::getCameraParameters] Camera parameters given, but with an invalid number of options (%lu vs 7)!\n", static_cast<unsigned long> (camera.size ()));
-    return false;
-  }
-
-  std::string clip_str  = camera.at(0);
-  std::string focal_str = camera.at(1);
-  std::string pos_str   = camera.at(2);
-  std::string view_str  = camera.at(3);
-  std::string fovy_str  = camera.at(4);
-  std::string win_size_str = camera.at(5);
-  std::string win_pos_str  = camera.at(6);
-
-  // Get each camera setting separately and parse for ','
-  std::vector<std::string> clip_st;
-  boost::split (clip_st, clip_str, boost::is_any_of (","), boost::token_compress_on);
-  if (clip_st.size () != 2)
-  {
-    pcl::console::print_error("[PCLVisualizer::getCameraParameters] Invalid parameters given for camera clipping angle!\n");
-    return false;
-  }
-
-  camera_temp.clip[0] = atof(clip_st.at(0).c_str());
-  camera_temp.clip[1] = atof(clip_st.at(1).c_str());
-
-  std::vector<std::string> focal_st;
-  boost::split (focal_st, focal_str, boost::is_any_of (","), boost::token_compress_on);
-  if (focal_st.size () != 3)
-  {
-    pcl::console::print_error("[PCLVisualizer::getCameraParameters] Invalid parameters given for camera focal point!\n");
-    return false;
-  }
-
-  camera_temp.focal[0] = atof(focal_st.at(0).c_str());
-  camera_temp.focal[1] = atof(focal_st.at(1).c_str());
-  camera_temp.focal[2] = atof(focal_st.at(2).c_str());
-
-  std::vector<std::string> pos_st;
-  boost::split (pos_st, pos_str, boost::is_any_of (","), boost::token_compress_on);
-  if (pos_st.size () != 3)
-  {
-    pcl::console::print_error("[PCLVisualizer::getCameraParameters] Invalid parameters given for camera position!\n");
-    return false;
-  }
-
-  camera_temp.pos[0] = atof(pos_st.at(0).c_str());
-  camera_temp.pos[1] = atof(pos_st.at(1).c_str());
-  camera_temp.pos[2] = atof(pos_st.at(2).c_str());
-
-  std::vector<std::string> view_st;
-  boost::split (view_st, view_str, boost::is_any_of (","), boost::token_compress_on);
-  if (view_st.size () != 3)
-  {
-    pcl::console::print_error("[PCLVisualizer::getCameraParameters] Invalid parameters given for camera viewup!\n");
-    return false;
-  }
-
-  camera_temp.view[0] = atof(view_st.at(0).c_str());
-  camera_temp.view[1] = atof(view_st.at(1).c_str());
-  camera_temp.view[2] = atof(view_st.at(2).c_str());
-
-  std::vector<std::string> fovy_size_st;
-  boost::split (fovy_size_st, fovy_str, boost::is_any_of (","), boost::token_compress_on);
-  if (fovy_size_st.size () != 1)
-  {
-    pcl::console::print_error("[PCLVisualizer::getCameraParameters] Invalid parameters given for field of view angle!\n");
-    return false;
-  }
-
-  camera_temp.fovy = atof(fovy_size_st.at(0).c_str());
-
-  std::vector<std::string> win_size_st;
-  boost::split (win_size_st, win_size_str, boost::is_any_of (","), boost::token_compress_on);
-  if (win_size_st.size () != 2)
-  {
-    pcl::console::print_error("[PCLVisualizer::getCameraParameters] Invalid parameters given for window size!\n");
-    return false;
-  }
-
-  camera_temp.window_size[0] = atof(win_size_st.at(0).c_str());
-  camera_temp.window_size[1] = atof(win_size_st.at(1).c_str());
-
-  std::vector<std::string> win_pos_st;
-  boost::split (win_pos_st, win_pos_str, boost::is_any_of (","), boost::token_compress_on);
-  if (win_pos_st.size () != 2)
-  {
-    pcl::console::print_error("[PCLVisualizer::getCameraParameters] Invalid parameters given for window position!\n");
-    return false;
-  }
-
-  camera_temp.window_pos[0] = atof(win_pos_st.at(0).c_str());
-  camera_temp.window_pos[1] = atof(win_pos_st.at(1).c_str());
-
-  pc_viewer->setCameraParameters(camera_temp);
-  return true;
-}
 
 void DataCollector::recordBallPositionWrtBaxter(baxter_core_msgs::EndpointStateConstPtr ee_msg)
 {
@@ -219,48 +82,6 @@ void DataCollector::baxterArmMotionStatusCallback(const std_msgs::Int8::ConstPtr
     baxter_arm_motion_state = msg->data;
 }
 
-void DataCollector::getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
-{
-    std::vector<int> indices;
-    pcl::PCLPointCloud2 pcl_pc2;
-    pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
-
-    /*
-    * It was found that even though point cloud ros message field says that libfreenect2
-    * point cloud is 'rgb', it is 'rgba'. Hence the code below assumes that incoming
-    * point cloud is 'rgba' and it converts it to 'rgb' to further use
-    */
-    pcl_conversions::toPCL(*msg, pcl_pc2);
-    pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
-    PointCloudXYZRGBAtoXYZRGB(temp_cloud, *cloud);
-
-    /*
-    * point cloud received from libfreenect2 shows that it is dense point cloud
-    * which means it shouldn't contain any 'nan' but 'nan' was found. Hence in
-    * order to remove 'nan', we first need to make it non-dense. we should
-    * make it dense, once 'nan' are removed.
-    */
-    cloud->is_dense = false;
-    pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
-    cloud->is_dense = true;
-}
-
-inline void DataCollector::PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out)
-{
-  out.width   = in.width;
-  out.height  = in.height;
-  out.points.resize(in.points.size());
-  for (size_t i = 0; i < in.points.size (); i++)
-  {
-    out.points[i].x = in.points[i].x;
-    out.points[i].y = in.points[i].y;
-    out.points[i].z = in.points[i].z;
-    out.points[i].r = in.points[i].r;
-    out.points[i].g = in.points[i].g;
-    out.points[i].b = in.points[i].b;
-  }
-}
-
 void DataCollector::saveData()
 {
     std::string baxter = data_dir + "/position_wrt_baxter.csv";
@@ -269,14 +90,21 @@ void DataCollector::saveData()
 
     ROS_INFO_STREAM("Saving collected data in following files: " << baxter << " and " << kinect);
 
-    writeCSV(baxter, header, position_wrt_baxter);
-    writeCSV(kinect, header, position_wrt_kinect);
+    bool status;
+    std::string err;
+
+    status = utility::writeCSV(baxter, header, position_wrt_baxter, err);
+    if(!status) ROS_ERROR_STREAM("Unable to save tracking data to CSV file. " << err);
+
+    status = utility::writeCSV(kinect, header, position_wrt_kinect, err);
+    if(!status) ROS_ERROR_STREAM("Unable to save tracking data to CSV file. " << err);
+
 }
 
 void DataCollector::callback(const baxter_core_msgs::EndpointStateConstPtr& ee_msg, const sensor_msgs::PointCloud2ConstPtr& pc_msg)
 {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-    getPointCloudFromMsg(pc_msg, cloud);
+    utility::getPointCloudFromMsg(pc_msg, cloud);
 
     // show caputed point cloud
     if (!pc_viewer->updatePointCloud(cloud, "cloud"))
@@ -326,26 +154,6 @@ void DataCollector::callback(const baxter_core_msgs::EndpointStateConstPtr& ee_m
     data_collection_progress_pub.publish(still_processing);
 }
 
-void DataCollector::writeCSV(std::string file_name, std::string header, std::vector<std::vector<float> > data)
-{
-    try
-    {
-        csvfile csv(file_name);
-        csv << header << endrow;
-
-        for (int i = 0; i < data.size(); i++)
-        {
-            for (int j = 0; j < data[i].size(); j++)
-                csv << data[i][j];
-            csv << endrow;
-        }
-        csv.close();
-    }
-    catch (std::exception& ex)
-    {
-        ROS_ERROR_STREAM("Unable to save tracking data to CSV file. " << ex.what());
-    }
-}
 
 void DataCollector::init(ros::NodeHandle nh)
 {
@@ -375,8 +183,8 @@ void DataCollector::init(ros::NodeHandle nh)
 
     nh.getParam("data_dir", data_dir);
 
-    std::vector<float> min_hsv_values = stringToArray(min_hsv);
-    std::vector<float> max_hsv_values = stringToArray(max_hsv);
+    std::vector<float> min_hsv_values = utility::stringToArray(min_hsv);
+    std::vector<float> max_hsv_values = utility::stringToArray(max_hsv);
 
     // initialize sphere detector
     pcl_project::RansacParams ransac_params(k_neighbors, max_itr, weight, d_thresh, prob, tolerance, epsilon);
@@ -391,30 +199,16 @@ void DataCollector::init(ros::NodeHandle nh)
 
     // initialize point cloud viewer
     pc_viewer = new pcl::visualization::PCLVisualizer("Cloud Viewer");
+
+    std::vector<std::string> cam_param;
+    pcl::visualization::Camera new_cam;
+
     pc_viewer->initCameraParameters();
-    bool result = loadCameraParametersPCL(cam_file);
+    bool result = utility::loadCameraParametersPCL(cam_file, cam_param);
+    result = result && utility::getCameraParametersPCL(cam_param, new_cam);
+    pc_viewer->setCameraParameters(new_cam);
+
     ROS_DEBUG_STREAM("loadCameraParametersPCL returned " << result);
-}
-
-std::vector<float> DataCollector::stringToArray(std::string str)
-{
-    // remove spaces
-    str.erase(std::remove_if(str.begin(), str.end(), ::isspace), str.end());
-
-    // split string by comma
-    std::vector<std::string> str_array;
-    boost::split(str_array, str, boost::is_any_of(","));
-
-    // remove opening and closing bracket
-    str_array[0] = str_array[0].substr(1);
-    str_array[2] = str_array[2].substr(0, str_array[2].size() -1);
-
-    // convert all string to float
-    std::vector<float> float_array(str_array.size());
-    for (int i = 0; i < str_array.size(); i++)
-        float_array[i] = atof(str_array[i].c_str());
-
-    return float_array;
 }
 
 DataCollector::DataCollector()

@@ -13,7 +13,6 @@
 #include <pcl/common/angles.h>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/features/normal_3d.h>
-#include <pcl/point_types_conversion.h>
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/visualization/pcl_visualizer.h>
@@ -70,9 +69,6 @@ namespace pcl_project
     private:
       void initHsvFilter();
       void initSphereDetector();
-
-      inline void PointCloudXYZRGBtoXYZHSV(pcl::PointCloud<pcl::PointXYZRGB>& in, pcl::PointCloud<pcl::PointXYZHSV>& out);
-      inline void PointCloudXYZHSVtoXYZRGB(pcl::PointCloud<pcl::PointXYZHSV>& in, pcl::PointCloud<pcl::PointXYZRGB>& out);
 
       pcl::ConditionalRemoval<pcl::PointXYZHSV> hsv_filter;
       pcl::NormalEstimation<pcl::PointXYZRGB, pcl::Normal> ne;

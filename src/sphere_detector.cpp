@@ -4,6 +4,7 @@
 * Date: 2018/02/20
 */
 
+#include <utility.h>
 #include <sphere_detector.h>
 
 namespace pcl_project
@@ -29,31 +30,6 @@ namespace pcl_project
 
     initHsvFilter();
     initSphereDetector();
-  }
-
-  inline void SphereDetector::PointCloudXYZRGBtoXYZHSV(pcl::PointCloud<pcl::PointXYZRGB>& in, pcl::PointCloud<pcl::PointXYZHSV>& out)
-  {
-    out.width = in.width;
-    out.height = in.height;
-    for (size_t i = 0; i < in.points.size(); i++)
-    {
-        pcl::PointXYZHSV p;
-        pcl::PointXYZRGBtoXYZHSV(in.points[i], p);
-        p.x = in.points[i].x; p.y = in.points[i].y; p.z = in.points[i].z; // bug in PCL 1.7
-        out.points.push_back(p);
-    }
-  }
-
-  inline void SphereDetector::PointCloudXYZHSVtoXYZRGB(pcl::PointCloud<pcl::PointXYZHSV>& in, pcl::PointCloud<pcl::PointXYZRGB>& out)
-  {
-    out.width = in.width;
-    out.height = in.height;
-    for (size_t i = 0; i < in.points.size(); i++)
-    {
-        pcl::PointXYZRGB p;
-        pcl::PointXYZHSVtoXYZRGB(in.points[i], p);
-        out.points.push_back(p);
-    }
   }
 
   void SphereDetector::initHsvFilter()
@@ -92,10 +68,10 @@ namespace pcl_project
     pcl::PointCloud<pcl::PointXYZHSV>::Ptr hsv_flitered_cloud(new pcl::PointCloud<pcl::PointXYZHSV>);
     pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
 
-    PointCloudXYZRGBtoXYZHSV(*raw_cloud, *hsv_cloud);
+    utility::PointCloudXYZRGBtoXYZHSV(*raw_cloud, *hsv_cloud);
     hsv_filter.setInputCloud(hsv_cloud);
     hsv_filter.filter(*hsv_flitered_cloud);
-    PointCloudXYZHSVtoXYZRGB(*hsv_flitered_cloud, *rgb_cloud);
+    utility::PointCloudXYZHSVtoXYZRGB(*hsv_flitered_cloud, *rgb_cloud);
 
     pcl::PointCloud<pcl::Normal>::Ptr cloud_normals(new pcl::PointCloud<pcl::Normal>);
     ne.setInputCloud(rgb_cloud);

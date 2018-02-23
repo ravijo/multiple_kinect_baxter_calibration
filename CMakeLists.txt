@@ -38,12 +38,12 @@ include_directories(
 MESSAGE(STATUS "PCL_VERSION: " ${PCL_VERSION})
 
 ## Declare sphere_detector as a library
-add_library(sphere_detector
+add_library(${PROJECT_NAME}_sphere_detector
   src/sphere_detector.cpp
 )
 
 ## Link sphere_detector library against PCL and catkin
-target_link_libraries(sphere_detector
+target_link_libraries(${PROJECT_NAME}_sphere_detector
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )
@@ -51,14 +51,14 @@ target_link_libraries(sphere_detector
 ## Declare executables and link against libraries
 add_executable(sphere_detector_test src/sphere_detector_test.cpp)
 target_link_libraries(sphere_detector_test
-  sphere_detector
+  ${PROJECT_NAME}_sphere_detector
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )
 
 add_executable(data_collector src/data_collector.cpp)
 target_link_libraries(data_collector
-  sphere_detector
+  ${PROJECT_NAME}_sphere_detector
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )
