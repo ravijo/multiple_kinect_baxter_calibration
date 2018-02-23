@@ -18,27 +18,28 @@ namespace utility
 {
   inline void PointCloudXYZRGBtoXYZHSV(pcl::PointCloud<pcl::PointXYZRGB>& in, pcl::PointCloud<pcl::PointXYZHSV>& out)
   {
-    out.width = in.width;
+    out.width  = in.width;
     out.height = in.height;
+    out.points.resize(in.points.size());
+
     for (size_t i = 0; i < in.points.size(); i++)
     {
-        pcl::PointXYZHSV p;
-        pcl::PointXYZRGBtoXYZHSV(in.points[i], p);
-        p.x = in.points[i].x; p.y = in.points[i].y; p.z = in.points[i].z; // bug in PCL 1.7
-        out.points.push_back(p);
+        pcl::PointXYZRGBtoXYZHSV(in.points[i], out.points[i]);
+        // fox for a bug in PCL 1.7
+        out.points[i].x = in.points[i].x;
+        out.points[i].y = in.points[i].y;
+        out.points[i].z = in.points[i].z;
     }
   }
 
   inline void PointCloudXYZHSVtoXYZRGB(pcl::PointCloud<pcl::PointXYZHSV>& in, pcl::PointCloud<pcl::PointXYZRGB>& out)
   {
-    out.width = in.width;
+    out.width  = in.width;
     out.height = in.height;
+    out.points.resize(in.points.size());
+
     for (size_t i = 0; i < in.points.size(); i++)
-    {
-        pcl::PointXYZRGB p;
-        pcl::PointXYZHSVtoXYZRGB(in.points[i], p);
-        out.points.push_back(p);
-    }
+        pcl::PointXYZHSVtoXYZRGB(in.points[i], out.points[i]);
   }
 
   inline void removeNanAndConvertPointCloudToRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out)
