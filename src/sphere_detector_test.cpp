@@ -17,7 +17,7 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "sphere_detector_test", ros::init_options::AnonymousName);
   ros::NodeHandle n;
 
-  std::string pcdFileName = ros::package::getPath("multiple_kinect_baxter_calibration") + "/files/captured_pcd/file_0.pcd";
+  std::string pcdFileName = ros::package::getPath("multiple_kinect_baxter_calibration") + "/files/sphere_libfreenect2.pcd";
 
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgbCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
   pcl::io::loadPCDFile(pcdFileName, *rgbCloud);

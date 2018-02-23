@@ -12,6 +12,7 @@
 #include <std_msgs/Int8.h>
 #include <sphere_detector.h>
 #include <sensor_msgs/Image.h>
+#include <pcl/filters/filter.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <message_filters/subscriber.h>
@@ -220,18 +221,28 @@ void DataCollector::baxterArmMotionStatusCallback(const std_msgs::Int8::ConstPtr
 
 void DataCollector::getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 {
+    std::vector<int> indices;
     pcl::PCLPointCloud2 pcl_pc2;
-    pcl_conversions::toPCL(*msg, pcl_pc2);
+    pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
 
-    if(msg->fields[3].name == "rgb")
-      pcl::fromPCLPointCloud2(pcl_pc2, *cloud); // for libfreenect
-    else
-    {
-      // for kinect_anywhere
-      pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
-      pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
-      PointCloudXYZRGBAtoXYZRGB(temp_cloud, *cloud); //TODO: make separate utility class for PCL functions
-    }
+    /*
+    * It was found that even though point cloud ros message field says that libfreenect2
+    * point cloud is 'rgb', it is 'rgba'. Hence the code below assumes that incoming
+    * point cloud is 'rgba' and it converts it to 'rgb' to further use
+    */
+    pcl_conversions::toPCL(*msg, pcl_pc2);
+    pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
+    PointCloudXYZRGBAtoXYZRGB(temp_cloud, *cloud);
+
+    /*
+    * point cloud received from libfreenect2 shows that it is dense point cloud
+    * which means it shouldn't contain any 'nan' but 'nan' was found. Hence in
+    * order to remove 'nan', we first need to make it non-dense. we should
+    * make it dense, once 'nan' are removed.
+    */
+    cloud->is_dense = false;
+    pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
+    cloud->is_dense = true;
 }
 
 inline void DataCollector::PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out)

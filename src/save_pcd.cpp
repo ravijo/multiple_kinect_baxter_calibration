@@ -8,7 +8,7 @@
 #include <ros/package.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
-#include <boost/filesystem.hpp>
+#include <pcl/filters/filter.h>
 #include <pcl_ros/point_cloud.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -39,19 +39,29 @@ void chatterCallback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& ms
 {
   ROS_INFO("Point Cloud Received.");
 
+  std::vector<int> indices;
   pcl::PCLPointCloud2 pcl_pc2;
+  pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-  pcl_conversions::toPCL(*msg, pcl_pc2);
 
-  if(msg->fields[3].name == "rgb")
-    pcl::fromPCLPointCloud2(pcl_pc2, *cloud); // for libfreenect
-  else
-  {
-    // for kinect_anywhere
-    pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
-    pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
-    PointCloudXYZRGBAtoXYZRGB(temp_cloud, *cloud);
-  }
+  /*
+  * It was found that even though point cloud ros message field says that libfreenect2
+  * point cloud is 'rgb', it is 'rgba'. Hence the code below assumes that incoming
+  * point cloud is 'rgba' and it converts it to 'rgb' to further use
+  */
+  pcl_conversions::toPCL(*msg, pcl_pc2);
+  pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
+  PointCloudXYZRGBAtoXYZRGB(temp_cloud, *cloud);
+
+  /*
+  * point cloud received from libfreenect2 shows that it is dense point cloud
+  * which means it shouldn't contain any 'nan' but 'nan' was found. Hence in
+  * order to remove 'nan', we first need to make it non-dense. we should
+  * make it dense, once 'nan' are removed.
+  */
+  cloud->is_dense = false;
+  pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
+  cloud->is_dense = true;
 
   std::stringstream filename;
   filename << "/file_" << (file_index++) << ".pcd";
