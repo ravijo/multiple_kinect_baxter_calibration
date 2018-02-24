@@ -11,8 +11,6 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int8.h>
 #include <sphere_detector.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <message_filters/subscriber.h>
 #include <baxter_core_msgs/EndpointState.h>
