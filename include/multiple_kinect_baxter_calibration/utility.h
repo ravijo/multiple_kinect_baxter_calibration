@@ -16,6 +16,15 @@
 
 namespace utility
 {
+  // due to PCL issues we are not able to use C++ 11 std. Let's define our own functions
+  // src: https://stackoverflow.com/a/20861692
+  template < typename T > std::string to_string(const T& n)
+  {
+      std::ostringstream stm;
+      stm << n;
+      return stm.str();
+  }
+
   inline void PointCloudXYZRGBtoXYZHSV(pcl::PointCloud<pcl::PointXYZRGB>& in, pcl::PointCloud<pcl::PointXYZHSV>& out)
   {
     out.width  = in.width;
@@ -46,6 +55,7 @@ namespace utility
   {
     size_t count = 0;
     out.header = in.header;
+    out.height = 1;
     out.points.resize(in.points.size());
 
     for (size_t i = 0; i < in.points.size(); i++)
@@ -55,12 +65,12 @@ namespace utility
             !pcl_isfinite(in.points[i].z))
             continue;
 
-        out.points[i].x = in.points[i].x;
-        out.points[i].y = in.points[i].y;
-        out.points[i].z = in.points[i].z;
-        out.points[i].r = in.points[i].r;
-        out.points[i].g = in.points[i].g;
-        out.points[i].b = in.points[i].b;
+        out.points[count].x = in.points[i].x;
+        out.points[count].y = in.points[i].y;
+        out.points[count].z = in.points[i].z;
+        out.points[count].r = in.points[i].r;
+        out.points[count].g = in.points[i].g;
+        out.points[count].b = in.points[i].b;
 
         count++;
     }
@@ -68,6 +78,8 @@ namespace utility
     // Resize to the correct size
     if (count != in.points.size())
         out.points.resize(count);
+
+    out.width = count;
   }
 
   void getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)

@@ -63,6 +63,13 @@ target_link_libraries(data_collector
   ${catkin_LIBRARIES}
 )
 
+add_executable(data_collector_multi src/data_collector_multi.cpp)
+target_link_libraries(data_collector_multi
+  ${PROJECT_NAME}_sphere_detector
+  ${PCL_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
+
 add_executable(save_pcd src/save_pcd.cpp)
 target_link_libraries(save_pcd
   ${PCL_LIBRARIES}
