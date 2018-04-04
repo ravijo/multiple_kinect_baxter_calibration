@@ -14,7 +14,6 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <message_filters/subscriber.h>
 #include <baxter_core_msgs/EndpointState.h>
-#include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
 // baxter arm motion state (moving:0, stop:1, finished:2)

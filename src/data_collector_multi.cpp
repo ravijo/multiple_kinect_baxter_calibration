@@ -14,7 +14,6 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <message_filters/subscriber.h>
 #include <baxter_core_msgs/EndpointState.h>
-#include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
 // number of kinects used
