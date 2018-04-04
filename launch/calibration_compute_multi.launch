@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+calibration_compute.launch: ROS launch file to compute absolute orientation calibration
+Requirements: No requirements needed
+Author: Nishanth Koganti, Ravi Joshi
+Date: 2016/6/16
+-->
+<launch>
+  <!-- define the location of baxter_trajectory and kinect_trajectory file -->
+  <arg name="data_dir" default="$(find multiple_kinect_baxter_calibration)/files/"/>
+
+  <!-- calibration using calibration_compute.py-->
+  <node pkg="multiple_kinect_baxter_calibration" type="calibration_compute_multi.py" name="calibration_compute_multi" output="screen">
+    <param name="data_dir" value="$(arg data_dir)"/>
+  </node>
+</launch>

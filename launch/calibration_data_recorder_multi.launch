@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-calibration_data_recorder.launch: data recorder for calibration
+calibration_data_recorder_multi.launch: data recorder for calibration
 Author: Ravi Joshi
 Date: 2018/02/16
 -->

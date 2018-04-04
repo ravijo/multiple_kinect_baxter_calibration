@@ -96,7 +96,7 @@ def main():
                    'calibration error (m)' : float('%.4f' % err),
                    'created on' : datetime.datetime.now().strftime('%d %B %Y %I:%M:%S %p')}
 
-    with open('%skinect_calibration.yaml' % (filesPath), 'w') as outfile:
+    with open('%sbaxter_kinect_calibration.yaml' % (filesPath), 'w') as outfile:
         yaml.dump(calibration, outfile)
 
     # plot both point sets together
