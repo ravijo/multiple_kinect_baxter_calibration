@@ -23,6 +23,7 @@ def main():
     # create tf listener and broadcaster
     tf_broadcaster = tf2_ros.StaticTransformBroadcaster()
 
+    all_transformations = []
     for i in range(1, 4):
         # load calibration file
         dirName = os.path.dirname(rospy.get_param('~parameters_file'))
@@ -39,25 +40,26 @@ def main():
         trans = params['trans']
         parent = params['parent']
 
-        static_transformStamped = TransformStamped()
+        static_transform = TransformStamped()
 
-        static_transformStamped.header.stamp = rospy.Time.now()
-        static_transformStamped.header.frame_id = parent
-        static_transformStamped.child_frame_id = child
+        static_transform.header.stamp = rospy.Time.now()
+        static_transform.header.frame_id = parent
+        static_transform.child_frame_id = child
 
-        static_transformStamped.transform.translation.x = trans[0]
-        static_transformStamped.transform.translation.y = trans[1]
-        static_transformStamped.transform.translation.z = trans[2]
-        static_transformStamped.transform.rotation.x = rot[0]
-        static_transformStamped.transform.rotation.y = rot[1]
-        static_transformStamped.transform.rotation.z = rot[2]
-        static_transformStamped.transform.rotation.w = rot[3]
+        static_transform.transform.translation.x = trans[0]
+        static_transform.transform.translation.y = trans[1]
+        static_transform.transform.translation.z = trans[2]
+        static_transform.transform.rotation.x = rot[0]
+        static_transform.transform.rotation.y = rot[1]
+        static_transform.transform.rotation.z = rot[2]
+        static_transform.transform.rotation.w = rot[3]
 
-        # Publish static transformation
-        tf_broadcaster.sendTransform(static_transformStamped)
+        all_transformations.append(static_transform)
+        if not multiple_kinects: break
 
-        if multiple_kinects: break
-
+    # src: https://answers.ros.org/question/261815
+    # Publish static transformation
+    tf_broadcaster.sendTransform(all_transformations)
     rospy.spin()
 
 

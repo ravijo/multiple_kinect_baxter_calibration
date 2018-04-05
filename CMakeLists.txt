@@ -82,7 +82,6 @@ target_link_libraries(view_cloud_realtime
   ${catkin_LIBRARIES}
 )
 
-
 add_executable(show_all_point_cloud src/show_all_point_cloud.cpp)
 target_link_libraries(show_all_point_cloud
   ${PCL_LIBRARIES}

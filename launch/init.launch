@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!--
+init.launch: initialization of kinect
+Requirements: Make sure all kinects are connected
+Author: Ravi Joshi
+Date: 2018/04/05
+-->
+<launch>
+  <arg name="kinect_sensor_1_name" default="kinect1"/>
+  <arg name="kinect_sensor_2_name" default="kinect2"/>
+  <arg name="kinect_sensor_3_name" default="kinect3"/>
+
+  <arg name="kinect_sensor_1_id" default="510760242542"/>
+  <arg name="kinect_sensor_2_id" default="510428142542"/>
+  <arg name="kinect_sensor_3_id" default="510341742542"/>
+
+  <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
+    <arg name="base_name" value="$(arg kinect_sensor_1_name)"/>
+    <arg name="sensor" value="$(arg kinect_sensor_1_id)"/>
+    <arg name="publish_tf" value="true"/>
+  </include>
+
+  <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
+    <arg name="base_name" value="$(arg kinect_sensor_2_name)"/>
+    <arg name="sensor" value="$(arg kinect_sensor_2_id)"/>
+    <arg name="publish_tf" value="true"/>
+  </include>
+
+  <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
+    <arg name="base_name" value="$(arg kinect_sensor_3_name)"/>
+    <arg name="sensor" value="$(arg kinect_sensor_3_id)"/>
+    <arg name="publish_tf" value="true"/>
+  </include>
+</launch>

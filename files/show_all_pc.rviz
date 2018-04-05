@@ -7,9 +7,6 @@ Panels:
         - /Global Options1
         - /Status1
         - /Grid1/Offset1
-        - /PointCloud22
-        - /PointCloud22/Status1
-        - /PointCloud23
       Splitter Ratio: 0.4375
     Tree Height: 895
   - Class: rviz/Selection
@@ -30,7 +27,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: Kinect 2
 Visualization Manager:
   Class: ""
   Displays:
@@ -374,7 +371,7 @@ Visualization Manager:
       Max Intensity: 4096
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: PointCloud2
+      Name: Kinect 1
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
@@ -396,7 +393,7 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz/PointCloud2
       Color: 255; 255; 255
-      Color Transformer: ""
+      Color Transformer: RGB8
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
@@ -404,8 +401,8 @@ Visualization Manager:
       Max Intensity: 4096
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: PointCloud2
-      Position Transformer: ""
+      Name: Kinect 2
+      Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
@@ -426,7 +423,7 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz/PointCloud2
       Color: 255; 255; 255
-      Color Transformer: ""
+      Color Transformer: RGB8
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
@@ -434,8 +431,8 @@ Visualization Manager:
       Max Intensity: 4096
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: PointCloud2
-      Position Transformer: ""
+      Name: Kinect 3
+      Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
@@ -470,7 +467,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 9.86908
+      Distance: 15.8372
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -482,10 +479,10 @@ Visualization Manager:
         Z: -0.613331
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.345399
+      Pitch: 0.895399
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.445401
+      Yaw: 2.1854
     Saved: ~
 Window Geometry:
   Displays:

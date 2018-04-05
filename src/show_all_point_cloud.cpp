@@ -13,26 +13,27 @@
 class ShowAllPointCloud
 {
     ros::Publisher pc1_pub, pc2_pub, pc3_pub;
-    int32_t red_color, green_color, blue_color;
+    uint32_t red_color, green_color, blue_color;
     std::string pc1_frame_id, pc2_frame_id, pc3_frame_id;
 
-    int32_t packRGB(uint8_t r, uint8_t g, uint8_t b);
-    void applyColor(pcl::PointCloud<pcl::PointXYZRGB>& cloud, int32_t color);
+    uint32_t packRGB(uint8_t r, uint8_t g, uint8_t b);
+    void applyColor(pcl::PointCloud<pcl::PointXYZRGB>& cloud, uint32_t color);
     void callback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg1, const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg2, const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg3);
   public:
     ShowAllPointCloud();
 };
 
-int32_t ShowAllPointCloud::packRGB(uint8_t r, uint8_t g, uint8_t b)
+uint32_t ShowAllPointCloud::packRGB(uint8_t r, uint8_t g, uint8_t b)
 {
-    int32_t color = (static_cast<uint32_t>(r) << 16 | static_cast<uint32_t>(g) << 8 | static_cast<uint32_t>(b));
+    // src: http://docs.pointclouds.org/1.7.0/structpcl_1_1_point_x_y_z_r_g_b.html
+    uint32_t color = ((uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b);
     return color;
 }
 
-void ShowAllPointCloud::applyColor(pcl::PointCloud<pcl::PointXYZRGB>& cloud, int32_t color)
+void ShowAllPointCloud::applyColor(pcl::PointCloud<pcl::PointXYZRGB>& cloud, uint32_t color)
 {
     for (size_t i = 0; i < cloud.points.size(); i++)
-        cloud.points[i].rgb = color;
+        cloud.points[i].rgb = *reinterpret_cast<float*>(&color);
 }
 
 void ShowAllPointCloud::callback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg1, const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg2, const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg3)
