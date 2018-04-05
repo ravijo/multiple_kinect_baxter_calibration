@@ -44,9 +44,9 @@ void ShowAllPointCloud::callback(const boost::shared_ptr<const sensor_msgs::Poin
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud2(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud3(new pcl::PointCloud<pcl::PointXYZRGB>);
 
-    utility::getPointCloudFromMsg(pc_msg1, cloud1);
-    utility::getPointCloudFromMsg(pc_msg2, cloud2);
-    utility::getPointCloudFromMsg(pc_msg3, cloud3);
+    utility::getPointCloudFromMsg(pc_msg1, *cloud1);
+    utility::getPointCloudFromMsg(pc_msg2, *cloud2);
+    utility::getPointCloudFromMsg(pc_msg3, *cloud3);
 
     applyColor(*cloud1, red_color);
     applyColor(*cloud2, green_color);

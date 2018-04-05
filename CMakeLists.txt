@@ -6,9 +6,14 @@ project(multiple_kinect_baxter_calibration)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
+  geometry_msgs
   pcl_conversions
   pcl_ros
   roscpp
+  rospy
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
   sensor_msgs
   std_msgs
   cmake_modules
@@ -84,6 +89,12 @@ target_link_libraries(view_cloud_realtime
 
 add_executable(show_all_point_cloud src/show_all_point_cloud.cpp)
 target_link_libraries(show_all_point_cloud
+  ${PCL_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
+
+add_executable(merge_point_clouds src/merge_point_clouds.cpp)
+target_link_libraries(merge_point_clouds
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )

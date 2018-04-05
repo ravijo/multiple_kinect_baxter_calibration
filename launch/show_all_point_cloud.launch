@@ -10,9 +10,9 @@ Date: 2018/02/16
   <arg name="pc2_topic" default="/kinect2/qhd/points"/>
   <arg name="pc3_topic" default="/kinect3/qhd/points"/>
 
-  <arg name="pc1_frame_id" default="/kinect1_link"/>
-  <arg name="pc2_frame_id" default="/kinect2_link"/>
-  <arg name="pc3_frame_id" default="/kinect3_link"/>
+  <arg name="pc1_frame_id" default="kinect1_link"/>
+  <arg name="pc2_frame_id" default="kinect2_link"/>
+  <arg name="pc3_frame_id" default="kinect3_link"/>
 
   <node name="show_all_point_cloud" pkg="multiple_kinect_baxter_calibration" type="show_all_point_cloud" output="screen">
     <param name="pc1_topic" value="$(arg pc1_topic)"/>

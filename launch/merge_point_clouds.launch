@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!--
+show_all_point_cloud.launch: show all point cloud in rviz
+Author: Ravi Joshi
+Date: 2018/02/16
+-->
+<launch>
+  <!-- rostopic for receving point cloud -->
+  <arg name="pc1_topic" default="/kinect1/qhd/points"/>
+  <arg name="pc2_topic" default="/kinect2/qhd/points"/>
+  <arg name="pc3_topic" default="/kinect3/qhd/points"/>
+
+  <arg name="base_frame_id" default="base"/>
+
+  <arg name="pc1_frame_id" default="kinect1_link"/>
+  <arg name="pc2_frame_id" default="kinect2_link"/>
+  <arg name="pc3_frame_id" default="kinect3_link"/>
+
+  <!--
+  ###########################################################################
+  # FOLLOWING CONFIGURATIONS ARE USED IN 'StatisticalOutlierRemoval'        #
+  # FILTERING. SEE BELOW URL FOR MORE INFO-                                 #
+  # http://pointclouds.org/documentation/tutorials/statistical_outlier.php  #
+  ###########################################################################
+  -->
+  <!-- number of nearest neighbors to use for mean distance estimation -->
+  <arg name="nr_k" default="50"/>
+  <!-- standard deviation multiplier for the distance threshold calculation -->
+  <arg name="stddev_mult" default="0.8"/>
+
+  <node name="merge_point_clouds" pkg="multiple_kinect_baxter_calibration" type="merge_point_clouds" output="screen">
+    <param name="pc1_topic" value="$(arg pc1_topic)"/>
+    <param name="pc2_topic" value="$(arg pc2_topic)"/>
+    <param name="pc3_topic" value="$(arg pc3_topic)"/>
+    <param name="base_frame_id" value="$(arg base_frame_id)"/>
+    <param name="pc1_frame_id" value="$(arg pc1_frame_id)"/>
+    <param name="pc2_frame_id" value="$(arg pc2_frame_id)"/>
+    <param name="pc3_frame_id" value="$(arg pc3_frame_id)"/>
+    <param name="nr_k" value="$(arg nr_k)"/>
+    <param name="stddev_mult" value="$(arg stddev_mult)"/>
+  </node>
+
+  <arg name="publish_calibration" default="false"/>
+  <group if="$(arg publish_calibration)">
+    <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch">
+      <arg name="multiple_kinects" value="true"/>
+    </include>
+  </group>
+
+  <node pkg="rviz" type="rviz" respawn="false" name="rviz" args="-d $(find multiple_kinect_baxter_calibration)/files/show_all_pc.rviz"/>
+</launch>

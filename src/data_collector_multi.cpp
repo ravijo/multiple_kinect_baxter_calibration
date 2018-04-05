@@ -122,9 +122,9 @@ void DataCollectorMulti::callback(const baxter_core_msgs::EndpointStateConstPtr&
       //pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud2(new pcl::PointCloud<pcl::PointXYZRGB>);
       //pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud3(new pcl::PointCloud<pcl::PointXYZRGB>);
 
-      utility::getPointCloudFromMsg(pc1_msg, clouds[0]);
-      utility::getPointCloudFromMsg(pc2_msg, clouds[1]);
-      utility::getPointCloudFromMsg(pc3_msg, clouds[2]);
+      utility::getPointCloudFromMsg(pc1_msg, *clouds[0]);
+      utility::getPointCloudFromMsg(pc2_msg, *clouds[1]);
+      utility::getPointCloudFromMsg(pc3_msg, *clouds[2]);
 
     // don't proceed further if robot is moving or if we are processing the existing data
     if (still_processing.data || (baxter_arm_motion_state == MOVING)) return;

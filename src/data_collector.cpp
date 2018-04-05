@@ -101,7 +101,7 @@ void DataCollector::saveData()
 void DataCollector::callback(const baxter_core_msgs::EndpointStateConstPtr& ee_msg, const sensor_msgs::PointCloud2ConstPtr& pc_msg)
 {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-    utility::getPointCloudFromMsg(pc_msg, cloud);
+    utility::getPointCloudFromMsg(pc_msg, *cloud);
 
     // show caputed point cloud
     if (!pc_viewer->updatePointCloud(cloud, "cloud"))

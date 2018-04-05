@@ -82,7 +82,7 @@ namespace utility
     out.width = count;
   }
 
-  void getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg, pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
+  void getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg, pcl::PointCloud<pcl::PointXYZRGB> &cloud)
   {
     pcl::PCLPointCloud2 pcl_pc2;
     pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
@@ -94,7 +94,7 @@ namespace utility
     */
     pcl_conversions::toPCL(*msg, pcl_pc2);
     pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
-    removeNanAndConvertPointCloudToRGB(temp_cloud, *cloud);
+    removeNanAndConvertPointCloudToRGB(temp_cloud, cloud);
   }
 
   bool writeCSV(std::string file_name, std::string header, std::vector<std::vector<float> > data, std::string &error)

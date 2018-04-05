@@ -31,4 +31,11 @@ Date: 2018/04/05
     <arg name="sensor" value="$(arg kinect_sensor_3_id)"/>
     <arg name="publish_tf" value="true"/>
   </include>
+
+  <arg name="publish_calibration" default="true"/>
+  <group if="$(arg publish_calibration)">
+    <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch">
+      <arg name="multiple_kinects" value="true"/>
+    </include>
+  </group>
 </launch>
