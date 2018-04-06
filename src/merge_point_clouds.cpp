@@ -14,6 +14,8 @@
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
+#define TF_MAX_ATTEMPTS 5
+
 class MergePointClouds
 {
     ros::Publisher merge_pc_pub;
@@ -22,7 +24,7 @@ class MergePointClouds
     pcl::StatisticalOutlierRemoval<pcl::PointXYZRGB> pc_filter;
 
     void initFilter(int nr_k, double stddev_mult);
-    void fetchTransformations(tf::StampedTransform transformations[]);
+    void fetchTransformations(double wait_time, tf::StampedTransform transformations[]);
     void filterPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in, pcl::PointCloud<pcl::PointXYZRGB> &out);
     void callback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg1, const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg2, const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg3);
   public:
@@ -77,7 +79,7 @@ void MergePointClouds::callback(const boost::shared_ptr<const sensor_msgs::Point
     merge_pc_pub.publish(cloud);
 }
 
-void MergePointClouds::fetchTransformations(tf::StampedTransform transformations[])
+void MergePointClouds::fetchTransformations(double wait_time, tf::StampedTransform transformations[])
 {
     tf2_ros::Buffer tfBuffer;
     tf2_ros::TransformListener tfListener(tfBuffer);
@@ -85,12 +87,23 @@ void MergePointClouds::fetchTransformations(tf::StampedTransform transformations
     tf::StampedTransform tf_t1, tf_t2, tf_t3;
     geometry_msgs::TransformStamped gm_t1, gm_t2, gm_t3;
 
+    int try_count = 0;
+    while(!tfBuffer.canTransform(base_frame_id, pc1_frame_id, ros::Time(0), ros::Duration(wait_time)))
+    {
+        if ((try_count++) > TF_MAX_ATTEMPTS)
+        {
+          ROS_ERROR_STREAM("Unable to fetch static transformations even after " << TF_MAX_ATTEMPTS << " attempts.");
+          ros::shutdown();
+          break;
+        }
+    }
+
     try
     {
         // get the latest available transformations
-        gm_t1 = tfBuffer.lookupTransform("base", "kinect1_link", ros::Time(0));
-        //gm_t2 = tfBuffer.lookupTransform(base_frame_id, pc2_frame_id, ros::Time(0));
-        //gm_t3 = tfBuffer.lookupTransform(base_frame_id, pc3_frame_id, ros::Time(0));
+        gm_t1 = tfBuffer.lookupTransform(base_frame_id, pc1_frame_id, ros::Time(0));
+        gm_t2 = tfBuffer.lookupTransform(base_frame_id, pc2_frame_id, ros::Time(0));
+        gm_t3 = tfBuffer.lookupTransform(base_frame_id, pc3_frame_id, ros::Time(0));
     }
     catch (tf2::TransformException &ex)
     {
@@ -128,8 +141,11 @@ MergePointClouds::MergePointClouds()
     nh.getParam("stddev_mult", stddev_mult);
     initFilter(nr_k, stddev_mult);
 
+    double wait_time;
+    nh.getParam("wait_time", wait_time);
+
     // before proceeding further we should get the calibration information
-    fetchTransformations(transformations);
+    fetchTransformations(wait_time, transformations);
 
     message_filters::Subscriber<sensor_msgs::PointCloud2> pc1_sub(nh, pc1_topic, 1);
     message_filters::Subscriber<sensor_msgs::PointCloud2> pc2_sub(nh, pc2_topic, 1);

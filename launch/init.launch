@@ -38,4 +38,7 @@ Date: 2018/04/05
       <arg name="multiple_kinects" value="true"/>
     </include>
   </group>
+
+  <!-- Baxter provided utility to enable gripper buttons -->
+  <node name="enable_gripper_buttons" pkg="baxter_examples" type="gripper_cuff_control.py"/>
 </launch>

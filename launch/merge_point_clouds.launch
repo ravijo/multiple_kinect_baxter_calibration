@@ -27,6 +27,8 @@ Date: 2018/02/16
   <arg name="nr_k" default="50"/>
   <!-- standard deviation multiplier for the distance threshold calculation -->
   <arg name="stddev_mult" default="0.8"/>
+  <!-- wait time for tf buffer to acquire transforms -->
+  <arg name="wait_time" default="2.0"/>
 
   <node name="merge_point_clouds" pkg="multiple_kinect_baxter_calibration" type="merge_point_clouds" output="screen">
     <param name="pc1_topic" value="$(arg pc1_topic)"/>
@@ -38,6 +40,7 @@ Date: 2018/02/16
     <param name="pc3_frame_id" value="$(arg pc3_frame_id)"/>
     <param name="nr_k" value="$(arg nr_k)"/>
     <param name="stddev_mult" value="$(arg stddev_mult)"/>
+    <param name="wait_time" value="$(arg wait_time)"/>
   </node>
 
   <arg name="publish_calibration" default="false"/>
