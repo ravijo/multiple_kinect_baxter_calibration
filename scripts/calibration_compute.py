@@ -88,8 +88,8 @@ def main():
     quat = quaternion_from_euler(*euler)
 
     # save results to yaml file
-    calibration = {'parent'    : '/base',
-                   'child'     : '/kinect2_link',
+    calibration = {'parent'    : 'base',
+                   'child'     : 'kinect2_link',
                    'trans'     : trans.tolist(),
                    'rot'       : quat.tolist(),
                    'rot_euler' : list(euler),

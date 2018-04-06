@@ -14,6 +14,7 @@
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
+// maximum attempts for tf in order to fetch transformations
 #define TF_MAX_ATTEMPTS 5
 
 class MergePointClouds
@@ -87,6 +88,7 @@ void MergePointClouds::fetchTransformations(double wait_time, tf::StampedTransfo
     tf::StampedTransform tf_t1, tf_t2, tf_t3;
     geometry_msgs::TransformStamped gm_t1, gm_t2, gm_t3;
 
+    /*
     int try_count = 0;
     while(!tfBuffer.canTransform(base_frame_id, pc1_frame_id, ros::Time(0), ros::Duration(wait_time)))
     {
@@ -97,13 +99,13 @@ void MergePointClouds::fetchTransformations(double wait_time, tf::StampedTransfo
           break;
         }
     }
-
+    */
     try
     {
         // get the latest available transformations
-        gm_t1 = tfBuffer.lookupTransform(base_frame_id, pc1_frame_id, ros::Time(0));
-        gm_t2 = tfBuffer.lookupTransform(base_frame_id, pc2_frame_id, ros::Time(0));
-        gm_t3 = tfBuffer.lookupTransform(base_frame_id, pc3_frame_id, ros::Time(0));
+        gm_t1 = tfBuffer.lookupTransform(base_frame_id, pc1_frame_id, ros::Time(0), ros::Duration(wait_time));
+        gm_t2 = tfBuffer.lookupTransform(base_frame_id, pc2_frame_id, ros::Time(0), ros::Duration(wait_time));
+        gm_t3 = tfBuffer.lookupTransform(base_frame_id, pc3_frame_id, ros::Time(0), ros::Duration(wait_time));
     }
     catch (tf2::TransformException &ex)
     {

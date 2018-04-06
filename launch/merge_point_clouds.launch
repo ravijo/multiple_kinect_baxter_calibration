@@ -50,5 +50,5 @@ Date: 2018/02/16
     </include>
   </group>
 
-  <node pkg="rviz" type="rviz" respawn="false" name="rviz" args="-d $(find multiple_kinect_baxter_calibration)/files/show_all_pc.rviz"/>
+  <node pkg="rviz" type="rviz" respawn="false" name="rviz" args="-d $(find multiple_kinect_baxter_calibration)/files/merge_pc.rviz"/>
 </launch>

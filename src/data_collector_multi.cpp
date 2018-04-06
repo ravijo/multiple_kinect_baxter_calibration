@@ -138,6 +138,7 @@ void DataCollectorMulti::callback(const baxter_core_msgs::EndpointStateConstPtr&
     //pcl::io::savePCDFileASCII ("/home/tom/Documents/ravi/Recycle_Bin/del/2.pcd", *clouds[1]);
     //pcl::io::savePCDFileASCII ("/home/tom/Documents/ravi/Recycle_Bin/del/3.pcd", *clouds[2]);
 
+/*
     // show caputed point cloud
     for (size_t i = 0; i < KINECT_COUNT; i++)
     {
@@ -152,7 +153,7 @@ void DataCollectorMulti::callback(const baxter_core_msgs::EndpointStateConstPtr&
         pc_viewers.at(i)->setCameraParameters(camera);
         pc_viewers.at(i)->spinOnce();
     }
-
+*/
     /*
     if (!pc_viewers.at(1)->updatePointCloud(clouds[1], "cloud1"))
         pc_viewers.at(1)->addPointCloud(clouds[1], "cloud1");
@@ -203,11 +204,18 @@ void DataCollectorMulti::callback(const baxter_core_msgs::EndpointStateConstPtr&
 
       for (size_t i = 0; i < KINECT_COUNT; i++)
       {
+          std::string cloud_id = "cloud" + utility::to_string(i);
+          if (!pc_viewers.at(i)->updatePointCloud(clouds[i], cloud_id))
+              pc_viewers.at(i)->addPointCloud(clouds[i], cloud_id);
+
+
           std::string sphere_id = "detected_sphere" + utility::to_string(i);
           pcl::PointXYZ detected_sphere(spheres_coff[i].values[0], spheres_coff[i].values[1], spheres_coff[i].values[2]);
           if (!pc_viewers.at(i)->updateSphere(detected_sphere, spheres_coff[i].values[3], 0.2, 1.0, 0.3, sphere_id))
-          pc_viewers.at(i)->addSphere(detected_sphere, spheres_coff[i].values[3], 0.2, 1.0, 0.3, sphere_id);
+              pc_viewers.at(i)->addSphere(detected_sphere, spheres_coff[i].values[3], 0.2, 1.0, 0.3, sphere_id);
 
+          // force the viewer to show updaded cloud
+          pc_viewers.at(i)->setCameraParameters(camera);
           pc_viewers.at(i)->spinOnce();
       }
     }

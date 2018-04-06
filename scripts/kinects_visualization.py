@@ -20,7 +20,7 @@ class KinectsVisualization():
         self.pc1_frame_id = pc1_frame_id
         self.pc2_frame_id = pc2_frame_id
         self.pc3_frame_id = pc3_frame_id
-        self.tf_wait = float(tf_wait)
+        #self.tf_wait = float(tf_wait)
 
         # colors must be given in following order '[#FF0000, #00FF00, #0000FF]'
         kinect_colors = colors.split(',')
@@ -28,10 +28,10 @@ class KinectsVisualization():
         color2 = self.hex_to_rgba(kinect_colors[1][2:])
         color3 = self.hex_to_rgba(kinect_colors[2][:-1][1:])
 
-        transformations = self.fetch_transformations()
-        kinect1 = self.create_kinect(0, color1, float(scale), self.pc1_frame_id, transformations[self.pc1_frame_id])
-        kinect2 = self.create_kinect(1, color2, float(scale), self.pc2_frame_id, transformations[self.pc2_frame_id])
-        kinect3 = self.create_kinect(2, color3, float(scale), self.pc3_frame_id, transformations[self.pc3_frame_id])
+        #transformations = self.fetch_transformations()
+        kinect1 = self.create_kinect(0, color1, float(scale), self.pc1_frame_id)
+        kinect2 = self.create_kinect(1, color2, float(scale), self.pc2_frame_id)
+        kinect3 = self.create_kinect(2, color3, float(scale), self.pc3_frame_id)
 
         kinect_array = MarkerArray()
         kinect_array.markers.append(kinect1)
@@ -52,6 +52,7 @@ class KinectsVisualization():
         rgb_color = tuple(float(int(hex_color[i:i+2], 16)/255.0) for i in (0, 2 ,4))
         return ColorRGBA(rgb_color[0], rgb_color[1], rgb_color[2], 1)
 
+    '''
     def fetch_transformations(self):
         all_transformations = {}
 
@@ -71,16 +72,12 @@ class KinectsVisualization():
             rospy.logerror('Unable to fetch static transformations. %s' % err)
 
         return all_transformations
+    '''
 
-    def create_kinect(self, index, color, scale, frame_id, transformation):
+    def create_kinect(self, index, color, scale, frame_id):
         kinect = self.create_marker(index, color, Marker.CUBE, rospy.Time.now(), frame_id)
         # kinect v2 dimensions are 66 mm width *  43 mm height * 249 mm length
         kinect.scale = Vector3(scale * 0.066, scale * 0.043, scale * 0.249)
-        trans = transformation['t']; rot = transformation['r']
-        position = Point(trans[0], trans[1], trans[2])
-        orientation = Quaternion(rot[0], rot[1], rot[2], rot[3])
-        kinect.pose.position = position
-        kinect.pose.orientation = orientation
         return kinect
 
     def create_marker(self, index, color, marker_type, time, frame_id):
