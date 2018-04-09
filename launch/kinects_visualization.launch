@@ -11,10 +11,11 @@ Date: 2017/24/10
   <arg name="pc3_frame_id" default="kinect3_link"/>
   <arg name="tf_wait" default="2.0"/>
   <!--
-  colors in hex for each kinect. make sure to have 
+  colors in hex for each kinect. make sure to have
   only one space in between each color as it is below
+  #212223 gray black
   -->
-  <arg name="colors" default="[#FF0000, #00FF00, #0000FF]"/>
+  <arg name="colors" default="[#212223, #212223, #212223]"/>
   <arg name="scale" default="1.0"/>
   <arg name="freq" default="0.5"/>
 

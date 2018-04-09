@@ -16,12 +16,14 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_geometry_msgs
   sensor_msgs
   std_msgs
+  cv_bridge
   cmake_modules
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(PCL REQUIRED)
 find_package(Eigen REQUIRED)
+find_package(OpenCV REQUIRED)
 
 ## catkin specific configuration
 catkin_package(
@@ -37,6 +39,7 @@ include_directories(
   ${PCL_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Print PCL Version (for debugging only)
@@ -97,4 +100,11 @@ add_executable(merge_point_clouds src/merge_point_clouds.cpp)
 target_link_libraries(merge_point_clouds
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
+)
+
+add_executable(new_sphere_detector src/new_sphere_detector.cpp)
+target_link_libraries(new_sphere_detector
+  ${PCL_LIBRARIES}
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
 )

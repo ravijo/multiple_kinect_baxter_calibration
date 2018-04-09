@@ -18,8 +18,8 @@ Date: 2018/02/16
   </node>
 
   <!-- minimum and maximum HSV values for sphere segmentation -->
-  <arg name="min_hsv" default="[55, 0.3, 0.6]"/>
-  <arg name="max_hsv" default="[65, 1.0, 1.0]"/>
+  <arg name="min_hsv" default="[30, 0.1, 0.5]"/>
+  <arg name="max_hsv" default="[90, 1.0, 1.0]"/>
 
   <!--
   ###################################################################
@@ -29,9 +29,9 @@ Date: 2018/02/16
   ###################################################################
   -->
   <!-- radius of sphere (in meter) -->
-  <arg name="radius" default="0.034"/>
+  <arg name="radius" default="0.1"/>
   <!-- length of stick to hold the sphere (in meter) -->
-  <arg name="offset" default="0.051"/>
+  <arg name="offset" default="0.092"/>
   <!-- number of 'k' nearest neighbors to use for feature estimation -->
   <arg name="k_neighbors" default="10"/>
   <!-- normal angular distance weight -->
@@ -43,7 +43,7 @@ Date: 2018/02/16
   <!-- probability of choosing at least one sample free from outliers -->
   <arg name="prob" default="0.99999"/>
   <!-- tolerance in radius (in meters) -->
-  <arg name="tolerance" default="0.02"/>
+  <arg name="tolerance" default="0.04"/>
   <!-- angle epsilon (delta) threshold (in degree) -->
   <arg name="epsilon" default="15"/>
   <!-- camera file for point cloud visualization -->

@@ -81,9 +81,9 @@ ShowAllPointCloud::ShowAllPointCloud()
     nh.getParam("pc2_frame_id", pc2_frame_id);
     nh.getParam("pc3_frame_id", pc3_frame_id);
 
-    red_color   = packRGB(255, 0, 0);
-    green_color = packRGB(0, 255, 0);
-    blue_color  = packRGB(0, 0, 255);
+    red_color   = packRGB(191, 63, 63);
+    green_color = packRGB(63, 191, 63);
+    blue_color  = packRGB(63, 63, 191);
 
     pc1_pub = nh.advertise<sensor_msgs::PointCloud2>("pc_1_points", 1);
     pc2_pub = nh.advertise<sensor_msgs::PointCloud2>("pc_2_points", 1);

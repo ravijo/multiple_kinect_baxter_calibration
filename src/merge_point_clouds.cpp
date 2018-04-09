@@ -7,10 +7,9 @@
 #include <ros/ros.h>
 #include <utility.h>
 #include <pcl_ros/transforms.h>
-#include <tf/transform_datatypes.h>
+#include <tf/transform_listener.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <message_filters/subscriber.h>
-#include <tf2_ros/transform_listener.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
@@ -19,6 +18,7 @@
 
 class MergePointClouds
 {
+    bool still_processing;
     ros::Publisher merge_pc_pub;
     tf::StampedTransform transformations[3];
     std::string base_frame_id, pc1_frame_id, pc2_frame_id, pc3_frame_id;
@@ -47,6 +47,9 @@ void MergePointClouds::initFilter(int nr_k, double stddev_mult)
 
 void MergePointClouds::callback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg1, const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg2, const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg3)
 {
+    if (still_processing) return;
+    still_processing = true;
+
     ROS_DEBUG_STREAM("MergePointClouds callback received");
 
     pcl::PointCloud<pcl::PointXYZRGB> cloud1, cloud2, cloud3;
@@ -68,57 +71,39 @@ void MergePointClouds::callback(const boost::shared_ptr<const sensor_msgs::Point
 
     pcl::PointCloud<pcl::PointXYZRGB> cloud;
 
+    // Statistical outlier removal filtering
+    filterPointCloud(raw_cloud, cloud);
+
     ros::Time now = ros::Time::now();
     cloud.header.frame_id = base_frame_id;
 
     // https://answers.ros.org/question/172730/pcl-header-timestamp/
     pcl_conversions::toPCL(now, cloud.header.stamp);
 
-    // Statistical outlier removal filtering
-    filterPointCloud(raw_cloud, cloud);
-
     merge_pc_pub.publish(cloud);
+
+    still_processing = false;
 }
 
 void MergePointClouds::fetchTransformations(double wait_time, tf::StampedTransform transformations[])
 {
-    tf2_ros::Buffer tfBuffer;
-    tf2_ros::TransformListener tfListener(tfBuffer);
+    tf::TransformListener listener;
+    tf::StampedTransform t1, t2, t3;
 
-    tf::StampedTransform tf_t1, tf_t2, tf_t3;
-    geometry_msgs::TransformStamped gm_t1, gm_t2, gm_t3;
-
-    /*
-    int try_count = 0;
-    while(!tfBuffer.canTransform(base_frame_id, pc1_frame_id, ros::Time(0), ros::Duration(wait_time)))
-    {
-        if ((try_count++) > TF_MAX_ATTEMPTS)
-        {
-          ROS_ERROR_STREAM("Unable to fetch static transformations even after " << TF_MAX_ATTEMPTS << " attempts.");
-          ros::shutdown();
-          break;
-        }
-    }
-    */
     try
     {
-        // get the latest available transformations
-        gm_t1 = tfBuffer.lookupTransform(base_frame_id, pc1_frame_id, ros::Time(0), ros::Duration(wait_time));
-        gm_t2 = tfBuffer.lookupTransform(base_frame_id, pc2_frame_id, ros::Time(0), ros::Duration(wait_time));
-        gm_t3 = tfBuffer.lookupTransform(base_frame_id, pc3_frame_id, ros::Time(0), ros::Duration(wait_time));
+        listener.waitForTransform(base_frame_id, pc1_frame_id, ros::Time(0), ros::Duration(wait_time) );
+        listener.lookupTransform(base_frame_id, pc1_frame_id, ros::Time(0), t1);
+        listener.lookupTransform(base_frame_id, pc2_frame_id, ros::Time(0), t2);
+        listener.lookupTransform(base_frame_id, pc3_frame_id, ros::Time(0), t3);
     }
-    catch (tf2::TransformException &ex)
+    catch (tf::TransformException ex)
     {
         ROS_ERROR_STREAM("Unable to fetch static transformations. " << ex.what());
         ros::shutdown();
     }
 
-    // convert transformations to tf
-    tf::transformStampedMsgToTF(gm_t1, tf_t1);
-    tf::transformStampedMsgToTF(gm_t2, tf_t2);
-    tf::transformStampedMsgToTF(gm_t3, tf_t3);
-
-    transformations[0] = tf_t1; transformations[1] = tf_t2; transformations[2] = tf_t3;
+    transformations[0] = t1; transformations[1] = t2; transformations[2] = t3;
 }
 
 MergePointClouds::MergePointClouds()
@@ -135,7 +120,7 @@ MergePointClouds::MergePointClouds()
     nh.getParam("pc2_frame_id", pc2_frame_id);
     nh.getParam("pc3_frame_id", pc3_frame_id);
 
-    merge_pc_pub = nh.advertise<sensor_msgs::PointCloud2>("merge_points", 1);
+    merge_pc_pub = nh.advertise<sensor_msgs::PointCloud2>("merge_points", 5);
 
     int nr_k;
     double stddev_mult;
@@ -148,6 +133,9 @@ MergePointClouds::MergePointClouds()
 
     // before proceeding further we should get the calibration information
     fetchTransformations(wait_time, transformations);
+
+    // we haven't started processing yet
+    still_processing = false;
 
     message_filters::Subscriber<sensor_msgs::PointCloud2> pc1_sub(nh, pc1_topic, 1);
     message_filters::Subscriber<sensor_msgs::PointCloud2> pc2_sub(nh, pc2_topic, 1);

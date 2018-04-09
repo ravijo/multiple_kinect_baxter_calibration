@@ -134,6 +134,8 @@ void DataCollectorMulti::callback(const baxter_core_msgs::EndpointStateConstPtr&
 
     //ROS_INFO_STREAM("Cloud 1 " << clouds[0]->points.size() << ", Cloud 2 "  << clouds[1]->points.size() << ", Cloud 3 "  << clouds[2]->points.size() );
 
+    
+
     //pcl::io::savePCDFileASCII ("/home/tom/Documents/ravi/Recycle_Bin/del/1.pcd", *clouds[0]);
     //pcl::io::savePCDFileASCII ("/home/tom/Documents/ravi/Recycle_Bin/del/2.pcd", *clouds[1]);
     //pcl::io::savePCDFileASCII ("/home/tom/Documents/ravi/Recycle_Bin/del/3.pcd", *clouds[2]);

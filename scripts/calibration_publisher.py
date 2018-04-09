@@ -18,7 +18,7 @@ def main():
     # initialize ros node
     rospy.init_node('publish_calibration', anonymous=True)
 
-    multiple_kinects = bool(rospy.get_param('~parameters_file'))
+    multiple_kinects = bool(rospy.get_param('~multiple_kinects'))
 
     # create tf listener and broadcaster
     tf_broadcaster = tf2_ros.StaticTransformBroadcaster()

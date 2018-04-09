@@ -23,6 +23,11 @@ Date: 2018/02/16
     <param name="pc3_frame_id" value="$(arg pc3_frame_id)"/>
   </node>
 
+  <arg name="colors" default="[#BF3F3F, #3FBF3F, #3F3FBF]"/>
+  <include file="$(find multiple_kinect_baxter_calibration)/launch/kinects_visualization.launch">
+    <arg name="colors" value="$(arg colors)"/>
+  </include>
+
   <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch">
     <arg name="multiple_kinects" value="true"/>
   </include>

@@ -8,9 +8,11 @@
 # import modules
 import tf
 import rospy
+from math import pi
 from std_msgs.msg import ColorRGBA
+from geometry_msgs.msg import Vector3, Quaternion
+from tf.transformations import  quaternion_about_axis
 from visualization_msgs.msg import Marker, MarkerArray
-from geometry_msgs.msg import Vector3, Point, Quaternion
 
 class KinectsVisualization():
     def __init__(self, base_frame_id, pc1_frame_id, pc2_frame_id, pc3_frame_id, tf_wait, colors, scale, freq):
@@ -75,22 +77,28 @@ class KinectsVisualization():
     '''
 
     def create_kinect(self, index, color, scale, frame_id):
-        kinect = self.create_marker(index, color, Marker.CUBE, rospy.Time.now(), frame_id)
+        def rotate_about_y_axis():
+            yaxis = [0, 1, 0]; beta = pi/2
+            qy = quaternion_about_axis(beta, yaxis)
+            return Quaternion(qy[0], qy[1], qy[2], qy[3])
+
+        def create_marker(index, color, marker_type, time, frame_id):
+            marker = Marker()
+            marker.id = index
+            marker.ns = self.ns
+            marker.color = color
+            marker.action = Marker.ADD
+            marker.type = marker_type
+            marker.header.stamp = time
+            marker.header.frame_id = frame_id
+            marker.lifetime = rospy.Duration(0)  # forever (static markers)
+            return marker
+
+        kinect = create_marker(index, color, Marker.CUBE, rospy.Time.now(), frame_id)
         # kinect v2 dimensions are 66 mm width *  43 mm height * 249 mm length
         kinect.scale = Vector3(scale * 0.066, scale * 0.043, scale * 0.249)
+        kinect.pose.orientation = rotate_about_y_axis()
         return kinect
-
-    def create_marker(self, index, color, marker_type, time, frame_id):
-        marker = Marker()
-        marker.id = index
-        marker.ns = self.ns
-        marker.color = color
-        marker.action = Marker.ADD
-        marker.type = marker_type
-        marker.header.stamp = time
-        marker.header.frame_id = frame_id
-        marker.lifetime = rospy.Duration(0)  # forever (static markers)
-        return marker
 
 if __name__ == '__main__':
     # initialize ros node

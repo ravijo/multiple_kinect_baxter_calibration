@@ -14,6 +14,8 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
+#define outside_limit(num, min, max) (num < min || num > max)
+
 namespace utility
 {
   // due to PCL issues we are not able to use C++ 11 std. Let's define our own functions
@@ -51,7 +53,7 @@ namespace utility
         pcl::PointXYZHSVtoXYZRGB(in.points[i], out.points[i]);
   }
 
-  inline void removeNanAndConvertPointCloudToRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out)
+  inline void removeNanAndConvertPointCloudToRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in, pcl::PointCloud<pcl::PointXYZRGB>& out, float min_z, float max_z)
   {
     size_t count = 0;
     out.header = in.header;
@@ -62,7 +64,7 @@ namespace utility
     {
         if (!pcl_isfinite(in.points[i].x) ||
             !pcl_isfinite(in.points[i].y) ||
-            !pcl_isfinite(in.points[i].z))
+            outside_limit(in.points[i].z, min_z, max_z))
             continue;
 
         out.points[count].x = in.points[i].x;
@@ -82,7 +84,7 @@ namespace utility
     out.width = count;
   }
 
-  void getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg, pcl::PointCloud<pcl::PointXYZRGB> &cloud)
+  void getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg, pcl::PointCloud<pcl::PointXYZRGB> &cloud, float min_z=0.5, float max_z=5.0)
   {
     pcl::PCLPointCloud2 pcl_pc2;
     pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
@@ -94,7 +96,7 @@ namespace utility
     */
     pcl_conversions::toPCL(*msg, pcl_pc2);
     pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
-    removeNanAndConvertPointCloudToRGB(temp_cloud, cloud);
+    removeNanAndConvertPointCloudToRGB(temp_cloud, cloud, min_z, max_z);
   }
 
   bool writeCSV(std::string file_name, std::string header, std::vector<std::vector<float> > data, std::string &error)
