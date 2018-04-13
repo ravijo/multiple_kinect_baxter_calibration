@@ -80,7 +80,7 @@ void callback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& msg) {
   */
 
   std::string file_name = package_path + "/files/scene.pcd";
-  ROS_INFO_STREAM("Saving point cloud " << file_name << ". " << (cloud->width * cloud->height) << " Points.");
+  ROS_INFO_STREAM("Saving point cloud '" << file_name << "'. " << (cloud->width * cloud->height) << " Points.");
   pcl::io::savePCDFileASCII(file_name, *cloud);
 }
 
