@@ -12,8 +12,20 @@
 #include <pcl/point_types.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
+/*
+void keyboardEventOccurred(
+  const pcl::visualization::KeyboardEvent& event, void* viewer) {
+    if (event.getKeySym() == "q" && event.keyDown()){
+        ROS_INFO_STREAM("Key 'q' was pressed. Exiting...");
+        pcl::visualization::PCLVisualizer* v
+            = static_cast<pcl::visualization::PCLVisualizer*>(viewer);
+        v->close(); // doesn't work with PCL 1.7
+    }
+}
+*/
+
 void pointPickingEventOccurred(
-  const pcl::visualization::PointPickingEvent& event, void* viewer_void) {
+  const pcl::visualization::PointPickingEvent& event, void* viewer) {
   if (event.getPointIndex() == -1)
     return;
 
@@ -38,18 +50,22 @@ int main(int argc, char **argv) {
   if (pcl::io::loadPCDFile < pcl::PointXYZRGB > (pcd_file, *cloud) == -1) {
     ROS_ERROR_STREAM("Couldn't read file input file " << pcd_file);
     return -1;
+  }else{
+    ROS_INFO_STREAM("Loading '" << pcd_file << "'");
   }
 
   ROS_INFO_STREAM("Hold down 'SHIFT' key while left-clicking to pick a point.");
 
   pcl::visualization::PCLVisualizer viewer(
-  "Cloud Viewer (Press 'j' to save screenshot)");
+  "Cloud Viewer (Press 'j' to take screenshot)");
+
   viewer.addPointCloud(cloud, "cloud");
 
   viewer.initCameraParameters();
   viewer.getCameraParameters(argc, argv);
   viewer.registerPointPickingCallback(pointPickingEventOccurred,
   (void*) &viewer);
+  //viewer.registerKeyboardCallback(keyboardEventOccurred, (void*)&viewer);
 
   viewer.spin();
 

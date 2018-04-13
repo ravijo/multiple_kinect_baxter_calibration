@@ -12,13 +12,6 @@
 
 #include <utility.h>
 
-
-// pcl headers
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
-#include <pcl/filters/filter.h>
-#include <pcl_conversions/pcl_conversions.h>
-
 std::string package_path;
 
 /*
@@ -41,6 +34,7 @@ inline void PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in,
   }
 }
 */
+
 void callback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& msg) {
   ROS_INFO("Point Cloud Received.");
 
@@ -93,6 +87,8 @@ int main(int argc, char **argv) {
   if(cloud_topic.empty()){
     cloud_topic = "/kinect1/sd/points";
     ROS_WARN_STREAM("Point cloud topic is not provided. Using '" << cloud_topic << "' as default point cloud topic");
+  }else{
+    ROS_INFO_STREAM("Point cloud topic is '" << cloud_topic << "'");
   }
 
   package_path = ros::package::getPath("multiple_kinect_baxter_calibration");

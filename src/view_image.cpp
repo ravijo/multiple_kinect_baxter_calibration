@@ -71,9 +71,10 @@ int main(int argc, char** argv) {
   src_image = cv::imread(image_file, CV_LOAD_IMAGE_COLOR);
   if (!src_image.data) // Check for invalid input
   {
-  std::cerr << "Could not open or find the image " << image_file
-  << std::endl;
-  return -1;
+    std::cerr << "Could not open or find the image '" << image_file << "'" << std::endl;
+    return -1;
+  }else{
+    std::cout << "Loading '" << image_file << "'" << std::endl;
   }
 
   cv::imshow(window_text, src_image);
