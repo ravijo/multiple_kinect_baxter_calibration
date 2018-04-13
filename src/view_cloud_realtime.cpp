@@ -53,9 +53,10 @@ void callback(
   */
 
   /*
-   * It was found that even though point cloud ros message field says that libfreenect2
-   * point cloud is 'rgb', it is 'rgba'. Hence the code below assumes that incoming
-   * point cloud is 'rgba' and it converts it to 'rgb' to further use
+   * It was found that even though point cloud ros message field says that
+   * libfreenect2 point cloud is 'rgb', it is 'rgba'. Hence the code below
+   * assumes that incoming point cloud is 'rgba' and it converts it to 'rgb'
+   * to further use
    */
   /*
   pcl_conversions::toPCL(*msg, pcl_pc2);
@@ -90,10 +91,12 @@ int main(int argc, char **argv) {
   std::string cloud_topic;
   nh.getParam("topic", cloud_topic);
 
-  if(cloud_topic.empty()){
+  if (cloud_topic.empty()) {
     cloud_topic = "/kinect1/sd/points";
-    ROS_WARN_STREAM("Point cloud topic is not provided. Using '" << cloud_topic << "' as default point cloud topic");
-  }else{
+    ROS_WARN_STREAM(
+        "Point cloud topic is not provided. Using '" << cloud_topic
+            << "' as default point cloud topic");
+  } else {
     ROS_INFO_STREAM("Point cloud topic is '" << cloud_topic << "'");
   }
 

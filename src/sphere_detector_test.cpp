@@ -8,51 +8,102 @@
 #include <utility.h>
 #include <ros/package.h>
 #include <sphere_detector.h>
-//#include <opencv2/opencv.hpp>
 
-int minH = 5, minS = 180, minV = 180;
-int maxH = 30, maxS = 255, maxV = 255;
-float radius = 0.034; // m
+float default_sphere_radius = 0.034; // m
+int default_min_h = 5, default_min_s = 180, default_min_v = 180;
+int default_max_h = 30, default_max_s = 255, default_max_v = 255;
 
-/*
- // src: https://stackoverflow.com/a/15009815/1175065
- cv::Mat equalizeIntensity(const cv::Mat& inputImage)
- {
- if(inputImage.channels() >= 3)
- {
- cv::Mat ycrcb;
+int main(int argc, char * * argv) {
+  ros::init(argc, argv, "sphere_detector_test",
+      ros::init_options::AnonymousName);
+  ros::NodeHandle nh("~");
 
- cv::cvtColor(inputImage, ycrcb, CV_BGR2YCrCb);
+  std::string pcd_file;
+  if (nh.getParam("file", pcd_file)) {
+    ROS_INFO_STREAM("PCD file is '" << pcd_file << "'");
+  } else {
+    pcd_file = ros::package::getPath("multiple_kinect_baxter_calibration")
+        + "/files/scene.pcd";
+    ROS_WARN_STREAM(
+        "PCD file is not provided. Using '" << pcd_file
+            << "' as default PCD file");
+  }
 
- std::vector<cv::Mat> channels;
- cv::split(ycrcb, channels);
+  float sphere_radius;
+  if (nh.getParam("r", sphere_radius)) {
+    ROS_INFO_STREAM("Sphere radius is " << sphere_radius);
+  } else {
+    sphere_radius = default_sphere_radius;
+    ROS_WARN_STREAM(
+        "Sphere radius is not provided. Using " << sphere_radius
+            << " as default value");
+  }
 
- cv::equalizeHist(channels[0], channels[0]);
+  int min_h, min_s, min_v;
+  if (nh.getParam("min_h", min_h)) {
+    ROS_INFO_STREAM("Minimum hue is " << min_h);
+  } else {
+    min_h = default_min_h;
+    ROS_WARN_STREAM(
+        "Minimum hue is not provided. Using " << min_h
+            << " as default value");
+  }
 
- cv::Mat result;
- cv::merge(channels, ycrcb);
+  if (nh.getParam("min_s", min_s)) {
+    ROS_INFO_STREAM("Minimum saturation is " << min_s);
+  } else {
+    min_s = default_min_s;
+    ROS_WARN_STREAM(
+        "Minimum saturation is not provided. Using " << min_s
+            << " as default value");
+  }
 
- cv::cvtColor(ycrcb, result, CV_YCrCb2BGR);
+  if (nh.getParam("min_v", min_v)) {
+    ROS_INFO_STREAM("Minimum value is " << min_v);
+  } else {
+    min_v = default_min_v;
+    ROS_WARN_STREAM(
+        "Minimum value is not provided. Using " << min_v
+            << " as default value");
+  }
 
- return result;
- }
- return cv::Mat();
- }
- */
+  int max_h, max_s, max_v;
+  if (nh.getParam("max_h", max_h)) {
+    ROS_INFO_STREAM("Maximum hue is " << max_h);
+  } else {
+    max_h = default_max_h;
+    ROS_WARN_STREAM(
+        "Maximum hue is not provided. Using " << max_h
+            << " as default value");
+  }
 
-int main(int argc, char** argv) {
-//  ros::init(argc, argv, "sphere_detector_test", ros::init_options::AnonymousName);
-//  ros::NodeHandle n;
+  if (nh.getParam("max_s", max_s)) {
+    ROS_INFO_STREAM("Maximum saturation is " << max_s);
+  } else {
+    max_s = default_max_s;
+    ROS_WARN_STREAM(
+        "Maximum saturation is not provided. Using " << max_s
+            << " as default value");
+  }
+
+  if (nh.getParam("max_v", max_v)) {
+    ROS_INFO_STREAM("Maximum value is " << max_v);
+  } else {
+    max_v = default_max_v;
+    ROS_WARN_STREAM(
+        "Maximum value is not provided. Using " << max_v
+            << " as default value");
+  }
 
   std::vector<int> min_hsv_values(3);
   std::vector<int> max_hsv_values(3);
 
-  min_hsv_values[0] = minH;
-  max_hsv_values[0] = maxH;
-  min_hsv_values[1] = minS;
-  max_hsv_values[1] = maxS;
-  min_hsv_values[2] = minV;
-  max_hsv_values[2] = maxV;
+  min_hsv_values[0] = min_h;
+  max_hsv_values[0] = max_h;
+  min_hsv_values[1] = min_s;
+  max_hsv_values[1] = max_s;
+  min_hsv_values[2] = min_v;
+  max_hsv_values[2] = max_v;
 
   // use default params
   pcl_project::RansacParams ransac_params;
@@ -68,79 +119,51 @@ int main(int argc, char** argv) {
    ransac_params.epsilon = epsilon;
    */
 
-  pcl_project::SphereDetector sphereDetector(radius, &min_hsv_values,
+  pcl_project::SphereDetector sphereDetector(sphere_radius, &min_hsv_values,
       &max_hsv_values, &ransac_params);
 
-  //std::string pcdFileName = ros::package::getPath("multiple_kinect_baxter_calibration") + "/files/sphere_libfreenect2.pcd";
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(
+      new pcl::PointCloud<pcl::PointXYZRGB>);
 
-  int total_frames = 44;
-  int total_kinect = 3;
-
-  int success[total_kinect];
-  for (size_t i = 0; i < total_kinect; i++)
-    success[i] = 0;
-
-  for (size_t i = 0; i < total_frames; i++) {
-    for (size_t j = 0; j < total_kinect; j++) {
-      std::string pcdFileName =
-          "/home/tom/Documents/ravi/Recycle_Bin/no-light/frame_"
-              + utility::to_string(i) + "_kinect_"
-              + utility::to_string(j) + ".pcd";
-
-      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(
-          new pcl::PointCloud<pcl::PointXYZRGB>);
-      pcl::io::loadPCDFile(pcdFileName, *cloud);
-
-      /*
-       cv::Mat src = cv::Mat(cloud->width, cloud->height, CV_8UC3);
-       for (size_t i = 0; i < cloud->points.size(); i++)
-       {
-       pcl::PointXYZRGB point = cloud->points[i];
-       src.at<cv::Vec3b>(i, cloud->height)[0] = point.b;
-       src.at<cv::Vec3b>(i, cloud->height)[1] = point.g;
-       src.at<cv::Vec3b>(i, cloud->height)[2] = point.r;
-       }
-
-       cv::Mat dst = equalizeIntensity(src);
-
-       for (size_t i = 0; i < cloud->points.size(); i++)
-       {
-       cloud->points[i].r = dst.at<cv::Vec3b>(i, cloud->height)[2];
-       cloud->points[i].g = dst.at<cv::Vec3b>(i, cloud->height)[1];
-       cloud->points[i].b = dst.at<cv::Vec3b>(i, cloud->height)[0];
-       }
-       */
-
-      pcl::ModelCoefficients coefficients;
-
-      //segmentSphere(pcl::visualization::PCLVisualizer* viewer, pcl::PointCloud<pcl::PointXYZRGB>::Ptr raw_cloud, pcl::PointCloud<pcl::PointXYZRGB>::Ptr filtered_cloud, pcl::ModelCoefficients& coefficients);
-      //bool status = sphereDetector.segmentSphere(NULL, cloud, coefficients);
-      //if(status) success[j] += 1;
-    }
+  // load PCD file and check if invalid file is provided
+  if (pcl::io::loadPCDFile < pcl::PointXYZRGB > (pcd_file, *cloud) == -1) {
+    ROS_ERROR_STREAM("Couldn't read PCD file " << pcd_file);
+    return -1;
   }
 
-  std::cout << "total_frames: " << total_frames << ". success kinect 1: "
-      << success[0] << ", kinect 2: " << success[1] << ", kinect 3: "
-      << success[2] << std::endl;
+  pcl::visualization::PCLVisualizer pcd_viewer("Point Cloud");
+  pcl::visualization::PCLVisualizer seg_viewer("Segmented Cloud");
 
-  /*
-   if (status)
-   {
-   //std::cout << coefficients.values[0] << ", " << coefficients.values[1] << ", "  << coefficients.values[2] << ", " << coefficients.values[3] << std::endl;
-   pcl::PointXYZ detectedSphere(coefficients.values[0], coefficients.values[1], coefficients.values[2]);
+  pcd_viewer.addPointCloud(cloud, "cloud");
+  pcd_viewer.initCameraParameters();
+  pcd_viewer.getCameraParameters(argc, argv);
 
-   pcl::visualization::PCLVisualizer viewer("Cloud Viewer");
-   viewer.addPointCloud(rgbCloud, "rgb_cloud");
-   viewer.addSphere(detectedSphere, coefficients.values[3], 0, 255, 0, "detected_sphere");
-   viewer.initCameraParameters();
-   bool result = viewer.getCameraParameters(argc, argv);
-   viewer.spin();
-   }
-   else
-   {
-   std::cout << "Failed" << std::endl;
-   }
-   */
+  // wait for 4 seconds (camera parameters takes time)
+  pcd_viewer.spinOnce(4000);
+
+  pcl::ModelCoefficients sphere_coff;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud(
+      new pcl::PointCloud<pcl::PointXYZRGB>);
+
+  bool status = sphereDetector.segmentSphere(&pcd_viewer, cloud,
+      segmented_cloud, sphere_coff);
+
+  seg_viewer.addPointCloud(segmented_cloud, "segmented_cloud");
+  seg_viewer.initCameraParameters();
+  seg_viewer.getCameraParameters(argc, argv);
+
+  if (status) {
+    ROS_INFO_STREAM("Sphere detection successfull");
+    pcl::PointXYZ detected_sphere(sphere_coff.values[0],
+        sphere_coff.values[1], sphere_coff.values[2]);
+    pcd_viewer.addSphere(detected_sphere, sphere_coff.values[3], 0.2, 1.0,
+        0.3, "detected_sphere");
+    pcd_viewer.spinOnce();
+  } else {
+    ROS_WARN_STREAM("Sphere detection failed");
+  }
+
+  seg_viewer.spin();
 
   return 0;
 }

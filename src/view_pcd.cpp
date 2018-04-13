@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 
   // load PCD file and check if invalid file is provided
   if (pcl::io::loadPCDFile < pcl::PointXYZRGB > (pcd_file, *cloud) == -1) {
-    ROS_ERROR_STREAM("Couldn't read file input file " << pcd_file);
+    ROS_ERROR_STREAM("Couldn't read input file " << pcd_file);
     return -1;
   }else{
     ROS_INFO_STREAM("Loading '" << pcd_file << "'");

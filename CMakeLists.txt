@@ -102,13 +102,6 @@ target_link_libraries(merge_point_clouds
   ${catkin_LIBRARIES}
 )
 
-add_executable(new_sphere_detector src/new_sphere_detector.cpp)
-target_link_libraries(new_sphere_detector
-  ${PCL_LIBRARIES}
-  ${catkin_LIBRARIES}
-  ${OpenCV_LIBRARIES}
-)
-
 add_executable(view_image src/view_image.cpp)
 target_link_libraries(view_image
   ${catkin_LIBRARIES}

@@ -74,7 +74,9 @@ void callback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& msg) {
   */
 
   std::string file_name = package_path + "/files/scene.pcd";
-  ROS_INFO_STREAM("Saving point cloud '" << file_name << "'. " << (cloud->width * cloud->height) << " Points.");
+  ROS_INFO_STREAM(
+      "Saving point cloud '" << file_name << "'. "
+          << (cloud->width * cloud->height) << " Points.");
   pcl::io::savePCDFileASCII(file_name, *cloud);
 }
 
@@ -84,10 +86,12 @@ int main(int argc, char **argv) {
   std::string cloud_topic;
   nh.getParam("topic", cloud_topic);
 
-  if(cloud_topic.empty()){
+  if (cloud_topic.empty()) {
     cloud_topic = "/kinect1/sd/points";
-    ROS_WARN_STREAM("Point cloud topic is not provided. Using '" << cloud_topic << "' as default point cloud topic");
-  }else{
+    ROS_WARN_STREAM(
+        "Point cloud topic is not provided. Using '" << cloud_topic
+            << "' as default point cloud topic");
+  } else {
     ROS_INFO_STREAM("Point cloud topic is '" << cloud_topic << "'");
   }
 
