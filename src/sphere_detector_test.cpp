@@ -18,12 +18,14 @@ int main(int argc, char * * argv) {
       ros::init_options::AnonymousName);
   ros::NodeHandle nh("~");
 
+  std::string package_path =
+  ros::package::getPath("multiple_kinect_baxter_calibration");
+
   std::string pcd_file;
   if (nh.getParam("file", pcd_file)) {
     ROS_INFO_STREAM("PCD file is '" << pcd_file << "'");
   } else {
-    pcd_file = ros::package::getPath("multiple_kinect_baxter_calibration")
-        + "/files/scene.pcd";
+    pcd_file = package_path + "/files/scene.pcd";
     ROS_WARN_STREAM(
         "PCD file is not provided. Using '" << pcd_file
             << "' as default PCD file");
@@ -131,12 +133,20 @@ int main(int argc, char * * argv) {
     return -1;
   }
 
+  pcl::visualization::Camera camera;
+  std::string cam_file = package_path + "/files/libfreenect.cam";
+  std::vector<std::string> cam_param;
+  bool result = utility::loadCameraParametersPCL(cam_file, cam_param);
+  result = result && utility::getCameraParametersPCL(cam_param, camera);
+  ROS_DEBUG_STREAM("loadCameraParametersPCL returned " << result);
+
   pcl::visualization::PCLVisualizer pcd_viewer("Point Cloud");
   pcl::visualization::PCLVisualizer seg_viewer("Segmented Cloud");
 
   pcd_viewer.addPointCloud(cloud, "cloud");
   pcd_viewer.initCameraParameters();
-  pcd_viewer.getCameraParameters(argc, argv);
+  pcd_viewer.setCameraParameters(camera);
+  pcd_viewer.setPosition(0, 0);
 
   // wait for 4 seconds (camera parameters takes time)
   pcd_viewer.spinOnce(4000);
@@ -150,7 +160,8 @@ int main(int argc, char * * argv) {
 
   seg_viewer.addPointCloud(segmented_cloud, "segmented_cloud");
   seg_viewer.initCameraParameters();
-  seg_viewer.getCameraParameters(argc, argv);
+  seg_viewer.setCameraParameters(camera);
+  seg_viewer.setPosition(0, camera.window_size[1]);
 
   if (status) {
     ROS_INFO_STREAM("Sphere detection successfull");
