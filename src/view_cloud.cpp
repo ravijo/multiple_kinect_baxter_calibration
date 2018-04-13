@@ -15,7 +15,7 @@
 void pointPickingEventOccurred(
   const pcl::visualization::PointPickingEvent& event, void* viewer_void) {
   if (event.getPointIndex() == -1)
-  return;
+    return;
 
   float x, y, z;
   event.getPoint(x, y, z);
