@@ -41,6 +41,8 @@ int main(int argc, char **argv) {
     return -1;
   }
 
+  ROS_INFO_STREAM("Hold down 'SHIFT' key while left-clicking to pick a point.");
+
   pcl::visualization::PCLVisualizer viewer(
   "Cloud Viewer (Press 's' to save screenshot)");
   viewer.addPointCloud(cloud, "cloud");
