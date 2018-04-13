@@ -108,3 +108,15 @@ target_link_libraries(new_sphere_detector
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )
+
+add_executable(view_image src/view_image.cpp)
+target_link_libraries(view_image
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+
+add_executable(view_cloud src/view_cloud.cpp)
+target_link_libraries(view_cloud
+  ${PCL_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
