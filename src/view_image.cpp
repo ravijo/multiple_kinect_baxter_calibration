@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "view_image_node", ros::init_options::AnonymousName);
   ros::NodeHandle nh("~");
   std::string image_file;
-  nh.getParam("image", image_file);
+  nh.getParam("file", image_file);
 
   cv::namedWindow(window_text, CV_WINDOW_AUTOSIZE);
   src_image = cv::imread(image_file, CV_LOAD_IMAGE_COLOR);
