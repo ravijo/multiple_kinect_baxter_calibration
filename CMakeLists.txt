@@ -115,8 +115,8 @@ target_link_libraries(view_image
   ${OpenCV_LIBRARIES}
 )
 
-add_executable(view_cloud src/view_cloud.cpp)
-target_link_libraries(view_cloud
+add_executable(view_pcd src/view_pcd.cpp)
+target_link_libraries(view_pcd
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )

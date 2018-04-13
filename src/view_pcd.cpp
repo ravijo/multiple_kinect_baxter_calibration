@@ -1,5 +1,5 @@
 /**
- * view_cloud.cpp: utility to view point cloud from PCD file
+ * view_pcd.cpp: utility to view point cloud from PCD file
  * Author: Ravi Joshi
  * Date: 2018/02/20
  */
@@ -25,7 +25,7 @@ void pointPickingEventOccurred(
 }
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "view_cloud_node", ros::init_options::AnonymousName);
+  ros::init(argc, argv, "view_pcd_node", ros::init_options::AnonymousName);
 
   ros::NodeHandle nh("~");
   std::string pcd_file;
@@ -33,9 +33,8 @@ int main(int argc, char **argv) {
 
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(
   new pcl::PointCloud<pcl::PointXYZRGB>);
-  pcl::io::loadPCDFile(pcd_file, *cloud);
 
-  // load PCD file
+  // load PCD file and check if invalid file is provided
   if (pcl::io::loadPCDFile < pcl::PointXYZRGB > (pcd_file, *cloud) == -1) {
     ROS_ERROR_STREAM("Couldn't read file input file " << pcd_file);
     return -1;
@@ -44,7 +43,7 @@ int main(int argc, char **argv) {
   ROS_INFO_STREAM("Hold down 'SHIFT' key while left-clicking to pick a point.");
 
   pcl::visualization::PCLVisualizer viewer(
-  "Cloud Viewer (Press 's' to save screenshot)");
+  "Cloud Viewer (Press 'j' to save screenshot)");
   viewer.addPointCloud(cloud, "cloud");
 
   viewer.initCameraParameters();
