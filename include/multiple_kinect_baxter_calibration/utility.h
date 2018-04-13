@@ -105,6 +105,7 @@ cv::Mat getImageFromPCLViewer(pcl::visualization::PCLVisualizer* viewer) {
   cv::Mat image(rows, cols, CV_8UC4, pixels);
   cv::cvtColor(image, image, cv::COLOR_RGBA2BGRA);
   cv::flip(image, image, 0);
+  delete pixels; // release memory
 
   return image;
 }
