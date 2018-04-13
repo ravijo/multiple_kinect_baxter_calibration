@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-calibration_data_recorder.launch: data recorder for calibration
+calibration_data_collector.launch: data recorder for calibration
 Author: Ravi Joshi
 Date: 2018/02/16
 -->
@@ -18,8 +18,8 @@ Date: 2018/02/16
   </node>
 
   <!-- minimum and maximum HSV values for sphere segmentation -->
-  <arg name="min_hsv" default="[55, 0.3, 0.6]"/>
-  <arg name="max_hsv" default="[65, 1.0, 1.0]"/>
+  <arg name="min_hsv" default="[5, 180, 180]"/>
+  <arg name="max_hsv" default="[30, 255, 255]"/>
 
   <!--
   ###################################################################
@@ -48,8 +48,7 @@ Date: 2018/02/16
   <arg name="epsilon" default="15"/>
   <!-- camera file for point cloud visualization -->
   <arg name="cam" default="$(find multiple_kinect_baxter_calibration)/files/kinect_anywhere.cam"/>
-  <!-- rostopic for receving baxter ee pose. make sure it matches with argument 'limb'
-  provided to 'baxter_controller' above  -->
+  <!-- rostopic for receving baxter ee pose. make sure it matches with argument 'limb' provided to 'baxter_controller' above -->
   <arg name="ee_topic" default="/robot/limb/right/endpoint_state"/>
   <!-- rostopic for receving point cloud -->
   <arg name="pc" default="/kinect_anywhere/point_cloud/points2"/>

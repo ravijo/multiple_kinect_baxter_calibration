@@ -1,5 +1,11 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+# trajectory_viapoint_recorder.py: records trajectory viapoint into csv file
+# Author: Ravi Joshi
+# Date: 2018/04/12
+
+# import modules
 import rospy
 import numpy as np
 from std_msgs.msg import Bool

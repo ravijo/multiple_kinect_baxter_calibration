@@ -1,5 +1,11 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+# baxter_controller.py: baxter arm  motion controller for calibration
+# Author: Ravi Joshi
+# Date: 2018/04/12
+
+# import modules
 import rospy
 import numpy as np
 from baxter_interface import Limb
@@ -9,7 +15,7 @@ from std_msgs.msg import Bool, Int8
 class BaxterController():
     def __init__(self, wait_time, limb, file_name):
         trajectory_index = 0
-        baxter_moving = 0 # moving:0, stop:1, finished:2
+        baxter_moving = 0  # moving:0, stop:1, finished:2
         self.data_collection_happening = False
 
         wait_time = int(wait_time)
@@ -21,7 +27,8 @@ class BaxterController():
         baxter_arm_motion_status_topic = '/multiple_kinect_baxter_calibration/baxter_arm_motion_status'
 
         rospy.Subscriber(data_collection_progress_topic, Bool, self.callback)
-        baxter_status_pub = rospy.Publisher(baxter_arm_motion_status_topic, Int8, queue_size=10)
+        baxter_status_pub = rospy.Publisher(
+            baxter_arm_motion_status_topic, Int8, queue_size=10)
 
         while not rospy.is_shutdown():
             if trajectory_index >= trajectory.shape[0]:

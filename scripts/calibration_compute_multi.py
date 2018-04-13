@@ -42,7 +42,8 @@ def absOrientation(x, y):
     U, D, V = np.linalg.svd(covarMatrix, full_matrices=True, compute_uv=True)
     V = V.T.copy()
 
-    S = np.diag(np.asarray([1, 1, np.sign(np.linalg.det(V) * np.linalg.det(U))]))
+    S = np.diag(np.asarray(
+        [1, 1, np.sign(np.linalg.det(V) * np.linalg.det(U))]))
 
     # get scaling factor
     c = np.trace(np.dot(np.diag(D), S)) / xSD
@@ -56,8 +57,9 @@ def absOrientation(x, y):
     # compute transformation error
     xOut = (np.dot(R, x.T)).T + t
     errs = np.sqrt(np.sum((y - xOut)**2, axis=1))
-    err  = errs.sum() / nSamples
+    err = errs.sum() / nSamples
     return xOut, R, t, err
+
 
 def main():
     # initialize ros node
@@ -72,10 +74,12 @@ def main():
 
     baxterFile = filesPath + 'position_wrt_baxter_multiple_kinect.csv'
     baxterTraj = np.loadtxt(baxterFile, delimiter=',', skiprows=1)
-    ax.scatter(baxterTraj[:, 0], baxterTraj[:, 1], baxterTraj[:, 2], label='Baxter')
+    ax.scatter(baxterTraj[:, 0], baxterTraj[:, 1],
+               baxterTraj[:, 2], label='Baxter')
 
     for i in range(1, 4):
-        kinectFile = filesPath + 'position_wrt_multiple_kinect_' + str(i) + '.csv'
+        kinectFile = filesPath + \
+            'position_wrt_multiple_kinect_' + str(i) + '.csv'
 
         rospy.loginfo('Reading files %s and %s' % (kinectFile, baxterFile))
 
@@ -94,19 +98,20 @@ def main():
         quat = quaternion_from_euler(*euler)
 
         # save results to yaml file
-        calibration = {'parent'    : 'base',
-                       'child'     : 'kinect' + str(i) + '_link',
-                       'trans'     : trans.tolist(),
-                       'rot'       : quat.tolist(),
-                       'rot_euler' : list(euler),
-                       'calibration error (m)' : float('%.4f' % err),
-                       'created on' : datetime.datetime.now().strftime('%d %B %Y %I:%M:%S %p')}
+        calibration = {'parent': 'base',
+                       'child': 'kinect' + str(i) + '_link',
+                       'trans': trans.tolist(),
+                       'rot': quat.tolist(),
+                       'rot_euler': list(euler),
+                       'calibration error (m)': float('%.4f' % err),
+                       'created on': datetime.datetime.now().strftime('%d %B %Y %I:%M:%S %p')}
 
         with open('%sbaxter_kinect_%s_calibration.yaml' % (filesPath, i), 'w') as outfile:
             yaml.dump(calibration, outfile)
 
         # plot the data
-        ax.scatter(kinectOut[:, 0], kinectOut[:, 1], kinectOut[:, 2], label='Kinect %s (err: %.2f cm)' % (i, err_cm))
+        ax.scatter(kinectOut[:, 0], kinectOut[:, 1], kinectOut[:, 2],
+                   label='Kinect %s (err: %.2f cm)' % (i, err_cm))
 
     # add labels and title
     ax.set_xlabel('x')
@@ -116,6 +121,7 @@ def main():
     ax.grid(True)
     ax.set_title('Multiple Kinect-Baxter Calibration')
     plt.show()
+
 
 if __name__ == '__main__':
     main()

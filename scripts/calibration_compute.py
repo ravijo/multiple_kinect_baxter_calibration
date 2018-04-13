@@ -57,8 +57,9 @@ def absOrientation(x, y):
     # compute transformation error
     xOut = (np.dot(R, x.T)).T + t
     errs = np.sqrt(np.sum((y - xOut)**2, axis=1))
-    err  = errs.sum() / nSamples
+    err = errs.sum() / nSamples
     return xOut, R, t, err
+
 
 def main():
     # initialize ros node
@@ -88,13 +89,13 @@ def main():
     quat = quaternion_from_euler(*euler)
 
     # save results to yaml file
-    calibration = {'parent'    : 'base',
-                   'child'     : 'kinect2_link',
-                   'trans'     : trans.tolist(),
-                   'rot'       : quat.tolist(),
-                   'rot_euler' : list(euler),
-                   'calibration error (m)' : float('%.4f' % err),
-                   'created on' : datetime.datetime.now().strftime('%d %B %Y %I:%M:%S %p')}
+    calibration = {'parent': 'base',
+                   'child': 'kinect2_link',
+                   'trans': trans.tolist(),
+                   'rot': quat.tolist(),
+                   'rot_euler': list(euler),
+                   'calibration error (m)': float('%.4f' % err),
+                   'created on': datetime.datetime.now().strftime('%d %B %Y %I:%M:%S %p')}
 
     with open('%sbaxter_kinect_calibration.yaml' % (filesPath), 'w') as outfile:
         yaml.dump(calibration, outfile)
@@ -117,6 +118,7 @@ def main():
     ax.grid(True)
     ax.set_title('Kinect-Baxter Calibration')
     plt.show()
+
 
 if __name__ == '__main__':
     main()

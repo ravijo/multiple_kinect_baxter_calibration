@@ -11,8 +11,9 @@ import rospy
 from math import pi
 from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import Vector3, Quaternion
-from tf.transformations import  quaternion_about_axis
+from tf.transformations import quaternion_about_axis
 from visualization_msgs.msg import Marker, MarkerArray
+
 
 class KinectsVisualization():
     def __init__(self, base_frame_id, pc1_frame_id, pc2_frame_id, pc3_frame_id, tf_wait, colors, scale, freq):
@@ -31,9 +32,12 @@ class KinectsVisualization():
         color3 = self.hex_to_rgba(kinect_colors[2][:-1][1:])
 
         #transformations = self.fetch_transformations()
-        kinect1 = self.create_kinect(0, color1, float(scale), self.pc1_frame_id)
-        kinect2 = self.create_kinect(1, color2, float(scale), self.pc2_frame_id)
-        kinect3 = self.create_kinect(2, color3, float(scale), self.pc3_frame_id)
+        kinect1 = self.create_kinect(
+            0, color1, float(scale), self.pc1_frame_id)
+        kinect2 = self.create_kinect(
+            1, color2, float(scale), self.pc2_frame_id)
+        kinect3 = self.create_kinect(
+            2, color3, float(scale), self.pc3_frame_id)
 
         kinect_array = MarkerArray()
         kinect_array.markers.append(kinect1)
@@ -51,7 +55,8 @@ class KinectsVisualization():
     def hex_to_rgba(self, hex_color):
         hex_color = hex_color.lstrip('#')
         # we need colors in 0 to 1 range
-        rgb_color = tuple(float(int(hex_color[i:i+2], 16)/255.0) for i in (0, 2 ,4))
+        rgb_color = tuple(
+            float(int(hex_color[i:i + 2], 16) / 255.0) for i in (0, 2, 4))
         return ColorRGBA(rgb_color[0], rgb_color[1], rgb_color[2], 1)
 
     '''
@@ -78,7 +83,8 @@ class KinectsVisualization():
 
     def create_kinect(self, index, color, scale, frame_id):
         def rotate_about_y_axis():
-            yaxis = [0, 1, 0]; beta = pi/2
+            yaxis = [0, 1, 0]
+            beta = pi / 2
             qy = quaternion_about_axis(beta, yaxis)
             return Quaternion(qy[0], qy[1], qy[2], qy[3])
 
@@ -94,11 +100,13 @@ class KinectsVisualization():
             marker.lifetime = rospy.Duration(0)  # forever (static markers)
             return marker
 
-        kinect = create_marker(index, color, Marker.CUBE, rospy.Time.now(), frame_id)
+        kinect = create_marker(index, color, Marker.CUBE,
+                               rospy.Time.now(), frame_id)
         # kinect v2 dimensions are 66 mm width *  43 mm height * 249 mm length
         kinect.scale = Vector3(scale * 0.066, scale * 0.043, scale * 0.249)
         kinect.pose.orientation = rotate_about_y_axis()
         return kinect
+
 
 if __name__ == '__main__':
     # initialize ros node
@@ -113,4 +121,5 @@ if __name__ == '__main__':
     scale = rospy.get_param('~scale')
     freq = rospy.get_param('~freq')
 
-    KinectsVisualization(base_frame_id, pc1_frame_id, pc2_frame_id, pc3_frame_id, tf_wait, colors, scale, freq)
+    KinectsVisualization(base_frame_id, pc1_frame_id, pc2_frame_id,
+                         pc3_frame_id, tf_wait, colors, scale, freq)

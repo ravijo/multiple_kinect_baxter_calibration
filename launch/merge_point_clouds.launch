@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-show_all_point_cloud.launch: show all point cloud in rviz
+merge_point_clouds.launch: merge point clouds and visualize in rviz
 Author: Ravi Joshi
 Date: 2018/02/16
 -->

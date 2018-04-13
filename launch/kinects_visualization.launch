@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <!--
-kinects_visualization.launch: Rviz visualization
+kinects_visualization.launch: Rviz visualization of kinects as marker
 Author: Ravi Joshi
-Date: 2017/24/10
+Date: 2018/04/12
 -->
 <launch>
   <arg name="base_frame_id" default="base"/>

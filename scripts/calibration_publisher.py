@@ -27,9 +27,11 @@ def main():
     for i in range(1, 4):
         # load calibration file
         dirName = os.path.dirname(rospy.get_param('~parameters_file'))
-        paramFile = os.path.join(dirName, 'baxter_kinect_' + str(i) + '_calibration.yaml')
+        paramFile = os.path.join(
+            dirName, 'baxter_kinect_' + str(i) + '_calibration.yaml')
 
-        paramFile = paramFile if multiple_kinects else rospy.get_param('~parameters_file')
+        paramFile = paramFile if multiple_kinects else rospy.get_param(
+            '~parameters_file')
 
         with open(paramFile, 'r') as f:
             params = yaml.load(f)
@@ -55,7 +57,8 @@ def main():
         static_transform.transform.rotation.w = rot[3]
 
         all_transformations.append(static_transform)
-        if not multiple_kinects: break
+        if not multiple_kinects:
+            break
 
     # src: https://answers.ros.org/question/261815
     # Publish static transformation

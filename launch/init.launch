@@ -44,5 +44,4 @@ Date: 2018/04/05
 
   <!-- change grippers for correct inverse kinematics -->
   <node name="change_grippers" pkg="multiple_kinect_baxter_calibration" type="change_grippers.py" output="screen"/>
-
 </launch>
