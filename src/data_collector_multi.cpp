@@ -23,6 +23,9 @@
 // baxter header
 #include <baxter_core_msgs/EndpointState.h>
 
+// vtk header
+#include <vtkCamera.h>
+
 // number of kinects used
 #define KINECT_COUNT 3
 
@@ -210,7 +213,7 @@ void DataCollectorMulti::callback(
     ros::shutdown();
     return;
   }
-
+  /*
   for (size_t i = 0; i < 3; i++) {
     std::string file_name =
         "/home/tom/Documents/ravi/Recycle_Bin/del/frame_"
@@ -218,6 +221,7 @@ void DataCollectorMulti::callback(
             + utility::to_string(i) + ".pcd";
     pcl::io::savePCDFileASCII(file_name, *clouds[i]);
   }
+  */
   frame++;
   //pcl::io::savePCDFileASCII ("/home/tom/Documents/ravi/Recycle_Bin/del/2.pcd", *clouds[1]);
   //pcl::io::savePCDFileASCII ("/home/tom/Documents/ravi/Recycle_Bin/del/3.pcd", *clouds[2]);
@@ -253,9 +257,9 @@ void DataCollectorMulti::callback(
       pcl::PointXYZ detected_sphere(spheres_coff[i].values[0],
           spheres_coff[i].values[1], spheres_coff[i].values[2]);
       if (!pc_viewers.at(i)->updateSphere(detected_sphere,
-          spheres_coff[i].values[3], 0.2, 1.0, 0.3, sphere_id))
+          spheres_coff[i].values[3], 0.2, 0.3, 1.0, sphere_id))
         pc_viewers.at(i)->addSphere(detected_sphere,
-            spheres_coff[i].values[3], 0.2, 1.0, 0.3, sphere_id);
+            spheres_coff[i].values[3], 0.2, 0.3, 1.0, sphere_id);
 
       // force the viewer to show updaded cloud
       //pc_viewers.at(i)->setCameraParameters(camera);
@@ -309,7 +313,15 @@ void DataCollectorMulti::initPCViewers(std::string cam_file) {
     pc_viewers.push_back(pc_viewer); // store it
   }
 
+  // use orthographic views
   for (size_t i = 0; i < KINECT_COUNT; i++)
+  {
+    pc_viewers.at(i)->getRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetParallelProjection(1);
+    pc_viewers.at(i)->setCameraParameters(camera);
+  }
+
+
+  for (size_t i = 0; i < 2 * KINECT_COUNT; i++)
     setWindowPosition(i);
 }
 
@@ -384,7 +396,7 @@ DataCollectorMulti::DataCollectorMulti() {
       baxter_core_msgs::EndpointState, sensor_msgs::PointCloud2,
       sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> SyncPolicy;
 
-  message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(10),
+  message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(100),
       baxter_arm_sub, point_cloud1_sub, point_cloud2_sub,
       point_cloud3_sub);
   sync.registerCallback(

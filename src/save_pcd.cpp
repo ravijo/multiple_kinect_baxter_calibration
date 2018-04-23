@@ -36,7 +36,7 @@ inline void PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA>& in,
 */
 
 void callback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& msg) {
-  ROS_INFO("Point Cloud Received.");
+  ROS_INFO_STREAM("Point Cloud Received.");
 
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(
       new pcl::PointCloud<pcl::PointXYZRGB>);

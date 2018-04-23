@@ -102,12 +102,20 @@ cv::Mat getImageFromPCLViewer(pcl::visualization::PCLVisualizer* viewer) {
       rows - 1, 1);
 
   // compose cv::Mat
-  cv::Mat image(rows, cols, CV_8UC4, pixels);
-  cv::cvtColor(image, image, cv::COLOR_RGBA2BGRA);
-  cv::flip(image, image, 0);
+  cv::Mat rgba_image(rows, cols, CV_8UC4, pixels);
+
+  cv::Mat bgr_image;
+
+  /*
+  * Converet rgba image to bgr format
+  *  (1) Opencv treats image as BGR format
+  *  (2) We don't need alpha channel
+  */
+  cv::cvtColor(rgba_image, bgr_image, cv::COLOR_RGBA2BGR);
+  cv::flip(bgr_image, bgr_image, 0);
   delete pixels; // release memory
 
-  return image;
+  return bgr_image;
 }
 
 void getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg,

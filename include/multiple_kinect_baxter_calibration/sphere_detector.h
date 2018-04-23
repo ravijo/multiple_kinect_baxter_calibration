@@ -12,6 +12,7 @@
 //pcl headers
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <pcl/common/common.h>
 #include <pcl/common/angles.h>
 #include <pcl/filters/crop_box.h>
 #include <pcl/ModelCoefficients.h>
@@ -58,13 +59,10 @@ public:
    *   RansacParams* ransac_params = Ransac params
    *   int overflow_offset = pixels for considering sphere outside window
    *                         default value is 10
-   *   float sphere_z_min  = minimum z coordinate value of sphere
-   *   float sphere_z_max  = maximum z coordinate value of sphere
    */
   SphereDetector(float sphere_radius, std::vector<int>* min_hsv,
       std::vector<int>* max_hsv, RansacParams* ransac_params,
-      int overflow_offset = 10, float sphere_z_min = 0.2,
-      float sphere_z_max = 3.0);
+      int overflow_offset = 10);
 
   /*
    * This function segments the sphere from point cloud
@@ -87,6 +85,8 @@ public:
 private:
   void initSphereDetector();
 
+  void get2DPoints(int points[]);
+
   cv::Rect getBoundingRect(cv::Mat image);
 
   void crop(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in,
@@ -95,9 +95,9 @@ private:
 
   bool convertMouseCoordsTo3DPC(vtkRenderWindowInteractor* iren,
       vtkPointPicker* point_picker, int mouse_x, int mouse_y,
-      Eigen::Vector4f& point);
+      Eigen::Vector3f& point);
 
-  bool get3DMinMaxRange(pcl::visualization::PCLVisualizer* viewer,
+  void get3DMinMaxRange(pcl::visualization::PCLVisualizer* viewer,
       cv::Size img, cv::Rect rect, Eigen::Vector4f& min_3d,
       Eigen::Vector4f& max_3d);
 

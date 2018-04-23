@@ -42,7 +42,7 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
 )
 
-## Print PCL Version (for debugging only)
+## Print PCL Version (for debugging only) PCL_VERSION: 1.7.1
 MESSAGE(STATUS "PCL_VERSION: " ${PCL_VERSION})
 
 ## Declare sphere_detector as a library
@@ -104,6 +104,12 @@ target_link_libraries(merge_point_clouds
 
 add_executable(view_image src/view_image.cpp)
 target_link_libraries(view_image
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+
+add_executable(segment_image src/segment_image.cpp)
+target_link_libraries(segment_image
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )

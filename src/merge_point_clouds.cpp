@@ -20,10 +20,15 @@
 // pcl header
 #include <pcl/filters/statistical_outlier_removal.h>
 
+// for time measurement
+#include <sys/time.h>
+
 // maximum attempts for tf in order to fetch transformations
 #define TF_MAX_ATTEMPTS 5
 
 class MergePointClouds {
+  struct timeval tp;
+
   bool still_processing;
   ros::Publisher merge_pc_pub;
   tf::StampedTransform transformations[3];
@@ -62,11 +67,20 @@ void MergePointClouds::callback(
     const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg1,
     const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg2,
     const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg3) {
+
+  gettimeofday(&tp, NULL);
+  long int t1 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+  //printf("Time (94828 us=94.828 ms) %lu us\n", tp.tv_usec);
+
+  //return;
+
+  /*
   if (still_processing)
     return;
   still_processing = true;
+  */
 
-  ROS_DEBUG_STREAM("MergePointClouds callback received");
+  //ROS_DEBUG_STREAM("MergePointClouds callback received");
 
   pcl::PointCloud<pcl::PointXYZRGB> cloud1, cloud2, cloud3;
 
@@ -74,34 +88,57 @@ void MergePointClouds::callback(
   utility::getPointCloudFromMsg(pc_msg2, cloud2);
   utility::getPointCloudFromMsg(pc_msg3, cloud3);
 
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr t1(
+  gettimeofday(&tp, NULL);
+  long int t2 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+  std::cout << "utility::getPointCloudFromMsg took (ms) " << (t2 - t1) << std::endl;
+
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr temp1(
       new pcl::PointCloud<pcl::PointXYZRGB>);
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr t2(
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr temp2(
       new pcl::PointCloud<pcl::PointXYZRGB>);
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr raw_cloud(
       new pcl::PointCloud<pcl::PointXYZRGB>);
 
   pcl_ros::transformPointCloud(cloud1, *raw_cloud, transformations[0]);
-  pcl_ros::transformPointCloud(cloud2, *t1, transformations[1]);
-  pcl_ros::transformPointCloud(cloud3, *t2, transformations[2]);
+  pcl_ros::transformPointCloud(cloud2, *temp1, transformations[1]);
+  pcl_ros::transformPointCloud(cloud3, *temp2, transformations[2]);
 
-  *raw_cloud += *t1;
-  *raw_cloud += *t2;
+  gettimeofday(&tp, NULL);
+  long int t3 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+  std::cout << "pcl_ros::transformPointCloud took (ms) " << (t3 - t2) << std::endl;
+
+  *raw_cloud += *temp1;
+  *raw_cloud += *temp2;
+
+  gettimeofday(&tp, NULL);
+  long int t4 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+  std::cout << "PCL concatination took (ms) " << (t4 - t3) << std::endl;
 
   pcl::PointCloud < pcl::PointXYZRGB > cloud;
 
   // Statistical outlier removal filtering
   filterPointCloud(raw_cloud, cloud);
 
+  gettimeofday(&tp, NULL);
+  long int t5 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+  std::cout << "filterPointCloud took (ms) " << (t5 - t4) << std::endl;
+
   ros::Time now = ros::Time::now();
   cloud.header.frame_id = base_frame_id;
 
   // https://answers.ros.org/question/172730/pcl-header-timestamp/
   pcl_conversions::toPCL(now, cloud.header.stamp);
+  gettimeofday(&tp, NULL);
+  long int t6 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+  std::cout << "pcl_conversions::toPCL took (ms) " << (t6 - t5) << std::endl;
 
   merge_pc_pub.publish(cloud);
 
-  still_processing = false;
+  //still_processing = false;
+
+  gettimeofday(&tp, NULL);
+  long int t7 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+  std::cout << "publish clous took (ms) " << (t7 - t6) << std::endl;
 }
 
 void MergePointClouds::fetchTransformations(double wait_time,
@@ -167,7 +204,7 @@ MergePointClouds::MergePointClouds() {
   typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::PointCloud2, sensor_msgs::PointCloud2,
       sensor_msgs::PointCloud2> SyncPolicy;
-  message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(10), pc1_sub,
+  message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(100), pc1_sub,
       pc2_sub, pc3_sub);
   sync.registerCallback(
       boost::bind(&MergePointClouds::callback, this, _1, _2, _3));

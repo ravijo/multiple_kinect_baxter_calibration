@@ -4,14 +4,30 @@
  * Date: 2018/02/20
  */
 
+// ros headers
 #include <ros/ros.h>
-#include <utility.h>
 #include <ros/package.h>
+
+// utility header
+#include <utility.h>
+
+// sphere detector header
 #include <sphere_detector.h>
 
+// vtk header
+#include <vtkCamera.h>
+
+/*
+// small yellow ball parameters
 float default_sphere_radius = 0.034; // m
-int default_min_h = 5, default_min_s = 180, default_min_v = 180;
-int default_max_h = 30, default_max_s = 255, default_max_v = 255;
+int default_min_h = 5, default_min_s = 20, default_min_v = 150;
+int default_max_h = 40, default_max_s = 190, default_max_v = 255;
+*/
+
+// Polystyrene green ball parameters
+float default_sphere_radius = 0.05; // m
+int default_min_h = 40, default_min_s = 50,  default_min_v = 60;
+int default_max_h = 60, default_max_s = 200, default_max_v = 255;
 
 int main(int argc, char * * argv) {
   ros::init(argc, argv, "sphere_detector_test",
@@ -133,8 +149,18 @@ int main(int argc, char * * argv) {
     return -1;
   }
 
+  std::string cam_file;
+  std::string source;
+  if (nh.getParam("source", source) && boost::starts_with(boost::algorithm::to_lower_copy(source), "w")) {
+    // if source is 'Windows'
+    cam_file = package_path + "/files/kinect_anywhere.cam";
+  } else {
+    // if source is 'Linux'
+    cam_file = package_path + "/files/libfreenect.cam";
+  }
+  ROS_INFO_STREAM("cam_file is '" << cam_file << "'");
+
   pcl::visualization::Camera camera;
-  std::string cam_file = package_path + "/files/libfreenect.cam";
   std::vector<std::string> cam_param;
   bool result = utility::loadCameraParametersPCL(cam_file, cam_param);
   result = result && utility::getCameraParametersPCL(cam_param, camera);
@@ -143,13 +169,25 @@ int main(int argc, char * * argv) {
   pcl::visualization::PCLVisualizer pcd_viewer("Point Cloud");
   pcl::visualization::PCLVisualizer seg_viewer("Segmented Cloud");
 
-  pcd_viewer.addPointCloud(cloud, "cloud");
-  pcd_viewer.initCameraParameters();
-  pcd_viewer.setCameraParameters(camera);
   pcd_viewer.setPosition(0, 0);
+  seg_viewer.setPosition(0, camera.window_size[1]);
+  pcd_viewer.setSize(camera.window_size[0], camera.window_size[1]);
+  seg_viewer.setSize(camera.window_size[0], camera.window_size[1]);
 
-  // wait for 4 seconds (camera parameters takes time)
-  pcd_viewer.spinOnce(4000);
+  pcd_viewer.addPointCloud(cloud, "cloud");
+
+  pcd_viewer.initCameraParameters();
+  pcd_viewer.getRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetParallelProjection(1);
+  pcd_viewer.setCameraParameters(camera);
+  seg_viewer.initCameraParameters();
+  seg_viewer.setCameraParameters(camera);
+
+  // force re-drawing
+  pcd_viewer.spinOnce(100, true);
+  seg_viewer.spinOnce();
+
+  // sleep for four seconds (camera parameters takes time)
+  ros::Duration(4).sleep();
 
   pcl::ModelCoefficients sphere_coff;
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud(
@@ -159,15 +197,12 @@ int main(int argc, char * * argv) {
       segmented_cloud, sphere_coff);
 
   seg_viewer.addPointCloud(segmented_cloud, "segmented_cloud");
-  seg_viewer.initCameraParameters();
-  seg_viewer.setCameraParameters(camera);
-  seg_viewer.setPosition(0, camera.window_size[1]);
 
   if (status) {
     ROS_INFO_STREAM("Sphere detection successfull");
     pcl::PointXYZ detected_sphere(sphere_coff.values[0],
         sphere_coff.values[1], sphere_coff.values[2]);
-    pcd_viewer.addSphere(detected_sphere, sphere_coff.values[3], 0.2, 1.0,
+    pcd_viewer.addSphere(detected_sphere, sphere_coff.values[3], 1.0, 0.2,
         0.3, "detected_sphere");
     pcd_viewer.spinOnce();
   } else {
@@ -176,5 +211,6 @@ int main(int argc, char * * argv) {
 
   seg_viewer.spin();
 
+  pcl::io::savePCDFileASCII("segmented_cloud.pcd", *segmented_cloud);
   return 0;
 }

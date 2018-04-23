@@ -6,6 +6,7 @@
 
 // ros headers
 #include <ros/ros.h>
+#include <ros/package.h>
 #include <pcl_ros/point_cloud.h>
 #include <sensor_msgs/PointCloud2.h>
 
@@ -99,11 +100,30 @@ int main(int argc, char **argv) {
   } else {
     ROS_INFO_STREAM("Point cloud topic is '" << cloud_topic << "'");
   }
+  std::string package_path =
+  ros::package::getPath("multiple_kinect_baxter_calibration");
+
+  std::string cam_file;
+  std::string source;
+  if (nh.getParam("source", source) && boost::starts_with(boost::algorithm::to_lower_copy(source), "w")) {
+    // if source is 'Windows'
+    cam_file = package_path + "/files/kinect_anywhere.cam";
+  } else {
+    // if source is 'Linux'
+    cam_file = package_path + "/files/libfreenect.cam";
+  }
+  ROS_INFO_STREAM("cam_file is '" << cam_file << "'");
+
+  pcl::visualization::Camera camera;
+  std::vector<std::string> cam_param;
+  bool result = utility::loadCameraParametersPCL(cam_file, cam_param);
+  result = result && utility::getCameraParametersPCL(cam_param, camera);
+  ROS_DEBUG_STREAM("loadCameraParametersPCL returned " << result);
 
   ros::Subscriber sub = nh.subscribe(cloud_topic, 1, callback);
 
   viewer.initCameraParameters();
-  viewer.getCameraParameters(argc, argv);
+  viewer.setCameraParameters(camera);
 
   ros::spin();
 

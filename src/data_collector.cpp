@@ -6,7 +6,7 @@
 
 #include <vector>
 
-//utility header
+// utility header
 #include <utility.h>
 
 // ros headers
@@ -20,8 +20,14 @@
 // sphere_detector header
 #include <sphere_detector.h>
 
-//baxter header
+// baxter header
 #include <baxter_core_msgs/EndpointState.h>
+
+// vtk header
+#include <vtkCamera.h>
+
+// preprocessor returns true if number is inside given limit
+#define between(num, min, max) (num > min && num < max)
 
 // number of kinects used
 #define KINECT_COUNT 1
@@ -33,6 +39,8 @@
 
 class DataCollector {
 private:
+  double tolerance;
+  float sphere_radius;
   int baxter_arm_motion_state; // moving:0, stop:1, finished:2
   Eigen::Matrix4d t_ball_wrt_ee;
   std_msgs::Bool still_processing;
@@ -146,13 +154,23 @@ void DataCollector::callback(
   still_processing.data = true; // we are about to start processing
   data_collection_progress_pub.publish(still_processing);
 
+  // set windows position
+  for (size_t i = 0; i < 2 * KINECT_COUNT; i++)
+    setWindowPosition(i);
+
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(
       new pcl::PointCloud<pcl::PointXYZRGB>);
   utility::getPointCloudFromMsg(pc_msg, *cloud);
 
+      // show caputed point cloud
+  if (!pc_viewers.at(0)->updatePointCloud(cloud, "cloud"))
+      pc_viewers.at(0)->addPointCloud(cloud, "cloud");
+  pc_viewers.at(0)->spinOnce();
+
   pcl::ModelCoefficients sphere_coff;
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud(
       new pcl::PointCloud<pcl::PointXYZRGB>);
+
   bool success = sphere_detector->segmentSphere(pc_viewers.at(0), cloud,
       segmented_cloud, sphere_coff);
 
@@ -161,24 +179,21 @@ void DataCollector::callback(
     pc_viewers.at(1)->addPointCloud(segmented_cloud, "segmented_cloud");
   pc_viewers.at(1)->spinOnce();
 
-  if (success) {
+  bool in_range = between(sphere_coff.values[3], sphere_radius - tolerance, sphere_radius + tolerance);
+  if (success && in_range) {
     ROS_INFO_STREAM("Sphere detection successfull");
 
     recordBallPositionWrtBaxter(ee_msg);
     recordBallPositionWrtKinect(sphere_coff);
 
-    // show caputed point cloud
-    if (!pc_viewers.at(0)->updatePointCloud(cloud, "cloud"))
-      pc_viewers.at(0)->addPointCloud(cloud, "cloud");
-
     pcl::PointXYZ detected_sphere(sphere_coff.values[0],
         sphere_coff.values[1], sphere_coff.values[2]);
-    if (!pc_viewers.at(0)->updateSphere(detected_sphere,
-        sphere_coff.values[3], 0.2, 1.0, 0.3, "detected_sphere"))
-      pc_viewers.at(0)->addSphere(detected_sphere, sphere_coff.values[3],
-          0.2, 1.0, 0.3, "detected_sphere");
+    if (!pc_viewers.at(1)->updateSphere(detected_sphere,
+        sphere_coff.values[3], 0.2, 0.3, 1.0, "detected_sphere"))
+      pc_viewers.at(1)->addSphere(detected_sphere, sphere_coff.values[3],
+          0.2, 0.3, 1.0, "detected_sphere");
 
-    pc_viewers.at(0)->spinOnce();
+    pc_viewers.at(1)->spinOnce();
   } else {
     ROS_WARN_STREAM("Sphere detection failed");
   }
@@ -188,14 +203,14 @@ void DataCollector::callback(
 }
 
 void DataCollector::init(ros::NodeHandle nh) {
-  float radius, offset;
+  float offset;
   int k_neighbors, max_itr;
   std::string min_hsv, max_hsv, cam_file;
-  double weight, d_thresh, prob, tolerance, epsilon;
+  double weight, d_thresh, prob, epsilon;
 
   nh.getParam("min_hsv", min_hsv);
   nh.getParam("max_hsv", max_hsv);
-  nh.getParam("radius", radius);
+  nh.getParam("radius", sphere_radius);
   nh.getParam("offset", offset);
 
   // parameters for SAC_RANSAC
@@ -220,12 +235,12 @@ void DataCollector::init(ros::NodeHandle nh) {
   // initialize sphere detector
   pcl_project::RansacParams ransac_params(k_neighbors, max_itr, weight,
       d_thresh, prob, tolerance, epsilon);
-  sphere_detector = new pcl_project::SphereDetector(radius, &min_hsv_values,
+  sphere_detector = new pcl_project::SphereDetector(sphere_radius, &min_hsv_values,
       &max_hsv_values, &ransac_params);
 
   // define homogeneous transformation matrix for sphere
   t_ball_wrt_ee.setIdentity(); // considering no rotation
-  t_ball_wrt_ee(2, 3) = radius + offset; // distance (m) of the ball center from ee
+  t_ball_wrt_ee(2, 3) = sphere_radius + offset; // distance (m) of the ball center from ee
 
   baxter_arm_motion_state = 0; //moving:0, stop:1, finished:2
   still_processing.data = false;
@@ -247,12 +262,16 @@ void DataCollector::init(ros::NodeHandle nh) {
 
     pc_viewer->initCameraParameters();
     pc_viewer->setCameraParameters(camera);
-    pc_viewer->spinOnce();
+    pc_viewer->spinOnce(10);
 
     pc_viewers.push_back(pc_viewer); // store it
   }
 
-  for (size_t i = 0; i < KINECT_COUNT; i++)
+  // use orthographic views
+  pc_viewers.at(0)->getRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetParallelProjection(1);
+  pc_viewers.at(0)->setCameraParameters(camera);
+
+  for (size_t i = 0; i < 2 * KINECT_COUNT; i++)
     setWindowPosition(i);
 }
 
@@ -268,6 +287,7 @@ void DataCollector::setWindowPosition(int index) {
     y = height;
   }
 
+  pc_viewers.at(index)->setSize(width, height);
   pc_viewers.at(index)->setPosition(x, y);
 }
 
