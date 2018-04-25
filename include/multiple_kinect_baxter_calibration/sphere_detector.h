@@ -17,6 +17,7 @@
 #include <pcl/filters/crop_box.h>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/features/normal_3d.h>
+#include <pcl/filters/extract_indices.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/sample_consensus/method_types.h>
@@ -86,6 +87,8 @@ private:
   void initSphereDetector();
 
   void get2DPoints(int points[]);
+
+  bool validateDetection(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
 
   cv::Rect getBoundingRect(cv::Mat image);
 

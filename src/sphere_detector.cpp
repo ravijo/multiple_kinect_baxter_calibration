@@ -250,6 +250,29 @@ void SphereDetector::crop(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in,
   box_filter.filter(*out);
 }
 
+bool SphereDetector::validateDetection(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
+{
+  // calculate average RGB values of the input cloud
+  int avg_r = 0, avg_g = 0, avg_b = 0;
+  for (size_t i = 0; i < cloud->points.size(); i++)
+  {
+    avg_r += (int)cloud->points[i].r;
+    avg_g += (int)cloud->points[i].g;
+    avg_b += (int)cloud->points[i].b;
+  }
+  avg_r = avg_r/cloud->points.size();
+  avg_g = avg_g/cloud->points.size();
+  avg_b = avg_b/cloud->points.size();
+
+  cv::Vec3b avg_hsv = utility::rgb_to_hsv_pixel(avg_r, avg_g, avg_b);
+
+  bool in_between = true;
+  for (size_t i = 0; i < 3; i++)
+    in_between = in_between &&  between(avg_hsv.val[i], min_hsv_ptr->val[i], max_hsv_ptr->val[i]);
+
+  return in_between;
+}
+
 bool SphereDetector::segmentSphere(pcl::visualization::PCLVisualizer* viewer,
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr raw_cloud,
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr filtered_cloud,
@@ -280,6 +303,24 @@ bool SphereDetector::segmentSphere(pcl::visualization::PCLVisualizer* viewer,
   seg.setInputNormals(cloud_normals);
   seg.segment(*inliers, coefficients);
 
-  return (inliers->indices.size() > 0);
+  // we have detected a sphere
+  if (inliers->indices.size() > 0)
+  {
+      // extract the sphere inliers from the input cloud
+   		pcl::ExtractIndices<pcl::PointXYZRGB> extract;
+   		extract.setInputCloud(filtered_cloud);
+   		extract.setIndices(inliers);
+   		extract.setNegative(false);
+
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr sphere_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+   		// Get the points associated with the planar surface
+   		extract.filter(*sphere_cloud);
+
+      //pcl::io::savePCDFileASCII("sphere_cloud.pcd", *sphere_cloud);
+
+      return validateDetection(sphere_cloud);
+  }
+  else
+    return false;
 }
 }

@@ -26,9 +26,6 @@
 // vtk header
 #include <vtkCamera.h>
 
-// preprocessor returns true if number is inside given limit
-#define between(num, min, max) (num > min && num < max)
-
 // number of kinects used
 #define KINECT_COUNT 1
 
@@ -303,7 +300,7 @@ DataCollector::DataCollector() {
   typedef message_filters::sync_policies::ApproximateTime<
       baxter_core_msgs::EndpointState, sensor_msgs::PointCloud2> SyncPolicy;
 
-  message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(10),
+  message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(2),
       baxter_arm_sub, point_cloud_sub);
   sync.registerCallback(boost::bind(&DataCollector::callback, this, _1, _2));
 

@@ -27,7 +27,24 @@
 // preprocessor returns true if number is outside given limit
 #define outside_limit(num, min, max) (num < min || num > max)
 
+// preprocessor returns true if number is inside given limit
+#define between(num, min, max) (num > min && num < max)
+
+
 namespace utility {
+// convert RGB pixel to HSV Pixel
+// colors are defined in OpenCV standards
+inline cv::Vec3b rgb_to_hsv_pixel(int r, int g, int b)
+{
+  cv::Mat bgr(1, 1, CV_8UC3, cv::Scalar(b, g, r));
+
+  cv::Mat hsv;
+  cv::cvtColor(bgr, hsv, cv::COLOR_BGR2HSV);
+
+  cv::Vec3b hsv_pixel = hsv.at<cv::Vec3b>(0, 0);
+  return hsv_pixel;
+}
+
 // due to PCL issues we are not able to use C++ 11 std. Let's define our own functions
 // src: https://stackoverflow.com/a/20861692
 template<typename T> std::string to_string(const T& n) {
