@@ -7,9 +7,6 @@
 #include <utility.h>
 #include <sphere_detector.h>
 
-// source: http://www.dbase.com/help/Preprocessor/IDH_PREPROC_DEFINE.htm
-#define mid(x,y) (((x)+(y))/2)
-
 namespace pcl_project {
 SphereDetector::SphereDetector(float sphere_radius, std::vector<int>* min_hsv,
     std::vector<int>* max_hsv, RansacParams* ransac_params,
