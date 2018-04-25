@@ -36,6 +36,7 @@
 
 class DataCollector {
 private:
+  int queue_size;
   double tolerance;
   float sphere_radius;
   int baxter_arm_motion_state; // moving:0, stop:1, finished:2
@@ -125,7 +126,6 @@ void DataCollector::saveData() {
   status = utility::writeCSV(kinect, header, position_wrt_kinect, err);
   if (!status)
     ROS_ERROR_STREAM("Unable to save tracking data to CSV file. " << err);
-
 }
 
 void DataCollector::callback(
@@ -193,6 +193,14 @@ void DataCollector::callback(
     pc_viewers.at(1)->spinOnce();
   } else {
     ROS_WARN_STREAM("Sphere detection failed");
+
+    /*
+    std::string seg = "segme_" + utility::to_string(index) + ".pcd";
+    std::string clo = "cloud_" + utility::to_string(index) + ".pcd";
+
+    pcl::io::savePCDFileASCII(seg, *segmented_cloud);
+    pcl::io::savePCDFileASCII(clo, *cloud);
+    */
   }
 
   still_processing.data = false; // we have done the processing
@@ -225,6 +233,8 @@ void DataCollector::init(ros::NodeHandle nh) {
   nh.getParam("ee_topic", ee_topic);
 
   nh.getParam("data_dir", data_dir);
+
+  nh.getParam("queue_size", queue_size);
 
   std::vector<int> min_hsv_values = utility::stringToArray(min_hsv);
   std::vector<int> max_hsv_values = utility::stringToArray(max_hsv);
@@ -300,7 +310,7 @@ DataCollector::DataCollector() {
   typedef message_filters::sync_policies::ApproximateTime<
       baxter_core_msgs::EndpointState, sensor_msgs::PointCloud2> SyncPolicy;
 
-  message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(2),
+  message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(queue_size),
       baxter_arm_sub, point_cloud_sub);
   sync.registerCallback(boost::bind(&DataCollector::callback, this, _1, _2));
 

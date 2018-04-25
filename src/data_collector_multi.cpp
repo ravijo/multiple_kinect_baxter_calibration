@@ -36,7 +36,7 @@
 
 class DataCollectorMulti {
 private:
-  int frame;
+  int frame, queue_size;
   int baxter_arm_motion_state; // moving:0, stop:1, finished:2
   Eigen::Matrix4d t_ball_wrt_ee;
   std::string ee_topic, data_dir;
@@ -358,6 +358,8 @@ void DataCollectorMulti::init(ros::NodeHandle nh) {
 
   nh.getParam("data_dir", data_dir);
 
+  nh.getParam("queue_size", queue_size);
+
   std::vector<int> min_hsv_values = utility::stringToArray(min_hsv);
   std::vector<int> max_hsv_values = utility::stringToArray(max_hsv);
 
@@ -396,7 +398,7 @@ DataCollectorMulti::DataCollectorMulti() {
       baxter_core_msgs::EndpointState, sensor_msgs::PointCloud2,
       sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> SyncPolicy;
 
-  message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(100),
+  message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(queue_size),
       baxter_arm_sub, point_cloud1_sub, point_cloud2_sub,
       point_cloud3_sub);
   sync.registerCallback(

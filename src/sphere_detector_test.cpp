@@ -125,7 +125,6 @@ int main(int argc, char * * argv) {
 
   // use default params
   pcl_project::RansacParams ransac_params;
-
   // change ransac_params as following
   /*
    ransac_params.k_neighbors = k_neighbors;
@@ -173,6 +172,7 @@ int main(int argc, char * * argv) {
   seg_viewer.setPosition(0, camera.window_size[1]);
   pcd_viewer.setSize(camera.window_size[0], camera.window_size[1]);
   seg_viewer.setSize(camera.window_size[0], camera.window_size[1]);
+  seg_viewer.spinOnce();
 
   pcd_viewer.addPointCloud(cloud, "cloud");
 
@@ -202,15 +202,15 @@ int main(int argc, char * * argv) {
     ROS_INFO_STREAM("Sphere detection successfull");
     pcl::PointXYZ detected_sphere(sphere_coff.values[0],
         sphere_coff.values[1], sphere_coff.values[2]);
-    pcd_viewer.addSphere(detected_sphere, sphere_coff.values[3], 1.0, 0.2,
-        0.3, "detected_sphere");
-    pcd_viewer.spinOnce();
+    seg_viewer.addSphere(detected_sphere, sphere_coff.values[3], 0.2,
+        0.3, 1.0, "detected_sphere");
+    seg_viewer.addText3D("Sphere", detected_sphere, 0.05, 0.2, 0.3, 1.0, "sphere_text");
   } else {
     ROS_WARN_STREAM("Sphere detection failed");
   }
 
   seg_viewer.spin();
 
-  pcl::io::savePCDFileASCII("segmented_cloud.pcd", *segmented_cloud);
+  //pcl::io::savePCDFileASCII("segmented_cloud.pcd", *segmented_cloud);
   return 0;
 }
