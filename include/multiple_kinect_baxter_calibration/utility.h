@@ -30,6 +30,8 @@
 // preprocessor returns true if number is inside given limit
 #define between(num, min, max) (num > min && num < max)
 
+// source: http://www.dbase.com/help/Preprocessor/IDH_PREPROC_DEFINE.htm
+#define mid(x,y) (((x)+(y))/2)
 
 namespace utility {
 // convert RGB pixel to HSV Pixel
