@@ -70,7 +70,7 @@ def main():
     data_dir = rospy.get_param('~data_dir')
     kinect = rospy.get_param('~kinect')
 
-    trajectory_file = os.path.join(data_dir, 'position_wrt_baxter_%s.csv' % kinect)
+    trajectory_file = os.path.join(data_dir, 'baxter_%s_position.csv' % kinect)
 
     rospy.loginfo('Reading file:\n%s\n' % trajectoryFile)
 
