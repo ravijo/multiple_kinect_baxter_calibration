@@ -25,14 +25,11 @@ class KinectsVisualization():
         self.pc3_frame_id = pc3_frame_id
 
         # colors must be given in following order '[#FF0000, #00FF00, #0000FF]'
-        kinect_colors = colors.split(',')
-        color1 = self.hex_to_rgba(kinect_colors[0][2:])
-        color2 = self.hex_to_rgba(kinect_colors[1][2:])
-        color3 = self.hex_to_rgba(kinect_colors[2][:-1][1:])
+        kinect_colors = [self.hex_to_rgba(x.strip(' ')) for x in colors.lstrip(' [,').rstrip(']').split(', ')]
 
-        kinect1 = self.create_kinect(0, color1, float(scale), self.pc1_frame_id)
-        kinect2 = self.create_kinect(1, color2, float(scale), self.pc2_frame_id)
-        kinect3 = self.create_kinect(2, color3, float(scale), self.pc3_frame_id)
+        kinect1 = self.create_kinect(0, kinect_colors[0], float(scale), self.pc1_frame_id)
+        kinect2 = self.create_kinect(1, kinect_colors[1], float(scale), self.pc2_frame_id)
+        kinect3 = self.create_kinect(2, kinect_colors[2], float(scale), self.pc3_frame_id)
 
         kinect_array = MarkerArray()
         kinect_array.markers.append(kinect1)
@@ -48,6 +45,7 @@ class KinectsVisualization():
 
     # src: https://stackoverflow.com/a/29643643/1175065
     def hex_to_rgba(self, hex_color):
+        # remove hash sign from the beginning of color code
         hex_color = hex_color.lstrip('#')
         # we need colors in 0 to 1 range
         rgb_color = tuple(float(int(hex_color[i:i + 2], 16) / 255.0) for i in (0, 2, 4))
