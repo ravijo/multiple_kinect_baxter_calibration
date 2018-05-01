@@ -13,22 +13,21 @@ from std_msgs.msg import Bool, Int8
 
 
 class BaxterController():
-    def __init__(self, wait_time, limb, file_name):
+    def __init__(self, wait_time, limb_name, trajectory):
         trajectory_index = 0
         baxter_moving = 0  # moving:0, stop:1, finished:2
         self.data_collection_happening = False
 
         wait_time = int(wait_time)
-        arm = Limb(limb)
-        joint_names = arm.joint_names()
+        limb = Limb(limb_name)
+        joint_names = limb.joint_names()
         trajectory = np.loadtxt(file_name, delimiter=',', skiprows=1)
 
         data_collection_progress_topic = '/multiple_kinect_baxter_calibration/is_data_collection_happening'
         baxter_arm_motion_status_topic = '/multiple_kinect_baxter_calibration/baxter_arm_motion_status'
 
         rospy.Subscriber(data_collection_progress_topic, Bool, self.callback)
-        baxter_status_pub = rospy.Publisher(
-            baxter_arm_motion_status_topic, Int8, queue_size=10)
+        baxter_status_pub = rospy.Publisher(baxter_arm_motion_status_topic, Int8, queue_size=10)
 
         while not rospy.is_shutdown():
             if trajectory_index >= trajectory.shape[0]:
@@ -42,7 +41,7 @@ class BaxterController():
                 baxter_status_pub.publish(baxter_moving)
                 joint_values = trajectory[trajectory_index, :]
                 joint_command = dict(zip(joint_names, joint_values))
-                arm.move_to_joint_positions(joint_command)
+                limb.move_to_joint_positions(joint_command)
                 rospy.sleep(wait_time)
                 trajectory_index += 1
 
@@ -59,6 +58,15 @@ def get_kinect_from_topic(topic):
     kinect = topic[all_slash[0] + 1 : all_slash[1]]
     return kinect
 
+def read_csv(file_name):
+    # load the data files
+    data = np.genfromtxt(file_name, delimiter=',', names=True)
+    # get single header string
+    header = data.dtype.names
+    # convert structured array to numpy array
+    data = data.view(np.float).reshape(data.shape + (-1,))
+    return data, header
+
 if __name__ == '__main__':
     rospy.init_node('baxter_controller_node', anonymous=True)
 
@@ -66,5 +74,9 @@ if __name__ == '__main__':
     wait_time = rospy.get_param('~wait_time')
     topic = rospy.get_param('~topic')
     file_name = rospy.get_param('~%s_trajectory' % get_kinect_from_topic(topic))
+    trajectory, header = read_csv(file_name)
 
-    BaxterController(wait_time, limb, file_name)
+    if not all(x.startswith(limb) for x in header):
+        rospy.logerr("Provided libm '%s' doesn't match with trajectory file. Trajectory file: \n'%s'" % (limb, file_name))
+    else:
+        BaxterController(wait_time, limb, trajectory)
