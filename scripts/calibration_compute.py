@@ -7,6 +7,7 @@
 # Source: http://math.stackexchange.com/questions/745234/calculate-rotation-translation-matrix-to-match-measurement-points-to-nominal-poi
 
 # import modules
+import os
 import yaml
 import rospy
 import datetime
@@ -69,7 +70,7 @@ def main():
     data_dir = rospy.get_param('~data_dir')
     kinect = rospy.get_param('~kinect')
 
-    trajectory_file = data_dir + 'position_wrt_baxter_' + kinect + '.csv'
+    trajectory_file = os.path.join(data_dir, 'position_wrt_baxter_%s.csv' % kinect)
 
     rospy.loginfo('Reading file:\n%s\n' % trajectoryFile)
 
@@ -99,8 +100,8 @@ def main():
                    'calibration error (m)': float('%.4f' % err),
                    'created on': datetime.datetime.now().strftime('%d %B %Y %I:%M:%S %p')}
 
-    with open('%sbaxter_%s_calibration.yaml' % (data_dir, kinect), 'w') as outfile:
-        yaml.dump(calibration, outfile)
+    with open('%sbaxter_%s_calibration.yaml' % (data_dir, kinect), 'w') as out_file:
+        yaml.dump(calibration, out_file)
 
     # plot both point sets together
     fig = plt.figure()
