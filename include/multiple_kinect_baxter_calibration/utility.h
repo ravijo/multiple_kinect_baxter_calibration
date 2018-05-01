@@ -81,7 +81,7 @@ std::vector<std::vector<T> > hstack(
 {
     std::vector<std::vector<T> > c;
 
-    // check if that number of rows are equal in both arrays
+    // check if the number of rows are equal in both arrays
     assert(a.size() != b.size() && "Error, number of rows must be equal in both arrays.");
 
     // for each row
