@@ -13,7 +13,7 @@
 
 using namespace cv;
 
-/// Global Variables
+/// global variables
 const int slider_max = 255;
 int min_h = 0, min_s = 0, min_v = 0;
 int max_h = slider_max, max_s = slider_max, max_v = slider_max;
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
 
     cv::namedWindow(window_text, CV_WINDOW_AUTOSIZE);
     src_image = cv::imread(image_file, CV_LOAD_IMAGE_COLOR);
-    if (!src_image.data) // Check for invalid input
+    if (!src_image.data) // check for invalid input
     {
         std::cerr << "Could not open or find the image '" << image_file << "'" << std::endl;
         return -1;
@@ -89,10 +89,10 @@ int main(int argc, char** argv)
         std::cout << "Loading '" << image_file << "'" << std::endl;
     }
 
-    // Create Windows
+    // create windows
     cv::namedWindow(window_text, CV_WINDOW_AUTOSIZE);
 
-    // Create Trackbars
+    // create trackbars
     createTrackbar("Minimum Hue", window_text, &min_h, slider_max, on_min_h_trackbar);
     createTrackbar("Minimum Saturation", window_text, &min_s, slider_max, on_min_s_trackbar);
     createTrackbar("Minimum Value", window_text, &min_v, slider_max, on_min_v_trackbar);
@@ -100,7 +100,7 @@ int main(int argc, char** argv)
     createTrackbar("Maximum Saturation", window_text, &max_s, slider_max, on_max_s_trackbar);
     createTrackbar("Maximum Value", window_text, &max_v, slider_max, on_max_v_trackbar);
 
-    /// Show some stuff
+    /// show some stuff
     on_min_h_trackbar(min_h, 0);
     on_min_s_trackbar(min_s, 0);
     on_min_v_trackbar(min_v, 0);
@@ -110,7 +110,7 @@ int main(int argc, char** argv)
 
     cv::imshow(window_text, src_image);
 
-    /// Wait until user press some key
+    /// wait until user press some key
     cv::waitKey(0);
     return 0;
 }
