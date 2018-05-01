@@ -34,9 +34,7 @@ Date: 2018/04/05
 
   <arg name="publish_calibration" default="true"/>
   <group if="$(arg publish_calibration)">
-    <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch">
-      <arg name="multiple_kinects" value="true"/>
-    </include>
+    <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch"/>
   </group>
 
   <!-- Baxter provided utility to enable gripper buttons -->

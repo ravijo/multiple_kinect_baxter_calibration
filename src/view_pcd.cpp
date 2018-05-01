@@ -34,19 +34,19 @@ void keyboardEventOccurred(
 void mouseEventOccurred (const pcl::visualization::MouseEvent &event,
                          void* viewer_void)
 {
-  pcl::visualization::PCLVisualizer *viewer = static_cast<pcl::visualization::PCLVisualizer *> (viewer_void);
   if (event.getButton() == pcl::visualization::MouseEvent::LeftButton &&
       event.getType() == pcl::visualization::MouseEvent::MouseButtonRelease)
   {
     ROS_INFO_STREAM("Left mouse button released at position (" << event.getX() << ", " << event.getY() << ")");
 
-    std::string text = "clicked here (" +  utility::to_string(event.getX()) + ", " + utility::to_string(event.getY()) + ")";
-    viewer->addText(text, event.getX(), event.getY(), 20, 1, 0, 0, text);
+    pcl::visualization::PCLVisualizer *viewer = static_cast<pcl::visualization::PCLVisualizer *> (viewer_void);
+    std::string text = "2D (" +  utility::to_string(event.getX()) + ", " + utility::to_string(event.getY()) + ")";
+    viewer->addText(text, event.getX(), event.getY(), 20, 1, 1, 0, text);
   }
 }
 
 void pointPickingEventOccurred(
-  const pcl::visualization::PointPickingEvent& event, void* viewer) {
+  const pcl::visualization::PointPickingEvent& event, void* viewer_void) {
     int index = event.getPointIndex();
   if (index == -1)
     return;
@@ -56,6 +56,12 @@ void pointPickingEventOccurred(
   ROS_INFO_STREAM(
   "Point picking event occurred. Point index="<< index << " coordinate ( " << x << ", "
   << y << ", " << z << ")");
+
+  pcl::visualization::PCLVisualizer *viewer = static_cast<pcl::visualization::PCLVisualizer *> (viewer_void);
+  std::string text = "3D (" +  utility::to_string(x) + ", " + utility::to_string(y) + ", " + utility::to_string(z) + ")";
+
+  pcl::PointXYZ point(x, y, z);
+  viewer->addText3D(text, point, 0.08, 1, 0, 0, text);
 }
 
 int main(int argc, char **argv) {

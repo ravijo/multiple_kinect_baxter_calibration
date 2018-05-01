@@ -13,27 +13,28 @@ import yaml
 import tf2_ros
 from geometry_msgs.msg import TransformStamped
 
+def get_kinects_from_data(data):
+    kinects = [x.strip(' ') for x in data.lstrip(' [,').rstrip(']').split(', ')]
+    return kinects
 
 def main():
     # initialize ros node
     rospy.init_node('publish_calibration', anonymous=True)
 
-    multiple_kinects = bool(rospy.get_param('~multiple_kinects'))
+    calibration = rospy.get_param('~calibration')
+    calibration = get_kinects_from_data(calibration)
+    data_dir = rospy.get_param('~data_dir')
 
     # create tf listener and broadcaster
     tf_broadcaster = tf2_ros.StaticTransformBroadcaster()
 
     all_transformations = []
-    for i in range(1, 4):
+    for calib in calibration:
         # load calibration file
-        dirName = os.path.dirname(rospy.get_param('~parameters_file'))
-        paramFile = os.path.join(
-            dirName, 'baxter_kinect_' + str(i) + '_calibration.yaml')
+        param_file = os.path.join(data_dir, ('baxter_%s_calibration.yaml' % calib))
+        rospy.loginfo('Reading file:\n%s\n' % param_file)
 
-        paramFile = paramFile if multiple_kinects else rospy.get_param(
-            '~parameters_file')
-
-        with open(paramFile, 'r') as f:
+        with open(param_file, 'r') as f:
             params = yaml.load(f)
 
         # parameter initialization
@@ -57,8 +58,6 @@ def main():
         static_transform.transform.rotation.w = rot[3]
 
         all_transformations.append(static_transform)
-        if not multiple_kinects:
-            break
 
     # src: https://answers.ros.org/question/261815
     # Publish static transformation

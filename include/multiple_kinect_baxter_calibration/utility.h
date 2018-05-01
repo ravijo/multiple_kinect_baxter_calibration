@@ -8,6 +8,7 @@
 #define MULTIPLE_KINECT_BAXTER_CALIBRATION_UTILITY_H_
 
 #include <vector>
+#include <assert.h>
 
 // header file for writing csv file
 #include <csvfile.h>
@@ -53,6 +54,43 @@ template<typename T> std::string to_string(const T& n) {
   std::ostringstream stm;
   stm << n;
   return stm.str();
+}
+
+
+// str is string to search, sub is the substring to search for
+// src: https://stackoverflow.com/a/4034809
+std::vector<int> find_all(std::string str, std::string sub){
+std::vector<int> positions; // holds all the positions that sub occurs within str
+
+int pos = str.find(sub, 0);
+while(pos != std::string::npos)
+{
+    positions.push_back(pos);
+    pos = str.find(sub,pos+1);
+}
+return positions;
+}
+
+template<typename T> std::vector<std::vector<T> > hstack(const std::vector<std::vector<T> >& a, const std::vector<std::vector<T> >& b) {
+  std::vector<std::vector<T> > c;
+
+  // check if that number of rows are equal in both arrays
+  assert(a.size() != b.size() && "Error, number of rows must be equal in both arrays.");
+
+  //for each row
+  for (size_t i = 0; i < a.size(); i++) {
+    std::vector<T> row;
+
+    for (size_t j = 0; j < a[i].size(); j++)
+    row.push_back(a[i][j]);
+
+    for (size_t j = 0; j < b[i].size(); j++)
+    row.push_back(b[i][j]);
+
+    c.push_back(row);
+  }
+
+  return c;
 }
 
 inline void PointCloudXYZRGBtoXYZHSV(pcl::PointCloud<pcl::PointXYZRGB>& in,

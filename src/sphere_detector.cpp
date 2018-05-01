@@ -61,7 +61,7 @@ void SphereDetector::initSphereDetector() {
   seg.setEpsAngle(pcl::deg2rad(epsilon));
 }
 
-cv::Rect SphereDetector::getBoundingRect(cv::Mat image) {
+bool SphereDetector::getBoundingRect(cv::Mat image, cv::Rect &bound_rect) {
   // smooth image
   cv::GaussianBlur(image, image, cv::Size(5, 5), 0, 0);
 
@@ -75,6 +75,9 @@ cv::Rect SphereDetector::getBoundingRect(cv::Mat image) {
   hsv_image.release(); // remove hsv_image from memory
 
   cv::Vec2d largest_contour(0, 0); // index, area
+
+  //cv::imwrite( "binary_image.jpg", binary_image);
+
   // find contours from binary image
   cv::vector < cv::vector<cv::Point> > contours;
   findContours(binary_image, contours, CV_RETR_EXTERNAL,
@@ -93,31 +96,22 @@ cv::Rect SphereDetector::getBoundingRect(cv::Mat image) {
 
   double largest_contour_area = largest_contour[1];
 
-  cv::Rect bound_rect;
-
   /*
   * calculate bouding rectangle only if
   * area associated with largest contour is more than zero
   */
-  if(largest_contour[1] > 0)
+  if(largest_contour[1] > 0){
       bound_rect = boundingRect(cv::Mat(contours[largest_contour[0]]));
 
-  cv::Rect outer_rect(bound_rect);
-  outer_rect.x -= bound_rect.width;
-  outer_rect.y -= bound_rect.height;
-  outer_rect.width = 3 * bound_rect.width;
-  outer_rect.height = 3 * bound_rect.height;
-
   /*
-  std::cout << "outer_rect " << outer_rect << std::endl;
-  cv::imwrite( "binary_image.jpg", binary_image);
-
   rectangle( binary_image, bound_rect.tl(), bound_rect.br(), cv::Scalar(255, 255, 255), 2, 8, 0 );
-  rectangle( binary_image, outer_rect.tl(), outer_rect.br(), cv::Scalar(255, 255, 255), 2, 8, 0 );
   cv::imwrite( "rect_binary_image.jpg", binary_image);
   */
-
-  return outer_rect;
+return true;
+}
+else{
+return false;
+}
 }
 
 bool SphereDetector::convertMouseCoordsTo3DPC(vtkRenderWindowInteractor* iren,
@@ -137,49 +131,43 @@ bool SphereDetector::convertMouseCoordsTo3DPC(vtkRenderWindowInteractor* iren,
     return false;
 }
 
-void SphereDetector::get2DPoints(int points[])
+void SphereDetector::get2DPoints(std::vector<cv::Point> &points)
 {
-  int x_1 = points[0], y_1 = points[1];
-  int x_2 = points[2], y_2 = points[3];
+  int x_a = points[0].x, y_a = points[0].y;
+  int x_c = points[1].x, y_c = points[1].y;
 
-  int x_e = mid(x_1, x_2),  y_e = mid(y_1, y_2);
-  points[4] = x_e, points[5] = y_e;
-
-  int x_a = x_e, y_a = y_1;
-  points[6] = x_e, points[7] = y_e;
-
-  int x_b = x_2, y_b = y_e;
-  points[8] = x_e, points[9] = y_e;
-
-  int x_c = x_e, y_c = y_2;
-  points[10] = x_e, points[11] = y_e;
-
-  int x_d = x_1, y_d = y_e;
-  points[12] = x_e, points[13] = y_e;
-
-  int x_g = mid(x_2, x_e), y_g = mid(y_2, y_e);
-  points[14] = x_e, points[15] = y_e;
-
-  int x_h = mid(x_d, x_c), y_h = mid(y_d, y_c);
-  points[16] = x_e, points[17] = y_e;
-
-  int x_i = mid(x_a, x_d), y_i = mid(y_a, y_d);
-  points[18] = x_e, points[19] = y_e;
-
-  int x_j = mid(x_a, x_e), y_j = mid(y_a, y_e);
-  points[20] = x_e, points[21] = y_e;
-
-  int x_k = mid(x_b, x_e), y_k = mid(y_b, y_e);
-  points[22] = x_e, points[23] = y_e;
-
+  int x_b = x_c, y_b = y_a;
+  int x_d = x_a, y_d = y_c;
+  int x_q = mid(x_a, x_c), y_q = mid(y_a, y_c);
+  int x_e = mid(x_a, x_d), y_e = mid(y_a, y_d);
   int x_f = mid(x_a, x_b), y_f = mid(y_a, y_b);
-  points[24] = x_e, points[25] = y_e;
+  int x_g = mid(x_b, x_c), y_g = mid(y_b, y_c);
+  int x_h = mid(x_d, x_c), y_h = mid(y_d, y_c);
+  int x_i = mid(x_h, x_e), y_i = mid(y_h, y_e);
+  int x_j = mid(x_e, x_f), y_j = mid(y_e, y_f);
+  int x_k = mid(x_f, x_g), y_k = mid(y_f, y_g);
+  int x_l = mid(x_g, x_h), y_l = mid(y_g, y_h);
+  int x_m = mid(x_i, x_l), y_m = mid(y_i, y_l);
+  int x_n = mid(x_i, x_j), y_n = mid(y_i, y_j);
+  int x_o = mid(x_j, x_k), y_o = mid(y_j, y_k);
+  int x_p = mid(x_k, x_l), y_p = mid(y_k, y_l);
 
-  int x_l = mid(x_c, x_e), y_l = mid(y_c, y_e);
-  points[26] = x_e, points[27] = y_e;
-
-  int x_m = mid(x_d, x_e), y_m = mid(y_d, y_e);
-  points[28] = x_e, points[29] = y_e;
+  points.push_back(cv::Point(x_a, y_a));
+  points.push_back(cv::Point(x_b, y_b));
+  points.push_back(cv::Point(x_c, y_c));
+  points.push_back(cv::Point(x_d, y_d));
+  points.push_back(cv::Point(x_e, y_e));
+  points.push_back(cv::Point(x_f, y_f));
+  points.push_back(cv::Point(x_g, y_g));
+  points.push_back(cv::Point(x_h, y_h));
+  points.push_back(cv::Point(x_i, y_i));
+  points.push_back(cv::Point(x_j, y_j));
+  points.push_back(cv::Point(x_k, y_k));
+  points.push_back(cv::Point(x_l, y_l));
+  points.push_back(cv::Point(x_m, y_m));
+  points.push_back(cv::Point(x_n, y_n));
+  points.push_back(cv::Point(x_o, y_o));
+  points.push_back(cv::Point(x_p, y_p));
 }
 
 void SphereDetector::get3DMinMaxRange(pcl::visualization::PCLVisualizer* viewer,
@@ -197,40 +185,35 @@ void SphereDetector::get3DMinMaxRange(pcl::visualization::PCLVisualizer* viewer,
   int end_x = rect.x + rect.width > img.width ? img.width - offset : rect.x + rect.width;
   int end_y = rect.y + rect.height > img.height ? offset : img.height - (rect.y + rect.height);
 
-  int size = 2 * 15;  // x-y pair
-  int points_2d[size];
-  points_2d[0] = start_x; points_2d[1] = start_y;
-  points_2d[2] = end_x;   points_2d[3] = end_y;
+  std::vector<cv::Point> points_2d;
+  points_2d.push_back(cv::Point(start_x, start_y));
+  points_2d.push_back(cv::Point(end_x, end_y));
   get2DPoints(points_2d);
 
   pcl::PointCloud<pcl::PointXYZ> points_3d;
   points_3d.height   = 1;
   points_3d.is_dense = false;
-
-  for (size_t i = 0; i < size; i+=2)
-  {
+  for (size_t i = 0; i < points_2d.size(); i++) {
     Eigen::Vector3f p;
-    bool status = convertMouseCoordsTo3DPC(iren, point_picker, points_2d[i], points_2d[i + 1], p);
-    if (status)
+    if (convertMouseCoordsTo3DPC(iren, point_picker, points_2d[i].x, points_2d[i].y, p))
     {
       pcl::PointXYZ point(p(0), p(1), p(2));
       points_3d.points.push_back(point);
     }
   }
-
   // make sure to set the width
   points_3d.width = points_3d.points.size();
 
   pcl::PointXYZ min_pt, max_pt;
   pcl::getMinMax3D(points_3d, min_pt, max_pt);
 
-  min_3d(0) = min_pt.x;
-  max_3d(0) = max_pt.x;
-
-  min_3d(1) = min_pt.y;
-  max_3d(1) = max_pt.y;
-
   // just to be on safe side lets define some offset
+  min_3d(0) = min_pt.x - radius;
+  max_3d(0) = max_pt.x + radius;
+
+  min_3d(1) = min_pt.y - radius;
+  max_3d(1) = max_pt.y + radius;
+
   min_3d(2) = min_pt.z - radius;
   max_3d(2) = max_pt.z + radius;
 
@@ -280,12 +263,19 @@ bool SphereDetector::segmentSphere(pcl::visualization::PCLVisualizer* viewer,
   cv::Size image_size = image.size();
   //cv::imwrite( "image.jpg", image); //just for checking
 
-  cv::Rect boundary = getBoundingRect(image);
+  cv::Rect boundary;
+  bool status = getBoundingRect(image, boundary);
   image.release(); // remove image from memory
+
+  if (!status)
+  return false;
 
   Eigen::Vector4f min_3d, max_3d;
   get3DMinMaxRange(viewer, image_size, boundary, min_3d, max_3d);
   crop(raw_cloud, filtered_cloud, min_3d, max_3d);
+
+  if (filtered_cloud->points.empty())
+  return false;
 
   pcl::PointCloud<pcl::PointXYZ>::Ptr xyz_cloud(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::copyPointCloud(*filtered_cloud, *xyz_cloud);
@@ -299,23 +289,27 @@ bool SphereDetector::segmentSphere(pcl::visualization::PCLVisualizer* viewer,
   seg.setInputCloud(xyz_cloud);
   seg.setInputNormals(cloud_normals);
   seg.segment(*inliers, coefficients);
-
+  std::cout << "[####] sphere detector after RANSAC" << std::endl;
   // we have detected a sphere
   if (inliers->indices.size() > 0)
   {
       // extract the sphere inliers from the input cloud
-   		pcl::ExtractIndices<pcl::PointXYZRGB> extract;
-   		extract.setInputCloud(filtered_cloud);
-   		extract.setIndices(inliers);
-   		extract.setNegative(false);
+      pcl::ExtractIndices<pcl::PointXYZRGB> extract;
+      extract.setInputCloud(filtered_cloud);
+      extract.setIndices(inliers);
+      extract.setNegative(false);
 
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr sphere_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-   		// Get the points associated with the planar surface
+   		// get the points associated with sphere
    		extract.filter(*sphere_cloud);
 
       //pcl::io::savePCDFileASCII("sphere_cloud.pcd", *sphere_cloud);
+      bool color_comp = validateDetection(sphere_cloud);
 
-      return validateDetection(sphere_cloud);
+      // make sure that sphere radius is in range
+      bool radius_range = between(coefficients.values[3], radius - tolerance, radius + tolerance);
+
+      return (color_comp && radius_range);
   }
   else
     return false;

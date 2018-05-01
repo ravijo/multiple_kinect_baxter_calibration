@@ -53,12 +53,18 @@ class BaxterController():
     def callback(self, msg):
         self.data_collection_happening = msg.data
 
+def get_kinect_from_topic(topic):
+    import re
+    all_slash = [m.start() for m in re.finditer('/', topic)]
+    kinect = topic[all_slash[0] + 1 : all_slash[1]]
+    return kinect
 
 if __name__ == '__main__':
     rospy.init_node('baxter_controller_node', anonymous=True)
 
     limb = rospy.get_param('~limb')
     wait_time = rospy.get_param('~wait_time')
-    file_name = rospy.get_param('~trajectory')
+    topic = rospy.get_param('~topic')
+    file_name = rospy.get_param('~%s_trajectory' % get_kinect_from_topic(topic))
 
     BaxterController(wait_time, limb, file_name)

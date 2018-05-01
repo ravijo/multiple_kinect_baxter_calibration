@@ -43,12 +43,12 @@ private:
   Eigen::Matrix4d t_ball_wrt_ee;
   std_msgs::Bool still_processing;
   pcl::visualization::Camera camera;
-  std::string pc_topic, ee_topic, data_dir;
   ros::Subscriber baxter_arm_motion_status_sub;
   pcl_project::SphereDetector* sphere_detector;
   ros::Publisher data_collection_progress_pub;
   std::vector<std::vector<float> > position_wrt_baxter;
   std::vector<std::vector<float> > position_wrt_kinect;
+  std::string pc_topic, ee_topic, data_dir, file_suffix;
   std::vector<pcl::visualization::PCLVisualizer*> pc_viewers;
 
   void saveData();
@@ -108,23 +108,14 @@ void DataCollector::baxterArmMotionStatusCallback(
 }
 
 void DataCollector::saveData() {
-  std::string baxter = data_dir + "/position_wrt_baxter.csv";
-  std::string kinect = data_dir + "/position_wrt_kinect.csv";
-  std::string header = "position_x,position_y,position_z";
+  std::string file_name = data_dir + "/position_wrt_baxter_" + file_suffix + ".csv";
+  std::string header = "baxter_x,baxter_y,baxter_z,kinect_x,kinect_y,kinect_z";
+  std::vector<std::vector<float> > trajectory = utility::hstack(position_wrt_baxter, position_wrt_kinect);
 
-  ROS_INFO_STREAM(
-      "Saving collected data in following files: " << baxter << " and "
-          << kinect);
+  ROS_INFO_STREAM("Saving collected data in following file: \n" << file_name << "\n");
 
-  bool status;
   std::string err;
-
-  status = utility::writeCSV(baxter, header, position_wrt_baxter, err);
-  if (!status)
-    ROS_ERROR_STREAM("Unable to save tracking data to CSV file. " << err);
-
-  status = utility::writeCSV(kinect, header, position_wrt_kinect, err);
-  if (!status)
+  if (!utility::writeCSV(file_name, header, trajectory, err))
     ROS_ERROR_STREAM("Unable to save tracking data to CSV file. " << err);
 }
 
@@ -159,7 +150,7 @@ void DataCollector::callback(
       new pcl::PointCloud<pcl::PointXYZRGB>);
   utility::getPointCloudFromMsg(pc_msg, *cloud);
 
-      // show caputed point cloud
+  // show caputed point cloud
   if (!pc_viewers.at(0)->updatePointCloud(cloud, "cloud"))
       pc_viewers.at(0)->addPointCloud(cloud, "cloud");
   pc_viewers.at(0)->spinOnce();
@@ -176,8 +167,7 @@ void DataCollector::callback(
     pc_viewers.at(1)->addPointCloud(segmented_cloud, "segmented_cloud");
   pc_viewers.at(1)->spinOnce();
 
-  bool in_range = between(sphere_coff.values[3], sphere_radius - tolerance, sphere_radius + tolerance);
-  if (success && in_range) {
+  if (success) {
     ROS_INFO_STREAM("Sphere detection successfull");
 
     recordBallPositionWrtBaxter(ee_msg);
@@ -228,13 +218,14 @@ void DataCollector::init(ros::NodeHandle nh) {
   nh.getParam("epsilon", epsilon);
 
   nh.getParam("cam_file", cam_file);
-
-  nh.getParam("pc_topic", pc_topic);
   nh.getParam("ee_topic", ee_topic);
-
   nh.getParam("data_dir", data_dir);
-
   nh.getParam("queue_size", queue_size);
+
+  nh.getParam("topic", pc_topic);
+
+  std::vector<int>  all_slash = utility::find_all(pc_topic, "/");
+  file_suffix = pc_topic.substr(all_slash[0] + 1, all_slash[1] - 1);
 
   std::vector<int> min_hsv_values = utility::stringToArray(min_hsv);
   std::vector<int> max_hsv_values = utility::stringToArray(max_hsv);
@@ -261,9 +252,8 @@ void DataCollector::init(ros::NodeHandle nh) {
   for (size_t i = 0; i < 2 * KINECT_COUNT; i++) {
     std::string window_name =
         i < KINECT_COUNT ?
-            "Point Cloud " + utility::to_string(i + 1) :
-            "Segmented Cloud "
-                + utility::to_string((i - KINECT_COUNT) + 1);
+            "Point Cloud (" + file_suffix + ")" :
+            "Segmented Cloud (" + file_suffix + ")";
     pcl::visualization::PCLVisualizer* pc_viewer(
         new pcl::visualization::PCLVisualizer(window_name));
 
@@ -275,8 +265,8 @@ void DataCollector::init(ros::NodeHandle nh) {
   }
 
   // use orthographic views
-  pc_viewers.at(0)->getRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetParallelProjection(1);
-  pc_viewers.at(0)->setCameraParameters(camera);
+  //pc_viewers.at(0)->getRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetParallelProjection(1);
+  //pc_viewers.at(0)->setCameraParameters(camera);
 
   for (size_t i = 0; i < 2 * KINECT_COUNT; i++)
     setWindowPosition(i);

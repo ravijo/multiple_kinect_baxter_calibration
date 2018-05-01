@@ -86,11 +86,11 @@ public:
 private:
   void initSphereDetector();
 
-  void get2DPoints(int points[]);
-
   bool validateDetection(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
 
-  cv::Rect getBoundingRect(cv::Mat image);
+  void get2DPoints(std::vector<cv::Point> &points);
+
+  bool getBoundingRect(cv::Mat image, cv::Rect &bound_rect);
 
   void crop(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in,
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr out, Eigen::Vector4f& min,

@@ -125,6 +125,9 @@ int main(int argc, char * * argv) {
 
   // use default params
   pcl_project::RansacParams ransac_params;
+  ransac_params.prob = 0.99999;
+  ransac_params.tolerance = 0.01;
+
   // change ransac_params as following
   /*
    ransac_params.k_neighbors = k_neighbors;
@@ -177,7 +180,7 @@ int main(int argc, char * * argv) {
   pcd_viewer.addPointCloud(cloud, "cloud");
 
   pcd_viewer.initCameraParameters();
-  pcd_viewer.getRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetParallelProjection(1);
+  //pcd_viewer.getRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetParallelProjection(1);
   pcd_viewer.setCameraParameters(camera);
   seg_viewer.initCameraParameters();
   seg_viewer.setCameraParameters(camera);
@@ -196,7 +199,10 @@ int main(int argc, char * * argv) {
   bool status = sphereDetector.segmentSphere(&pcd_viewer, cloud,
       segmented_cloud, sphere_coff);
 
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> red(segmented_cloud, 255, 0, 0);
+  pcd_viewer.addPointCloud(segmented_cloud, red, "segmented_cloud");
   seg_viewer.addPointCloud(segmented_cloud, "segmented_cloud");
+  pcd_viewer.spinOnce();
 
   if (status) {
     ROS_INFO_STREAM("Sphere detection successfull");
@@ -211,6 +217,6 @@ int main(int argc, char * * argv) {
 
   seg_viewer.spin();
 
-  //pcl::io::savePCDFileASCII("segmented_cloud.pcd", *segmented_cloud);
+  pcl::io::savePCDFileASCII("segmented_cloud.pcd", *segmented_cloud);
   return 0;
 }

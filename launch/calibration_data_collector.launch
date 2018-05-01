@@ -5,16 +5,27 @@ Author: Ravi Joshi
 Date: 2018/02/16
 -->
 <launch>
+  <!-- rostopic for receving point cloud -->
+  <!-- libfreenect topic = /kinect1/sd/points -->
+  <!-- kinect_anywhere topic = /kinect_anywhere/point_cloud/points2 -->
+  <arg name="topic" doc="topic:=/kinect1/sd/points"/>
+
+  <!-- baxter arm pre-defined trajectory for various kinect -->
+  <arg name="kinect1_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
+  <arg name="kinect2_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
+  <arg name="kinect3_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
+
   <!-- make sure it matches with argument 'ee_topic' provided to 'data_collector' below -->
   <arg name="limb" default="right"/>
   <!-- wait time to stablize arm before capturing point cloud (seconds)-->
   <arg name="wait_time" default="2"/>
-  <!-- baxter arm pre-defined trajectory -->
-  <arg name="trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
   <node name="baxter_controller" pkg="multiple_kinect_baxter_calibration" type="baxter_controller.py" output="screen">
+    <param name="topic" value="$(arg topic)"/>
+    <param name="kinect1_trajectory" value="$(arg kinect1_trajectory)"/>
+    <param name="kinect2_trajectory" value="$(arg kinect2_trajectory)"/>
+    <param name="kinect3_trajectory" value="$(arg kinect3_trajectory)"/>
     <param name="limb" value="$(arg limb)"/>
     <param name="wait_time" value="$(arg wait_time)"/>
-    <param name="trajectory" value="$(arg trajectory)"/>
   </node>
 
   <!-- minimum and maximum HSV values for sphere segmentation -->
@@ -53,10 +64,6 @@ Date: 2018/02/16
   <arg name="cam" default="$(find multiple_kinect_baxter_calibration)/files/libfreenect.cam"/>
   <!-- rostopic for receving baxter ee pose. make sure it matches with argument 'limb' provided to 'baxter_controller' above -->
   <arg name="ee_topic" default="/robot/limb/right/endpoint_state"/>
-  <!-- rostopic for receving point cloud -->
-  <!-- libfreenect topic = /kinect1/sd/points -->
-  <!-- kinect_anywhere topic = /kinect_anywhere/point_cloud/points2 -->
-  <arg name="pc" default="/kinect1/sd/points"/>
   <!-- directory for saving collected data -->
   <arg name="data_dir" default="$(find multiple_kinect_baxter_calibration)/files"/>
   <!-- queue_size for subscriber -->
@@ -75,7 +82,7 @@ Date: 2018/02/16
     <param name="epsilon" value="$(arg epsilon)"/>
     <param name="cam_file" value="$(arg cam)"/>
     <param name="ee_topic" value="$(arg ee_topic)"/>
-    <param name="pc_topic" value="$(arg pc)"/>
+    <param name="topic" value="$(arg topic)"/>
     <param name="data_dir" value="$(arg data_dir)"/>
     <param name="queue_size" value="$(arg queue_size)"/>
   </node>

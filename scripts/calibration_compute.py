@@ -17,48 +17,48 @@ from mpl_toolkits.mplot3d import Axes3D
 from tf.transformations import euler_from_matrix, quaternion_from_euler
 
 # matplotlib settings
-matplotlib.rcParams.update({'font.size': 14})
+matplotlib.rcParams.update({'font.size': 10})
 
 
-def absOrientation(x, y):
+def abs_orientation(x, y):
     # number of samples
-    nSamples = x.shape[0]
+    n_samples = x.shape[0]
 
     # center data
-    xMean = x.mean(axis=0)
-    yMean = y.mean(axis=0)
+    x_mean = x.mean(axis=0)
+    y_mean = y.mean(axis=0)
 
-    xTemp = x - xMean
-    yTemp = y - yMean
+    x_temp = x - x_mean
+    y_temp = y - y_mean
 
     # get the variance
-    xSD = np.mean(np.sum(xTemp**2, 1))
-    np.mean(np.sum(yTemp**2, 1))
+    x_sd = np.mean(np.sum(x_temp**2, 1))
+    np.mean(np.sum(y_temp**2, 1))
 
     # get covariance matrix
-    covarMatrix = np.dot(yTemp.T, xTemp) / nSamples
+    covar_matrix = np.dot(y_temp.T, x_temp) / n_samples
 
     # apply singular value decomposition
-    U, D, V = np.linalg.svd(covarMatrix, full_matrices=True, compute_uv=True)
+    U, D, V = np.linalg.svd(covar_matrix, full_matrices=True, compute_uv=True)
     V = V.T.copy()
 
     S = np.diag(np.asarray(
         [1, 1, np.sign(np.linalg.det(V) * np.linalg.det(U))]))
 
     # get scaling factor
-    c = np.trace(np.dot(np.diag(D), S)) / xSD
+    c = np.trace(np.dot(np.diag(D), S)) / x_sd
 
     # get rotation matrix
     R = c * np.dot(np.dot(U, S), V.T)
 
     # get translation vector
-    t = yMean - np.dot(R, xMean)
+    t = y_mean - np.dot(R, x_mean)
 
     # compute transformation error
-    xOut = (np.dot(R, x.T)).T + t
-    errs = np.sqrt(np.sum((y - xOut)**2, axis=1))
-    err = errs.sum() / nSamples
-    return xOut, R, t, err
+    x_out = (np.dot(R, x.T)).T + t
+    errs = np.sqrt(np.sum((y - x_out)**2, axis=1))
+    err = errs.sum() / n_samples
+    return x_out, R, t, err
 
 
 def main():
@@ -66,19 +66,21 @@ def main():
     rospy.init_node('compute_calibration', anonymous=True)
 
     # get path to folder containing recorded data
-    filesPath = rospy.get_param('~data_dir')
+    data_dir = rospy.get_param('~data_dir')
+    kinect = rospy.get_param('~kinect')
 
-    kinectFile = filesPath + 'position_wrt_kinect.csv'
-    baxterFile = filesPath + 'position_wrt_baxter.csv'
+    trajectoryFile = data_dir + 'position_wrt_baxter_' + kinect + '.csv'
 
-    rospy.loginfo('Reading files %s and %s' % (kinectFile, baxterFile))
+    rospy.loginfo('Reading file:\n%s\n' % trajectoryFile)
 
     # load trajectories
-    kinectTraj = np.loadtxt(kinectFile, delimiter=',', skiprows=1)
-    baxterTraj = np.loadtxt(baxterFile, delimiter=',', skiprows=1)
+    trajectory = np.loadtxt(trajectoryFile, delimiter=',', skiprows=1)
+
+    kinect_traj = trajectory[:, :3]
+    baxter_traj = trajectory[:, 3:]
 
     # compute absolute orientation
-    kinectOut, rot, trans, err = absOrientation(kinectTraj, baxterTraj)
+    kinect_out, rot, trans, err = abs_orientation(kinect_traj, baxter_traj)
 
     # output results
     err_cm = err * 100.0
@@ -90,14 +92,14 @@ def main():
 
     # save results to yaml file
     calibration = {'parent': 'base',
-                   'child': 'kinect2_link',
+                   'child': ('%s_link' % kinect),
                    'trans': trans.tolist(),
                    'rot': quat.tolist(),
                    'rot_euler': list(euler),
                    'calibration error (m)': float('%.4f' % err),
                    'created on': datetime.datetime.now().strftime('%d %B %Y %I:%M:%S %p')}
 
-    with open('%sbaxter_kinect_calibration.yaml' % (filesPath), 'w') as outfile:
+    with open('%sbaxter_%s_calibration.yaml' % (data_dir, kinect), 'w') as outfile:
         yaml.dump(calibration, outfile)
 
     # plot both point sets together
@@ -105,18 +107,19 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
 
     # plot the data
-    ax.scatter(kinectOut[:, 0], kinectOut[:, 1],
-               kinectOut[:, 2], s=10, c='r', marker='o', label='Kinect')
-    ax.scatter(baxterTraj[:, 0], baxterTraj[:, 1],
-               baxterTraj[:, 2], s=10, c='b', marker='^', label='Baxter')
+    ax.scatter(kinect_out[:, 0], kinect_out[:, 1],
+               kinect_out[:, 2], s=10, c='r', marker='o', label='Kinect')
+    ax.scatter(baxter_traj[:, 0], baxter_traj[:, 1],
+               baxter_traj[:, 2], s=10, c='b', marker='^', label='Baxter')
+
 
     # add labels and title
-    ax.set_xlabel('X-axis')
-    ax.set_ylabel('Y-axis')
-    ax.set_zlabel('Z-axis')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
     ax.legend()
     ax.grid(True)
-    ax.set_title('Kinect-Baxter Calibration')
+    plt.title('baxter %s calibration (err: %.2f cm)' % (kinect, err_cm), y=1.1)
     plt.show()
 
 
