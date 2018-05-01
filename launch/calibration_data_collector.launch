@@ -15,7 +15,7 @@ Date: 2018/02/16
   <arg name="kinect2_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
   <arg name="kinect3_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
 
-  <!-- make sure it matches with argument 'ee_topic' provided to 'data_collector' below -->
+  <!-- left/right limb used for calibration process -->
   <arg name="limb" default="right"/>
   <!-- wait time to stablize arm before capturing point cloud (seconds)-->
   <arg name="wait_time" default="2"/>
@@ -62,8 +62,6 @@ Date: 2018/02/16
   <!-- libfreenect file = libfreenect.cam -->
   <!-- kinect_anywhere file = kinect_anywhere.cam -->
   <arg name="cam" default="$(find multiple_kinect_baxter_calibration)/files/libfreenect.cam"/>
-  <!-- rostopic for receving baxter ee pose. make sure it matches with argument 'limb' provided to 'baxter_controller' above -->
-  <arg name="ee_topic" default="/robot/limb/right/endpoint_state"/>
   <!-- directory for saving collected data -->
   <arg name="data_dir" default="$(find multiple_kinect_baxter_calibration)/files"/>
   <!-- queue_size for subscriber -->
@@ -81,7 +79,7 @@ Date: 2018/02/16
     <param name="tolerance" value="$(arg tolerance)"/>
     <param name="epsilon" value="$(arg epsilon)"/>
     <param name="cam_file" value="$(arg cam)"/>
-    <param name="ee_topic" value="$(arg ee_topic)"/>
+    <param name="limb" value="$(arg limb)"/>
     <param name="topic" value="$(arg topic)"/>
     <param name="data_dir" value="$(arg data_dir)"/>
     <param name="queue_size" value="$(arg queue_size)"/>

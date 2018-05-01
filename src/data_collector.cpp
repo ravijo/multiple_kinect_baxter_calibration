@@ -200,7 +200,7 @@ void DataCollector::callback(
 void DataCollector::init(ros::NodeHandle nh) {
   float offset;
   int k_neighbors, max_itr;
-  std::string min_hsv, max_hsv, cam_file;
+  std::string min_hsv, max_hsv, cam_file, limb;
   double weight, d_thresh, prob, epsilon;
 
   nh.getParam("min_hsv", min_hsv);
@@ -218,7 +218,11 @@ void DataCollector::init(ros::NodeHandle nh) {
   nh.getParam("epsilon", epsilon);
 
   nh.getParam("cam_file", cam_file);
-  nh.getParam("ee_topic", ee_topic);
+  nh.getParam("limb", limb);
+
+  // define end-effector topic
+  ee_topic = "/robot/limb/" + limb + "/endpoint_state";
+
   nh.getParam("data_dir", data_dir);
   nh.getParam("queue_size", queue_size);
 
