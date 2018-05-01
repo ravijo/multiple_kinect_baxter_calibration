@@ -26,9 +26,6 @@
 // vtk header
 #include <vtkCamera.h>
 
-// number of kinects used
-#define KINECT_COUNT 1
-
 // baxter arm motion state (moving:0, stop:1, finished:2)
 #define MOVING 0
 #define STOP 1
@@ -145,7 +142,7 @@ void DataCollector::callback(const baxter_core_msgs::EndpointStateConstPtr& ee_m
     data_collection_progress_pub.publish(still_processing);
 
     // set windows position
-    for (size_t i = 0; i < 2 * KINECT_COUNT; i++)
+    for (size_t i = 0; i < 2; i++)
         setWindowPosition(i);
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -257,10 +254,10 @@ void DataCollector::init(ros::NodeHandle nh)
     result = result && utility::getCameraParametersPCL(cam_param, camera);
     ROS_DEBUG_STREAM("loadCameraParametersPCL returned " << result);
 
-    for (size_t i = 0; i < 2 * KINECT_COUNT; i++)
+    for (size_t i = 0; i < 2; i++)
     {
-        std::string window_name = i < KINECT_COUNT ? "Point Cloud (" + file_suffix + ")"
-                                                   : "Segmented Cloud (" + file_suffix + ")";
+        std::string window_name
+            = i < 1 ? "Point Cloud (" + file_suffix + ")" : "Segmented Cloud (" + file_suffix + ")";
         pcl::visualization::PCLVisualizer* pc_viewer(
             new pcl::visualization::PCLVisualizer(window_name));
 
@@ -275,7 +272,7 @@ void DataCollector::init(ros::NodeHandle nh)
     // pc_viewers.at(0)->getRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetParallelProjection(1);
     // pc_viewers.at(0)->setCameraParameters(camera);
 
-    for (size_t i = 0; i < 2 * KINECT_COUNT; i++)
+    for (size_t i = 0; i < 2; i++)
         setWindowPosition(i);
 }
 
@@ -287,9 +284,9 @@ void DataCollector::setWindowPosition(int index)
     int x = index * width;
     int y = 0;
 
-    if (index >= KINECT_COUNT)
+    if (index >= 1)
     {
-        x = (index - KINECT_COUNT) * width;
+        x = (index - 1) * width;
         y = height;
     }
 
