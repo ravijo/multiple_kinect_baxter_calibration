@@ -69,12 +69,12 @@ def main():
     data_dir = rospy.get_param('~data_dir')
     kinect = rospy.get_param('~kinect')
 
-    trajectoryFile = data_dir + 'position_wrt_baxter_' + kinect + '.csv'
+    trajectory_file = data_dir + 'position_wrt_baxter_' + kinect + '.csv'
 
     rospy.loginfo('Reading file:\n%s\n' % trajectoryFile)
 
     # load trajectories
-    trajectory = np.loadtxt(trajectoryFile, delimiter=',', skiprows=1)
+    trajectory = np.loadtxt(trajectory_file, delimiter=',', skiprows=1)
 
     kinect_traj = trajectory[:, :3]
     baxter_traj = trajectory[:, 3:]
