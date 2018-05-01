@@ -9,7 +9,6 @@ Date: 2018/04/12
   <arg name="pc1_frame_id" default="kinect1_link"/>
   <arg name="pc2_frame_id" default="kinect2_link"/>
   <arg name="pc3_frame_id" default="kinect3_link"/>
-  <arg name="tf_wait" default="2.0"/>
   <!--
   colors in hex for each kinect. make sure to have
   only one space in between each color as it is below
@@ -24,7 +23,6 @@ Date: 2018/04/12
     <param name="pc1_frame_id" value="$(arg pc1_frame_id)"/>
     <param name="pc2_frame_id" value="$(arg pc2_frame_id)"/>
     <param name="pc3_frame_id" value="$(arg pc3_frame_id)"/>
-    <param name="tf_wait" value="$(arg tf_wait)"/>
     <param name="colors" value="$(arg colors)"/>
     <param name="scale" value="$(arg scale)"/>
     <param name="freq" value="$(arg freq)"/>
