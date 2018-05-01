@@ -106,7 +106,7 @@ void DataCollector::baxterArmMotionStatusCallback(const std_msgs::Int8::ConstPtr
 
 void DataCollector::saveData()
 {
-    std::string file_name = data_dir + "/position_wrt_baxter_" + file_suffix + ".csv";
+    std::string file_name = data_dir + "/baxter_" + file_suffix + "_position.csv";
     std::string header = "baxter_x,baxter_y,baxter_z,kinect_x,kinect_y,kinect_z";
     std::vector<std::vector<float> > trajectory
         = utility::hstack(position_wrt_baxter, position_wrt_kinect);
