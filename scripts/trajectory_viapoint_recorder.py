@@ -6,7 +6,9 @@
 # Date: 2018/04/12
 
 # import modules
+import os
 import rospy
+import rospkg
 import numpy as np
 from baxter_interface import Limb, Navigator
 
@@ -28,9 +30,13 @@ class TrajectoryViapointRecorder():
 
     def save_data(self):
         file_header = ','.join(x for x in self.file_header)
-        np.savetxt(self.file_name, self.trajectory, header=file_header,
+        # src: http://wiki.ros.org/Packages#Client_Library_Support
+        full_path =  os.path.join(rospkg.RosPack().get_path(
+                'multiple_kinect_baxter_calibration'), 'files', self.file_name)
+
+        np.savetxt(full_path, self.trajectory, header=file_header,
                    delimiter=',', fmt='%.4f', comments='')
-        rospy.loginfo('Trajectory have been successfully saved to %s' % self.file_name)
+        rospy.loginfo("Trajectory have been successfully saved to \n'%s'\n" % full_path)
 
     def limb_nav_button_pressed(self, state):
         now = rospy.Time.now()
