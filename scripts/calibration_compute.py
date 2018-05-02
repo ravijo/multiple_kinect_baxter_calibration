@@ -72,13 +72,13 @@ def main():
 
     trajectory_file = os.path.join(data_dir, 'baxter_%s_position.csv' % kinect)
 
-    rospy.loginfo('Reading file:\n%s\n' % trajectoryFile)
+    rospy.loginfo('Reading file:\n%s\n' % trajectory_file)
 
     # load trajectories
     trajectory = np.loadtxt(trajectory_file, delimiter=',', skiprows=1)
 
-    kinect_traj = trajectory[:, :3]
-    baxter_traj = trajectory[:, 3:]
+    baxter_traj = trajectory[:, :3]
+    kinect_traj = trajectory[:, 3:]
 
     # compute absolute orientation
     kinect_out, rot, trans, err = abs_orientation(kinect_traj, baxter_traj)
@@ -115,12 +115,12 @@ def main():
 
 
     # add labels and title
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
+    ax.set_xlabel('x (m)')
+    ax.set_ylabel('y (m)')
+    ax.set_zlabel('z (m)')
     ax.legend()
     ax.grid(True)
-    plt.title('baxter %s calibration (err: %.2f cm)' % (kinect, err_cm), y=1.1)
+    plt.title('baxter %s calibration (err: %.2f cm)' % (kinect, err_cm), y=1.1) # move title little bit up
     plt.show()
 
 

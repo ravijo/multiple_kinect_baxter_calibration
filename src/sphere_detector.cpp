@@ -280,7 +280,7 @@ bool SphereDetector::segmentSphere(pcl::visualization::PCLVisualizer* viewer,
     seg.setInputCloud(xyz_cloud);
     seg.setInputNormals(cloud_normals);
     seg.segment(*inliers, coefficients);
-    std::cout << "[####] sphere detector after RANSAC" << std::endl;
+
     // we have detected a sphere
     if (inliers->indices.size() > 0)
     {

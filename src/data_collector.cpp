@@ -111,7 +111,7 @@ void DataCollector::saveData()
     std::vector<std::vector<float> > trajectory
         = utility::hstack(position_wrt_baxter, position_wrt_kinect);
 
-    ROS_INFO_STREAM("Saving collected data in following file: \n" << file_name << "\n");
+    ROS_INFO_STREAM("Saving collected data in following file: \n'" << file_name << "'\n");
 
     std::string err;
     if (!utility::writeCSV(file_name, header, trajectory, err))
@@ -218,7 +218,6 @@ void DataCollector::init(ros::NodeHandle nh)
     nh.getParam("tolerance", tolerance);
     nh.getParam("epsilon", epsilon);
 
-    nh.getParam("cam_file", cam_file);
     nh.getParam("limb", limb);
 
     // define end-effector topic
@@ -247,6 +246,10 @@ void DataCollector::init(ros::NodeHandle nh)
 
     baxter_arm_motion_state = 0; // moving:0, stop:1, finished:2
     still_processing.data = false;
+
+    // if point cloud topic starts with 'kinect_anywhere'
+    cam_file = (file_suffix.find("kinect_anywhere") == 0) ?
+        data_dir + "/kinect_anywhere.cam" : data_dir + "/libfreenect.cam";
 
     // initialize point cloud viewers and related parameters
     std::vector<std::string> cam_param;

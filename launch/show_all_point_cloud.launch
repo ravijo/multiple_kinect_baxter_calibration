@@ -28,9 +28,10 @@ Date: 2018/02/16
     <arg name="colors" value="$(arg colors)"/>
   </include>
 
-  <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch">
-    <arg name="multiple_kinects" value="true"/>
-  </include>
+  <arg name="publish_calibration" default="false"/>
+  <group if="$(arg publish_calibration)">
+    <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch"/>
+  </group>
 
   <node pkg="rviz" type="rviz" respawn="false" name="rviz" args="-d $(find multiple_kinect_baxter_calibration)/files/show_all_pc.rviz"/>
 </launch>

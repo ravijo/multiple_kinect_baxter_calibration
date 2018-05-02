@@ -14,6 +14,7 @@ Date: 2018/02/16
   <arg name="kinect1_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
   <arg name="kinect2_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
   <arg name="kinect3_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
+  <arg name="kinect_anywhere_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
 
   <!-- left/right limb used for calibration process -->
   <arg name="limb" default="right"/>
@@ -24,6 +25,7 @@ Date: 2018/02/16
     <param name="kinect1_trajectory" value="$(arg kinect1_trajectory)"/>
     <param name="kinect2_trajectory" value="$(arg kinect2_trajectory)"/>
     <param name="kinect3_trajectory" value="$(arg kinect3_trajectory)"/>
+    <param name="kinect_anywhere_trajectory" value="$(arg kinect_anywhere_trajectory)"/>
     <param name="limb" value="$(arg limb)"/>
     <param name="wait_time" value="$(arg wait_time)"/>
   </node>
@@ -58,10 +60,6 @@ Date: 2018/02/16
   <arg name="tolerance" default="0.01"/>
   <!-- angle epsilon (delta) threshold (in degree) -->
   <arg name="epsilon" default="15"/>
-  <!-- camera file for point cloud visualization -->
-  <!-- libfreenect file = libfreenect.cam -->
-  <!-- kinect_anywhere file = kinect_anywhere.cam -->
-  <arg name="cam" default="$(find multiple_kinect_baxter_calibration)/files/libfreenect.cam"/>
   <!-- directory for saving collected data -->
   <arg name="data_dir" default="$(find multiple_kinect_baxter_calibration)/files"/>
   <!-- queue_size for subscriber -->
@@ -78,7 +76,6 @@ Date: 2018/02/16
     <param name="prob" value="$(arg prob)"/>
     <param name="tolerance" value="$(arg tolerance)"/>
     <param name="epsilon" value="$(arg epsilon)"/>
-    <param name="cam_file" value="$(arg cam)"/>
     <param name="limb" value="$(arg limb)"/>
     <param name="topic" value="$(arg topic)"/>
     <param name="data_dir" value="$(arg data_dir)"/>
