@@ -37,6 +37,9 @@ Date: 2018/04/05
     <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch"/>
   </group>
 
+  <!-- Baxter provided utility to enable robot -->
+  <node name="enable_robot" pkg="baxter_tools" type="enable_robot.py" args="-e" output="screen"/>
+
   <!-- Baxter provided utility to enable gripper buttons -->
   <node name="enable_gripper_buttons" pkg="baxter_examples" type="gripper_cuff_control.py"/>
 
