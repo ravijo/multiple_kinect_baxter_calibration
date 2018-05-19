@@ -77,6 +77,8 @@ def main():
     # load trajectories
     trajectory = np.loadtxt(trajectory_file, delimiter=',', skiprows=1)
 
+    # first three columns belong to baxter trajectories and
+    # remaining three columns belong to kinect trajectories
     baxter_traj = trajectory[:, :3]
     kinect_traj = trajectory[:, 3:]
 
