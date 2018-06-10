@@ -31,7 +31,7 @@ int default_max_h = 60, default_max_s = 200, default_max_v = 255;
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "sphere_detector_test", ros::init_options::AnonymousName);
+    ros::init(argc, argv, "sphere_detector_test_node", ros::init_options::AnonymousName);
     ros::NodeHandle nh("~");
 
     std::string package_path = ros::package::getPath("multiple_kinect_baxter_calibration");

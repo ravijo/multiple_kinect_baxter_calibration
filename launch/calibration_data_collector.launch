@@ -10,16 +10,19 @@ Date: 2018/02/16
   <!-- kinect_anywhere topic = /kinect_anywhere/point_cloud/points2 -->
   <arg name="topic" doc="topic:=/kinect1/sd/points"/>
 
+  <!-- limb used in calibration process -->
+  <arg name="limb" default="right"/>
+
+  <!-- log level parameter -->
+  <!-- it should be one of the following- Info, Debug, Warn, Error, Fatal. -->
+  <arg name="log" default="Info"/>
+
   <!-- baxter arm pre-defined trajectory for various kinect -->
   <arg name="kinect1_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
   <arg name="kinect2_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
   <arg name="kinect3_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
   <arg name="kinect_anywhere_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
 
-  <!-- left/right limb used for calibration process -->
-  <arg name="limb" default="right"/>
-  <!-- wait time to stablize arm before capturing point cloud (seconds)-->
-  <arg name="wait_time" default="2"/>
   <node name="baxter_controller" pkg="multiple_kinect_baxter_calibration" type="baxter_controller.py" output="screen">
     <param name="topic" value="$(arg topic)"/>
     <param name="kinect1_trajectory" value="$(arg kinect1_trajectory)"/>
@@ -27,7 +30,6 @@ Date: 2018/02/16
     <param name="kinect3_trajectory" value="$(arg kinect3_trajectory)"/>
     <param name="kinect_anywhere_trajectory" value="$(arg kinect_anywhere_trajectory)"/>
     <param name="limb" value="$(arg limb)"/>
-    <param name="wait_time" value="$(arg wait_time)"/>
   </node>
 
   <!-- minimum and maximum HSV values for sphere segmentation -->
@@ -42,28 +44,46 @@ Date: 2018/02/16
   # http://docs.pointclouds.org/1.7.0/group__sample__consensus.html #
   ###################################################################
   -->
+
   <!-- radius of sphere (in meter) -->
   <arg name="radius" default="0.05"/>
+
   <!-- length of stick to hold the sphere (in meter) -->
   <arg name="offset" default="0.0343"/>
+
   <!-- number of 'k' nearest neighbors to use for feature estimation -->
   <arg name="k_neighbors" default="10"/>
+
   <!-- normal angular distance weight -->
   <arg name="weight" default="0.05"/>
+
   <!-- maximum number of iterations before giving up -->
   <arg name="max_itr" default="1000"/>
+
   <!-- distance to the model threshold -->
   <arg name="d_thresh" default="0.005"/>
+
   <!-- probability of choosing at least one sample free from outliers -->
   <arg name="prob" default="0.99999"/>
+
   <!-- tolerance in radius (in meters) 1cm -->
   <arg name="tolerance" default="0.01"/>
+
   <!-- angle epsilon (delta) threshold (in degree) -->
   <arg name="epsilon" default="15"/>
-  <!-- directory for saving collected data -->
+
+  <!-- directory for saving tracking data -->
   <arg name="data_dir" default="$(find multiple_kinect_baxter_calibration)/files"/>
-  <!-- queue_size for subscriber -->
+
+  <!-- queue_size for the subscribers (lesser is better) -->
   <arg name="queue_size" default="2"/>
+
+  <!-- wait time to stablize arm before capturing point cloud (seconds)-->
+  <arg name="wait_time" default="2"/>
+
+  <!-- maximum number of samples to collect at any waypoint -->
+  <arg name="max_samples" default="5"/>
+
   <node name="data_collector" pkg="multiple_kinect_baxter_calibration" type="data_collector" output="screen">
     <param name="min_hsv" value="$(arg min_hsv)"/>
     <param name="max_hsv" value="$(arg max_hsv)"/>
@@ -80,5 +100,8 @@ Date: 2018/02/16
     <param name="topic" value="$(arg topic)"/>
     <param name="data_dir" value="$(arg data_dir)"/>
     <param name="queue_size" value="$(arg queue_size)"/>
+    <param name="wait_time" value="$(arg wait_time)"/>
+    <param name="max_samples" value="$(arg max_samples)"/>
+    <param name="log" value="$(arg log)"/>
   </node>
 </launch>

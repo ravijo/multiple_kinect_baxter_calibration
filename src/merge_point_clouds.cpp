@@ -257,7 +257,7 @@ MergePointClouds::MergePointClouds()
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "merge_point_clouds", ros::init_options::AnonymousName);
+    ros::init(argc, argv, "merge_point_clouds_node", ros::init_options::AnonymousName);
     MergePointClouds merge_point_clouds;
 
     return 0;

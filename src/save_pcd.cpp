@@ -14,12 +14,12 @@
 
 std::string package_path;
 
-void callback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& msg)
+void callback(const sensor_msgs::PointCloud2ConstPtr& msg)
 {
     ROS_INFO_STREAM("Point Cloud Received.");
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-    utility::getPointCloudFromMsg(msg, *cloud);
+    utility::getPointCloudFromMsg(*msg, *cloud);
 
     /*
     std::vector<int> indices;
@@ -60,7 +60,7 @@ void callback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& msg)
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "save_pcd", ros::init_options::AnonymousName);
+    ros::init(argc, argv, "save_pcd_node", ros::init_options::AnonymousName);
     ros::NodeHandle nh("~");
     std::string cloud_topic;
     nh.getParam("topic", cloud_topic);

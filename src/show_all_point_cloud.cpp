@@ -43,9 +43,10 @@ void ShowAllPointCloud::applyColor(pcl::PointCloud<pcl::PointXYZRGB>& cloud, uin
         cloud.points[i].rgb = *reinterpret_cast<float*>(&color);
 }
 
-void ShowAllPointCloud::callback(const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg1,
-    const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg2,
-    const boost::shared_ptr<const sensor_msgs::PointCloud2>& pc_msg3)
+void ShowAllPointCloud::callback(
+    const sensor_msgs::PointCloud2ConstPtr& pc_msg1,
+    const sensor_msgs::PointCloud2ConstPtr& pc_msg2,
+    const sensor_msgs::PointCloud2ConstPtr& pc_msg3)
 {
     ROS_DEBUG_STREAM("ShowAllPointCloud callback received");
 
@@ -53,9 +54,9 @@ void ShowAllPointCloud::callback(const boost::shared_ptr<const sensor_msgs::Poin
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud2(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud3(new pcl::PointCloud<pcl::PointXYZRGB>);
 
-    utility::getPointCloudFromMsg(pc_msg1, *cloud1);
-    utility::getPointCloudFromMsg(pc_msg2, *cloud2);
-    utility::getPointCloudFromMsg(pc_msg3, *cloud3);
+    utility::getPointCloudFromMsg(*pc_msg1, *cloud1);
+    utility::getPointCloudFromMsg(*pc_msg2, *cloud2);
+    utility::getPointCloudFromMsg(*pc_msg3, *cloud3);
 
     applyColor(*cloud1, red_color);
     applyColor(*cloud2, green_color);
@@ -112,7 +113,7 @@ ShowAllPointCloud::ShowAllPointCloud()
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "show_all_point_cloud", ros::init_options::AnonymousName);
+    ros::init(argc, argv, "show_all_point_cloud_node", ros::init_options::AnonymousName);
     ShowAllPointCloud show_all_point_cloud;
 
     return 0;

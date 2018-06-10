@@ -39,10 +39,8 @@ void mouseEventOccurred(const pcl::visualization::MouseEvent& event, void* viewe
         ROS_INFO_STREAM("Left mouse button released at position (" << event.getX() << ", "
                                                                    << event.getY() << ")");
 
-        pcl::visualization::PCLVisualizer* viewer
-            = static_cast<pcl::visualization::PCLVisualizer*>(viewer_void);
-        std::string text = "2D (" + utility::to_string(event.getX()) + ", "
-            + utility::to_string(event.getY()) + ")";
+        pcl::visualization::PCLVisualizer* viewer = static_cast<pcl::visualization::PCLVisualizer*>(viewer_void);
+        std::string text = "2D (" + utility::to_string(event.getX()) + ", " + utility::to_string(event.getY()) + ")";
         viewer->addText(text, event.getX(), event.getY(), 20, 1, 1, 0, text);
     }
 }
@@ -59,10 +57,8 @@ void pointPickingEventOccurred(
     ROS_INFO_STREAM("Point picking event occurred. Point index=" << index << " coordinate ( " << x
                                                                  << ", " << y << ", " << z << ")");
 
-    pcl::visualization::PCLVisualizer* viewer
-        = static_cast<pcl::visualization::PCLVisualizer*>(viewer_void);
-    std::string text = "3D (" + utility::to_string(x) + ", " + utility::to_string(y) + ", "
-        + utility::to_string(z) + ")";
+    pcl::visualization::PCLVisualizer* viewer = static_cast<pcl::visualization::PCLVisualizer*>(viewer_void);
+    std::string text = "3D (" + utility::to_string(x) + ", " + utility::to_string(y) + ", " + utility::to_string(z) + ")";
 
     pcl::PointXYZ point(x, y, z);
     viewer->addText3D(text, point, 0.08, 1, 0, 0, text);
@@ -113,6 +109,7 @@ int main(int argc, char** argv)
         // if source is 'Linux'
         cam_file = package_path + "/files/libfreenect.cam";
     }
+
     ROS_INFO_STREAM("cam_file is '" << cam_file << "'");
 
     pcl::visualization::Camera camera;

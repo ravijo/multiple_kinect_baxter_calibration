@@ -18,12 +18,25 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   cv_bridge
   cmake_modules
+  genmsg
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(PCL REQUIRED)
 find_package(Eigen REQUIRED)
 find_package(OpenCV REQUIRED)
+
+## Declare ROS services in the 'srv' folder
+add_service_files(
+  FILES
+  move_arm_to_waypoint.srv
+)
+
+## Generate added services
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ## catkin specific configuration
 catkin_package(
@@ -56,58 +69,69 @@ target_link_libraries(${PROJECT_NAME}_sphere_detector
   ${catkin_LIBRARIES}
 )
 
-## Declare executables and link against libraries
-add_executable(sphere_detector_test src/sphere_detector_test.cpp)
+## Build executables and link against libraries
+add_executable(sphere_detector_test
+  src/sphere_detector_test.cpp)
 target_link_libraries(sphere_detector_test
   ${PROJECT_NAME}_sphere_detector
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )
 
-add_executable(data_collector src/data_collector.cpp)
+add_executable(data_collector
+  src/data_collector.cpp)
 target_link_libraries(data_collector
   ${PROJECT_NAME}_sphere_detector
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )
+add_dependencies(data_collector
+  multiple_kinect_baxter_calibration_generate_messages_cpp)
 
-add_executable(save_pcd src/save_pcd.cpp)
+add_executable(save_pcd
+  src/save_pcd.cpp)
 target_link_libraries(save_pcd
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )
 
-add_executable(view_cloud_realtime src/view_cloud_realtime.cpp)
+add_executable(view_cloud_realtime
+  src/view_cloud_realtime.cpp)
 target_link_libraries(view_cloud_realtime
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )
 
-add_executable(show_all_point_cloud src/show_all_point_cloud.cpp)
+add_executable(show_all_point_cloud
+  src/show_all_point_cloud.cpp)
 target_link_libraries(show_all_point_cloud
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )
 
-add_executable(merge_point_clouds src/merge_point_clouds.cpp)
+add_executable(merge_point_clouds
+  src/merge_point_clouds.cpp)
 target_link_libraries(merge_point_clouds
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )
 
-add_executable(view_image src/view_image.cpp)
+add_executable(view_image
+  src/view_image.cpp)
 target_link_libraries(view_image
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )
 
-add_executable(segment_image src/segment_image.cpp)
+add_executable(segment_image
+  src/segment_image.cpp)
 target_link_libraries(segment_image
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )
 
-add_executable(view_pcd src/view_pcd.cpp)
+add_executable(view_pcd
+  src/view_pcd.cpp)
 target_link_libraries(view_pcd
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}

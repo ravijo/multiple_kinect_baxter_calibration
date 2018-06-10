@@ -99,9 +99,7 @@ bool SphereDetector::getBoundingRect(cv::Mat image, cv::Rect& bound_rect)
         return true;
     }
     else
-    {
         return false;
-    }
 }
 
 bool SphereDetector::convertMouseCoordsTo3DPC(vtkRenderWindowInteractor* iren,
@@ -212,8 +210,10 @@ void SphereDetector::get3DMinMaxRange(pcl::visualization::PCLVisualizer* viewer,
     max_3d(3) = 1;
 }
 
-void SphereDetector::crop(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in,
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr out, Eigen::Vector4f& min, Eigen::Vector4f& max)
+void SphereDetector::crop(
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr in,
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr out,
+    Eigen::Vector4f& min, Eigen::Vector4f& max)
 {
     box_filter.setMin(min);
     box_filter.setMax(max);
@@ -237,12 +237,12 @@ bool SphereDetector::validateDetection(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cl
 
     cv::Vec3b avg_hsv = utility::rgb_to_hsv_pixel(avg_r, avg_g, avg_b);
 
-    bool in_between = true;
+    bool all_channel_in_between = true;
     for (size_t i = 0; i < 3; i++)
-        in_between
-            = in_between && between(avg_hsv.val[i], min_hsv_ptr->val[i], max_hsv_ptr->val[i]);
+        all_channel_in_between = all_channel_in_between &&
+        between(avg_hsv.val[i], min_hsv_ptr->val[i], max_hsv_ptr->val[i]);
 
-    return in_between;
+    return all_channel_in_between;
 }
 
 bool SphereDetector::segmentSphere(pcl::visualization::PCLVisualizer* viewer,

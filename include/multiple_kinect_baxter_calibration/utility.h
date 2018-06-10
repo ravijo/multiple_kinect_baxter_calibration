@@ -186,7 +186,7 @@ cv::Mat getImageFromPCLViewer(pcl::visualization::PCLVisualizer* viewer)
     return bgr_image;
 }
 
-void getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg,
+void getPointCloudFromMsg(const sensor_msgs::PointCloud2 &msg,
     pcl::PointCloud<pcl::PointXYZRGB>& cloud, float min_z = 0.5, float max_z = 5.0)
 {
     pcl::PCLPointCloud2 pcl_pc2;
@@ -198,7 +198,7 @@ void getPointCloudFromMsg(sensor_msgs::PointCloud2ConstPtr msg,
      * assumes that incoming point cloud is 'rgba' and it converts it to 'rgb'
      * to further use
      */
-    pcl_conversions::toPCL(*msg, pcl_pc2);
+    pcl_conversions::toPCL(msg, pcl_pc2);
     pcl::fromPCLPointCloud2(pcl_pc2, temp_cloud);
     removeNanAndConvertPointCloudToRGB(temp_cloud, cloud, min_z, max_z);
 }
