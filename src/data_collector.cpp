@@ -30,7 +30,7 @@
 #include "multiple_kinect_baxter_calibration/move_arm_to_waypoint.h"
 
 // name for 'move_arm_to_waypoint' service
-#define MOVE_ARM_SERVICE "move_arm_to_waypoint"
+#define MOVE_ARM_SERVICE "/move_arm_to_waypoint"
 
 class DataCollector
 {
@@ -185,6 +185,11 @@ void DataCollector::saveTrackingData()
 // returns true: if tracking is successfull, false otherwise
 bool DataCollector::processLatestData()
 {
+    // return if we haven't received the data yet
+    // source: https://stackoverflow.com/a/5610531/1175065
+    if(!pc_msg_ptr || !ee_msg_ptr)
+        return false;
+
     // create point cloud and end-effector objects retrieved from
     // respective boost::shared_ptr. our assumption is that the stored
     // point cloud and end-effector messages belong to the
@@ -443,9 +448,9 @@ DataCollector::DataCollector()
     ros::spinOnce();
 
     // wait for the 'move_arm_to_waypoint' service to be advertised
-    ros::service::waitForService(MOVE_ARM_SERVICE);
+    ros::service::waitForService(MOVE_ARM_SERVICE, ros::Duration(-1));
 
-    //  create a client for the 'move_arm_to_waypoint' service
+    //  creates a client for the 'move_arm_to_waypoint' service
     ros::ServiceClient move_arm = nh.serviceClient<multiple_kinect_baxter_calibration::move_arm_to_waypoint>(MOVE_ARM_SERVICE);
 
     // keep running in an infinite loop
@@ -495,10 +500,11 @@ DataCollector::DataCollector()
       // start processing the latest point cloud
       // grab the latest point cloud. repeat it 'max_samples' times
       for (size_t i = 0; i < max_samples; i++)
-          bool status = processLatestData();
-
-      // call all the callbacks
-      ros::spinOnce();
+      {
+        bool status = processLatestData();
+        // call all the callbacks
+        ros::spinOnce();
+      }
     }
 }
 
@@ -507,7 +513,7 @@ int main(int argc, char** argv)
     // create ros node with random suffix
     ros::init(argc, argv, "data_collector_node", ros::init_options::AnonymousName);
 
-    // create an instance of 'DataCollector'
+    // create and instance of 'DataCollector'
     DataCollector dc;
 
     return 0;

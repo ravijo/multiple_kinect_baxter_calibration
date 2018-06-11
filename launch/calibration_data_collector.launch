@@ -76,7 +76,7 @@ Date: 2018/02/16
   <arg name="data_dir" default="$(find multiple_kinect_baxter_calibration)/files"/>
 
   <!-- queue_size for the subscribers (lesser is better) -->
-  <arg name="queue_size" default="2"/>
+  <arg name="queue_size" default="1"/>
 
   <!-- wait time to stablize arm before capturing point cloud (seconds)-->
   <arg name="wait_time" default="2"/>

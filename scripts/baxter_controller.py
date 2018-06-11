@@ -34,7 +34,7 @@ class BaxterController():
 
     def handle_move_arm_to_waypoint(self, request):
         # check if the trajectory finished
-        trajectory_finished = self.trajectory_index >= self.trajectory.shape[0]:
+        trajectory_finished = self.trajectory_index >= self.trajectory.shape[0]
 
         # if trajectory isn't finished
         if not trajectory_finished:
@@ -45,7 +45,10 @@ class BaxterController():
             joint_command = dict(zip(self.joint_names, joint_values))
 
             # move the limb to given joint angle
-            self.limb.move_to_joint_positions(joint_command)
+            try:
+                self.limb.move_to_joint_positions(joint_command)
+            except ROSException:
+                pass
 
             # increment the counter
             self.trajectory_index += 1

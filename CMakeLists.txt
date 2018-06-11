@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(multiple_kinect_baxter_calibration)
 
-## Add support for C++11, supported in ROS Kinetic and newer
+## Add support for C++11
 # add_definitions(-std=c++11)
 
 ## Find catkin macros and libraries
@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   cv_bridge
   cmake_modules
-  genmsg
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -86,7 +86,7 @@ target_link_libraries(data_collector
   ${catkin_LIBRARIES}
 )
 add_dependencies(data_collector
-  multiple_kinect_baxter_calibration_generate_messages_cpp)
+  multiple_kinect_baxter_calibration_gencpp)
 
 add_executable(save_pcd
   src/save_pcd.cpp)
