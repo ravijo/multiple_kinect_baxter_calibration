@@ -501,9 +501,9 @@ DataCollector::DataCollector()
       // grab the latest point cloud. repeat it 'max_samples' times
       for (size_t i = 0; i < max_samples; i++)
       {
-        bool status = processLatestData();
         // call all the callbacks
         ros::spinOnce();
+        bool status = processLatestData();
       }
     }
 }
