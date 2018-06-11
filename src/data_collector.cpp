@@ -445,7 +445,7 @@ DataCollector::DataCollector()
     // wait for the 'move_arm_to_waypoint' service to be advertised
     ros::service::waitForService(MOVE_ARM_SERVICE);
 
-    //  creates a client for the 'move_arm_to_waypoint' service
+    //  create a client for the 'move_arm_to_waypoint' service
     ros::ServiceClient move_arm = nh.serviceClient<multiple_kinect_baxter_calibration::move_arm_to_waypoint>(MOVE_ARM_SERVICE);
 
     // keep running in an infinite loop
@@ -507,7 +507,7 @@ int main(int argc, char** argv)
     // create ros node with random suffix
     ros::init(argc, argv, "data_collector_node", ros::init_options::AnonymousName);
 
-    // create and instance of 'DataCollector'
+    // create an instance of 'DataCollector'
     DataCollector dc;
 
     return 0;
