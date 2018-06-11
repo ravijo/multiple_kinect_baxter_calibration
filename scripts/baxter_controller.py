@@ -24,7 +24,7 @@ class BaxterController():
 
         # store the joint names since
         # it will be used later while commanding the limb
-        self.joint_names = limb.joint_names()
+        self.joint_names = self.limb.joint_names()
 
         # define a service called 'move_arm_to_waypoint'
         service = rospy.Service('move_arm_to_waypoint', move_arm_to_waypoint, self.handle_move_arm_to_waypoint)
