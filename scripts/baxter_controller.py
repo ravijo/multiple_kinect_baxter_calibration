@@ -34,7 +34,7 @@ class BaxterController():
 
     def handle_move_arm_to_waypoint(self, request):
         # check if the trajectory finished
-        trajectory_finished = self.trajectory_index >= self.trajectory.shape[0]:
+        trajectory_finished = self.trajectory_index >= self.trajectory.shape[0]
 
         # if trajectory isn't finished
         if not trajectory_finished:
