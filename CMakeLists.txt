@@ -27,9 +27,6 @@ find_package(OpenCV REQUIRED)
 
 ## catkin specific configuration
 catkin_package(
-#  INCLUDE_DIRS ...
-#  LIBRARIES ...
-#  CATKIN_DEPENDS
   DEPENDS Eigen
 )
 
