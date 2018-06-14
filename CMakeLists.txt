@@ -18,25 +18,12 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   cv_bridge
   cmake_modules
-  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(PCL REQUIRED)
 find_package(Eigen REQUIRED)
 find_package(OpenCV REQUIRED)
-
-## Declare ROS services in the 'srv' folder
-add_service_files(
-  FILES
-  move_arm_to_waypoint.srv
-)
-
-## Generate added services
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
 
 ## catkin specific configuration
 catkin_package(
@@ -85,8 +72,6 @@ target_link_libraries(data_collector
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )
-add_dependencies(data_collector
-  multiple_kinect_baxter_calibration_gencpp)
 
 add_executable(save_pcd
   src/save_pcd.cpp)

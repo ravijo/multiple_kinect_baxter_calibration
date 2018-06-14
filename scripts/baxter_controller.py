@@ -8,8 +8,8 @@
 # import modules
 import rospy
 import numpy as np
+import std_srvs.srv
 from baxter_interface import Limb
-from multiple_kinect_baxter_calibration.srv import move_arm_to_waypoint
 
 class BaxterController():
     def __init__(self, limb_name, trajectory):
@@ -27,12 +27,27 @@ class BaxterController():
         self.joint_names = self.limb.joint_names()
 
         # define a service called 'move_arm_to_waypoint'
-        service = rospy.Service('move_arm_to_waypoint', move_arm_to_waypoint, self.handle_move_arm_to_waypoint)
+        self.service = rospy.Service('move_arm_to_waypoint', std_srvs.srv.Trigger, self.handle_move_arm_to_waypoint)
 
+        # flag to set when trajectory is  finished
+        self.trajectory_finished = False
+
+    def spin(self):
         # let the ros stay awake and serve the request
-        rospy.spin()
+        rate = rospy.Rate(10)
+        while not rospy.is_shutdown() and not self.trajectory_finished:
+            rate.sleep()
+
+        # give some time so that the service request returns if any
+        rospy.sleep(1)
+        self.service.shutdown()
+        rospy.logdebug('Shutting down the baxter controller node')
+        rospy.signal_shutdown('User requested')
 
     def handle_move_arm_to_waypoint(self, request):
+        # create a response object for the trigger service
+        response = std_srvs.srv.TriggerResponse()
+
         # check if the trajectory finished
         trajectory_finished = self.trajectory_index >= self.trajectory.shape[0]
 
@@ -41,18 +56,24 @@ class BaxterController():
             # get the latest joint values from given trajectory
             joint_values = trajectory[self.trajectory_index, :]
 
-            # create a dictionary of joint names and values
-            joint_command = dict(zip(self.joint_names, joint_values))
+            # create command, i.e., a dictionary of joint names and values
+            command = dict(zip(self.joint_names, joint_values))
 
             # move the limb to given joint angle
             try:
-                self.limb.move_to_joint_positions(joint_command)
+                self.limb.move_to_joint_positions(command)
+                response.message = 'Successfully moved arm to the following waypoint %s' % command
             except ROSException:
-                pass
+                response.message = 'Error while moving arm to the following waypoint %s' % command
 
             # increment the counter
             self.trajectory_index += 1
-        return trajectory_finished
+        else:
+            response.message = 'Arm trajectory is finished already'
+
+        response.success = trajectory_finished
+        self.trajectory_finished = trajectory_finished
+        return response
 
 # get the sensor_name as the first word between two leftmost slash chacters
 def get_sensor_name(topic):
@@ -86,4 +107,5 @@ if __name__ == '__main__':
     if not all(x.startswith(limb) for x in header):
         rospy.logerr("Provided limb '%s' doesn't match with trajectory file. Trajectory file: \n'%s'" % (limb, file_name))
     else:
-        BaxterController(limb, trajectory)
+        controller = BaxterController(limb, trajectory)
+        controller.spin()

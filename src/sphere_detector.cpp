@@ -7,7 +7,7 @@
 #include <utility.h>
 #include <sphere_detector.h>
 
-namespace pcl_project
+namespace pcl_utility
 {
 SphereDetector::SphereDetector(float sphere_radius, std::vector<int>* min_hsv,
     std::vector<int>* max_hsv, RansacParams* ransac_params, int overflow_offset)

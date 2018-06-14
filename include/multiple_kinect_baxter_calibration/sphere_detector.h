@@ -28,7 +28,7 @@
 #include <vtkPointPicker.h>
 #include <vtkRenderWindowInteractor.h>
 
-namespace pcl_project
+namespace pcl_utility
 {
 class RansacParams
 {

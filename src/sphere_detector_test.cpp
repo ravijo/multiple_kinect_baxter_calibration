@@ -134,7 +134,7 @@ int main(int argc, char** argv)
     max_hsv_values[2] = max_v;
 
     // use default params
-    pcl_project::RansacParams ransac_params;
+    pcl_utility::RansacParams ransac_params;
     ransac_params.prob = 0.99999;
     ransac_params.tolerance = 0.01;
 
@@ -149,7 +149,7 @@ int main(int argc, char** argv)
      ransac_params.epsilon = epsilon;
      */
 
-    pcl_project::SphereDetector sphereDetector(
+    pcl_utility::SphereDetector sphereDetector(
         sphere_radius, &min_hsv_values, &max_hsv_values, &ransac_params);
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);

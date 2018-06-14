@@ -26,11 +26,14 @@
 // vtk header
 #include <vtkCamera.h>
 
-// header file for 'move_arm_to_waypoint' service
-#include "multiple_kinect_baxter_calibration/move_arm_to_waypoint.h"
+// we are using trigger service for implementing 'move_arm_to_waypoint' service
+#include <std_srvs/Trigger.h>
 
 // name for 'move_arm_to_waypoint' service
 #define MOVE_ARM_SERVICE "/move_arm_to_waypoint"
+
+// for thread related support
+#include <boost/thread.hpp>
 
 class DataCollector
 {
@@ -40,6 +43,20 @@ private:
 
     // maximum number of samples at any waypoint
     int max_samples;
+
+    // service for moving baxter arm to waypoint
+    ros::ServiceClient move_arm;
+
+    // ros node handle
+    ros::NodeHandle nh;
+
+    // ros asynchronous spinner. instead of a blocking spin() call,
+    // it has start() and stop() calls.
+    boost::shared_ptr<ros::AsyncSpinner> spinner;
+
+    // various subscribers
+    ros::Subscriber point_cloud_sub;
+    ros::Subscriber baxter_arm_sub;
 
     // wait time to stablize arm before capturing point cloud (seconds)
     ros::Duration wait_duration;
@@ -51,7 +68,7 @@ private:
     pcl::visualization::Camera camera;
 
     // pointer to sphere detector library
-    pcl_project::SphereDetector* sphere_detector;
+    boost::shared_ptr<pcl_utility::SphereDetector> sphere_detector;
 
     // various tracking data
     // position_wrt_baxter: position of the shpere w.r.t. baxter
@@ -75,7 +92,7 @@ private:
     void saveTrackingData();
 
     // initialization of various parameter etc.
-    void init(ros::NodeHandle nh);
+    void init();
 
     // set log level of ros node
     void setLoggerLevel(std::string level);
@@ -101,6 +118,9 @@ private:
 public:
     // default constructor
     DataCollector();
+
+    // main function
+    void spin();
 };
 
 // function to record the sphere center w.r.t. baxter
@@ -155,7 +175,9 @@ void DataCollector::baxterEECallback(const baxter_core_msgs::EndpointStateConstP
 {
     // store boost::shared_ptr pointer of latest received data
     ee_msg_ptr = ee_msg;
-    ROS_DEBUG_STREAM("Callback received: end-effector data");
+
+    // print single message after 2 seconds (to keep the terminal cleaner)
+    ROS_DEBUG_THROTTLE(2, "Callback received: end-effector data");
 }
 
 // callback function for point cloud
@@ -163,7 +185,9 @@ void DataCollector::pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& p
 {
     // store boost::shared_ptr pointer of latest received data
     pc_msg_ptr = pc_msg;
-    ROS_DEBUG_STREAM("Callback received: point cloud data");
+
+    // print single message after 2 seconds (to keep the terminal cleaner)
+    ROS_DEBUG_THROTTLE(2, "Callback received: point cloud data");
 }
 
 // function to save the tracking data into a csv file
@@ -293,7 +317,7 @@ void DataCollector::setLoggerLevel(std::string level)
 }
 
 // initialization of various parameter etc.
-void DataCollector::init(ros::NodeHandle nh)
+void DataCollector::init()
 {
     // length of stick to hold the sphere (in meter)
     float offset;
@@ -365,8 +389,8 @@ void DataCollector::init(ros::NodeHandle nh)
     std::vector<int> max_hsv_values = utility::stringToArray(max_hsv);
 
     // initialize sphere detector
-    pcl_project::RansacParams ransac_params(k_neighbors, max_itr, weight, d_thresh, prob, tolerance, epsilon);
-    sphere_detector = new pcl_project::SphereDetector(sphere_radius, &min_hsv_values, &max_hsv_values, &ransac_params);
+    pcl_utility::RansacParams ransac_params(k_neighbors, max_itr, weight, d_thresh, prob, tolerance, epsilon);
+    sphere_detector.reset(new pcl_utility::SphereDetector(sphere_radius, &min_hsv_values, &max_hsv_values, &ransac_params));
 
     // considering no rotation in 't_sphere_wrt_ee 'transformation matrix
     t_sphere_wrt_ee.setIdentity();
@@ -410,6 +434,72 @@ void DataCollector::init(ros::NodeHandle nh)
         setWindowPosition(i);
 }
 
+// let the ROS stay awake and we collect the data
+void DataCollector::spin()
+{
+    // make sure we have the data. so we need to start the spinner
+    spinner->start();
+
+    // wait for the 'move_arm_to_waypoint' service to be advertised
+    ROS_DEBUG_STREAM("Waiting for service " << MOVE_ARM_SERVICE);
+    ros::service::waitForService(MOVE_ARM_SERVICE, ros::Duration(-1));
+
+    // create a client for the 'move_arm_to_waypoint' service
+    ROS_DEBUG_STREAM("Creating client for service " << MOVE_ARM_SERVICE);
+    move_arm = nh.serviceClient<std_srvs::Trigger>(MOVE_ARM_SERVICE);
+
+    // keep running in an infinite loop
+    // exit only when trajectory is finished
+    while (ros::ok())
+    {
+        // -------------------------------------------------------------------- //
+        // ------------------------------ STEP 1 ------------------------------ //
+        // -------------------------------------------------------------------- //
+        // move the baxter arm and wait for the arm to stop
+        std_srvs::Trigger service;
+
+        // call the service and wait for it. call again if failed
+        if (!move_arm.call(service))
+        {
+            ROS_ERROR_STREAM("Failed to call service " << MOVE_ARM_SERVICE);
+            continue;
+        }
+
+        // the service has returned successfully
+        bool trajectory_finished = service.response.success;
+        ROS_DEBUG_STREAM("Service " << MOVE_ARM_SERVICE << " has returned successfully with the following message " << service.response.message);
+
+        // exit and save the tracking data if the trajectory is finished
+        if (trajectory_finished)
+        {
+            // throw error if we couldn't track the sphere even once, save otherwise
+            if (position_wrt_camera.empty())
+                ROS_ERROR_STREAM("Couldn't record any data. Run the program again.");
+            else
+                saveTrackingData();
+
+            // stop the node by giving a message
+            ROS_INFO_STREAM("Exiting now...");
+            ros::shutdown();
+            break;
+        }
+
+        // -------------------------------------------------------------------- //
+        // ------------------------------ STEP 2 ------------------------------ //
+        // -------------------------------------------------------------------- //
+        // wait for a while so that the baxter arm stops shaking
+        wait_duration.sleep();
+
+        // -------------------------------------------------------------------- //
+        // ------------------------------ STEP 3 ------------------------------ //
+        // -------------------------------------------------------------------- //
+        // start processing the latest point cloud
+        // grab the latest point cloud. repeat it 'max_samples' times
+        for (size_t i = 0; i < max_samples; i++)
+            bool status = processLatestData();
+    }
+}
+
 // function for setting the positions of visualizers
 void DataCollector::setWindowPosition(int index)
 {
@@ -435,77 +525,33 @@ void DataCollector::setWindowPosition(int index)
 // default constructor
 DataCollector::DataCollector()
 {
-    ros::NodeHandle nh("~");
+    // assign nodehandle with relative namespace
+    nh = ros::NodeHandle("~");
 
     // initialize of the parameter
-    init(nh);
+    init();
 
     // create subscriber for the point cloud data and end-effector pose
-    ros::Subscriber point_cloud_sub = nh.subscribe(pc_topic, queue_size, &DataCollector::pointCloudCallback, this);
-    ros::Subscriber baxter_arm_sub = nh.subscribe(ee_topic, queue_size, &DataCollector::baxterEECallback, this);
+    point_cloud_sub = nh.subscribe(pc_topic, queue_size, &DataCollector::pointCloudCallback, this);
+    baxter_arm_sub = nh.subscribe(ee_topic, queue_size, &DataCollector::baxterEECallback, this);
 
-    // make sure we have the data. so we need to call all the callbacks
-    ros::spinOnce();
+    // get the concurrent hardware thread count
+    unsigned int spported_threads = boost::thread::hardware_concurrency();
+    ROS_DEBUG_STREAM("Number of heardware supported threads for this CPU is " << spported_threads);
 
-    // wait for the 'move_arm_to_waypoint' service to be advertised
-    ros::service::waitForService(MOVE_ARM_SERVICE, ros::Duration(-1));
+    // we need one thread for point cloud data subscriber and
+    // another thread for end-effector data subscriber
+    int desired_threads = 2;
 
-    //  creates a client for the 'move_arm_to_waypoint' service
-    ros::ServiceClient move_arm = nh.serviceClient<multiple_kinect_baxter_calibration::move_arm_to_waypoint>(MOVE_ARM_SERVICE);
+    // show warning to user
+    if(desired_threads > spported_threads)
+        ROS_WARN_STREAM("It is suggested to upgrade your CPU for better performance");
+    else
+        ROS_DEBUG_STREAM("Initializing " << desired_threads << " threads");
 
-    // keep running in an infinite loop
-    // exit only when trajectory is finished
-    while (ros::ok())
-    {
-      // -------------------------------------------------------------------- //
-      // ------------------------------ STEP 1 ------------------------------ //
-      // -------------------------------------------------------------------- //
-      // move the baxter arm and wait for the arm to stop
-      multiple_kinect_baxter_calibration::move_arm_to_waypoint service;
-
-      // call the service and wait for it. call again if failed
-      if (!move_arm.call(service))
-      {
-          ROS_ERROR_STREAM("Failed to call service " << MOVE_ARM_SERVICE);
-          continue;
-      }
-
-      // the service has returned successfully
-      bool trajectory_finished = service.response.trajectory_finished;
-
-      // exit and save the tracking data if the trajectory is finished
-      if (trajectory_finished)
-      {
-        // throw error if we couldn't track the sphere even once, save otherwise
-        if (position_wrt_camera.empty())
-            ROS_ERROR_STREAM("Couldn't record any data. Run the program again.");
-        else
-            saveTrackingData();
-
-        // stop the node by giving a message
-        ROS_INFO_STREAM("Exiting now...");
-        ros::shutdown();
-        break;
-      }
-
-      // -------------------------------------------------------------------- //
-      // ------------------------------ STEP 2 ------------------------------ //
-      // -------------------------------------------------------------------- //
-      // wait for a while so that the baxter arm stops shaking
-      wait_duration.sleep();
-
-      // -------------------------------------------------------------------- //
-      // ------------------------------ STEP 3 ------------------------------ //
-      // -------------------------------------------------------------------- //
-      // start processing the latest point cloud
-      // grab the latest point cloud. repeat it 'max_samples' times
-      for (size_t i = 0; i < max_samples; i++)
-      {
-        // call all the callbacks
-        ros::spinOnce();
-        bool status = processLatestData();
-      }
-    }
+    // lazy initialization for boost::shared_ptr
+    // source: https://stackoverflow.com/a/12997218/1175065
+    spinner.reset(new ros::AsyncSpinner(desired_threads));
 }
 
 int main(int argc, char** argv)
@@ -515,6 +561,7 @@ int main(int argc, char** argv)
 
     // create and instance of 'DataCollector'
     DataCollector dc;
+    dc.spin();
 
     return 0;
 }
