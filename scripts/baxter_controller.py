@@ -29,7 +29,7 @@ class BaxterController():
         # define a service called 'move_arm_to_waypoint'
         self.service = rospy.Service('move_arm_to_waypoint', std_srvs.srv.Trigger, self.handle_move_arm_to_waypoint)
 
-        # flag to set when trajectory is  finished
+        # flag to set when trajectory is finished
         self.trajectory_finished = False
 
     def spin(self):
@@ -38,7 +38,7 @@ class BaxterController():
         while not rospy.is_shutdown() and not self.trajectory_finished:
             rate.sleep()
 
-        # give some time so that the service request returns if any
+        # wait some time before stopping the node so that the service request returns if any
         rospy.sleep(1)
         self.service.shutdown()
         rospy.logdebug('Shutting down the baxter controller node')
@@ -71,7 +71,11 @@ class BaxterController():
         else:
             response.message = 'Arm trajectory is finished already'
 
+        # set the success parameter of the response object
         response.success = trajectory_finished
+
+        # set the flag just before returning from the function so that it is 
+        # almost certain that the service request is returned successfully
         self.trajectory_finished = trajectory_finished
         return response
 
