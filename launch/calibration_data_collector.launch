@@ -84,6 +84,12 @@ Date: 2018/02/16
   <!-- maximum number of samples to collect at any waypoint -->
   <arg name="max_samples" default="5"/>
 
+  <!-- minimum z coordinate value of point cloud w.r.t. camera -->
+  <arg name="min_z" default="0.5"/>
+
+  <!-- maximum z coordinate value of point cloud w.r.t. camera -->
+  <arg name="max_z" default="5.0"/>
+
   <node name="data_collector" pkg="multiple_kinect_baxter_calibration" type="data_collector" output="screen">
     <param name="min_hsv" value="$(arg min_hsv)"/>
     <param name="max_hsv" value="$(arg max_hsv)"/>
@@ -102,6 +108,8 @@ Date: 2018/02/16
     <param name="queue_size" value="$(arg queue_size)"/>
     <param name="wait_time" value="$(arg wait_time)"/>
     <param name="max_samples" value="$(arg max_samples)"/>
+    <param name="min_z" value="$(arg min_z)"/>
+    <param name="max_z" value="$(arg max_z)"/>
     <param name="log" value="$(arg log)"/>
   </node>
 </launch>

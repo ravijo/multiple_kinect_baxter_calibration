@@ -44,6 +44,9 @@ private:
     // maximum number of samples at any waypoint
     int max_samples;
 
+    // minimum and maximum z coordinate value of point cloud w.r.t. camera
+    float min_z, max_z;
+
     // service for moving baxter arm to waypoint
     ros::ServiceClient move_arm;
 
@@ -227,7 +230,7 @@ bool DataCollector::processLatestData()
 
     // convert sensor_msgs::PointCloud2 to pcl::PointCloud
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-    utility::getPointCloudFromMsg(pc_msg, *cloud);
+    utility::getPointCloudFromMsg(pc_msg, *cloud, min_z, max_z);
 
     // show the caputed point cloud
     if (!pc_viewers.at(0)->updatePointCloud(cloud, "cloud"))
@@ -379,6 +382,10 @@ void DataCollector::init()
     nh.getParam("log", level);
     setLoggerLevel(level);
 
+    // minimum and maximum z coordinate value of point cloud w.r.t. camera
+    nh.getParam("min_z", min_z);
+    nh.getParam("max_z", max_z);
+
     // get the sensor_name as the first word between two leftmost slash chacters
     std::vector<int> all_slash = utility::find_all(pc_topic, "/");
     sensor_name = pc_topic.substr(all_slash[0] + 1, all_slash[1] - 1);
@@ -495,8 +502,13 @@ void DataCollector::spin()
         // -------------------------------------------------------------------- //
         // start processing the latest point cloud
         // grab the latest point cloud. repeat it 'max_samples' times
+        int success_count = 0;
         for (size_t i = 0; i < max_samples; i++)
-            bool status = processLatestData();
+        {
+          bool status = processLatestData();
+          success_count += status; //divide by sizeof(bool)
+        }
+        ROS_INFO_STREAM("Successfully detected sphere " << success_count << " times out of " << max_samples);
     }
 }
 
