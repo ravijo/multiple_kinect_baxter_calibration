@@ -60,25 +60,67 @@ roslaunch multiple_kinect_baxter_calibration calibration_compute.launch kinect:=
 roslaunch multiple_kinect_baxter_calibration calibration_publisher.launch calibration:="[kinect2]"
 ```
 
+## Other utility files
+### view_cloud_realtime
+To view the point cloud data in real-time
+```
+rosrun multiple_kinect_baxter_calibration view_cloud_realtime _topic:="/kinect2/sd/points"
+```
+### save_pcd
+To save the point cloud data in a PCD file
+```
+rosrun multiple_kinect_baxter_calibration save_pcd _topic:="/kinect2/sd/points"
+```
+### view_pcd
+To visualize the stored point cloud file
+```
+rosrun multiple_kinect_baxter_calibration view_pcd _file:=scene.pcd
+```
+Please press <kbd>j</kbd> to take screenshot of the current scene.
 
+### segment_image
+To find out the HSV range of the colored marker in the image
+```
+rosrun multiple_kinect_baxter_calibration segment_image _file:=scene.jpg
+```
+### view_image
+To find out the RGB and HSV value of any pixel in the image
 ```
 rosrun multiple_kinect_baxter_calibration view_image _file:=scene.jpg
-rosrun multiple_kinect_baxter_calibration view_cloud _file:=scene.pcd
-rosrun multiple_kinect_baxter_calibration save_pcd _topic:="/kinect1/sd/points"
-rosrun multiple_kinect_baxter_calibration view_cloud_realtime _topic:="/kinect1/sd/points"
-rosrun multiple_kinect_baxter_calibration sphere_detector_test
+```
+## sphere_detector_test
+To test whether sphere segmentation is working or not
+```
+rosrun multiple_kinect_baxter_calibration sphere_detector_test _file:=scene.pcd
+```
+
+## For three Kinects running on iai_kinect2
+1. Initilize project and start all the kinects
+```
+roslaunch multiple_kinect_baxter_calibration init.launch
+```
+2. Collect the data for `kinect1`
+```
 roslaunch multiple_kinect_baxter_calibration calibration_data_collector.launch topic:=/kinect1/sd/points
+```
+3. Compute the calibration for `kinect1`
+```
 roslaunch multiple_kinect_baxter_calibration calibration_compute.launch kinect:=kinect1
+```
+4. Repeate steps 2 and 3 for `kinect2` and `kinect3`
+5. Publish the calibration data
+```
 roslaunch multiple_kinect_baxter_calibration calibration_publisher.launch calibration:="[kinect1, kinect2, kinect3]"
 ```
-For kinect_anywhere
+
+## For kinect_anywhere
 ```
 roslaunch kinect_anywhere kinect_anywhere.launch color:=false body:=true pointcloud:=true kinect_frame:=kinect1_link
 roslaunch multiple_kinect_baxter_calibration calibration_data_collector.launch topic:=/kinect_anywhere/point_cloud/points2
 roslaunch multiple_kinect_baxter_calibration calibration_compute.launch kinect:=kinect_anywhere
-
-Open file and make child: kinect1_link
-
+```
+Open calibration file and modify child to `kinect1_link`
+```
 roslaunch multiple_kinect_baxter_calibration calibration_publisher.launch calibration:="[kinect_anywhere]"
 ```
 
