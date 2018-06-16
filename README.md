@@ -1,4 +1,46 @@
 # multiple_kinect_baxter_calibration
+This repository contains code for autonomous calibration of Baxter robot and Kinect camera. It supports multiple Kinect sensors.
+
+## Dependencies
+* [Baxter SDK](https://github.com/RethinkRobotics/baxter)
+  * Steps to install Baxter SDK can be found [here](http://sdk.rethinkrobotics.com/wiki/Workstation_Setup)
+* [iai_kinect2](https://github.com/code-iai/iai_kinect2)
+  * Tools for using the Kinect v2 in ROS
+* [kinect_anywhere](https://github.com/ravijo/kinect_anywhere)
+  * If you want to use Kinect v2 on windows 
+
+## Installation
+1. Download or clone the repository to the source directory of ROS workspace
+1. Compile the workspace by using `catkin_make`
+1. Mark the python scripts executable by using command below-
+```
+roscd multiple_kinect_baxter_calibration/scripts
+chmod +x *.py
+```
+## Steps for calibration
+There are following three steps of the calibration process-
+1. Place the marker on Baxter arm
+1. Define a trajectory of Baxter arm
+1. Collect the data
+1. Compute the calibration
+1. Publish the calibration
+
+Below are the details of each step.
+
+### Place the marker on Baxter arm
+We are using a green colored sphere as a marker as shown below-
+![setup](files/docs/setup.jpg)
+
+### Define a trajectory of Baxter arm
+Each Baxter Kinect setup varies due to the the location of camera. Hence, prior to data collection step, we must need to define a trajectory of Baxter arm by following steps mentioned below-
+* Record way-points of the arm trajectory by executing the following script. 
+```
+rosrun multiple_kinect_baxter_calibration trajectory_waypoints_recorder.py _file:=baxter.csv _limb:=right
+```
+* Please note that the [Zero-G mode](http://sdk.rethinkrobotics.com/wiki/Zero-G_Mode) is enabled hence the arm can be moved easily to any location by grasping the cuff over its groove. 
+* Press the `Baxter` button on the arm in order to record the way-point.
+* Record 20 different way-points. Press <kbd>CTRL</kbd>+<kbd>C</kbd> to stop the recording process.
+
 
 ```
 rosrun multiple_kinect_baxter_calibration view_image _file:=scene.jpg
@@ -21,9 +63,4 @@ Open file and make child: kinect1_link
 roslaunch multiple_kinect_baxter_calibration calibration_publisher.launch calibration:="[kinect_anywhere]"
 ```
 
-Installation
-```
-roscd multiple_kinect_baxter_calibration/scripts
-chmod +x *.py
-catkin_make
-```
+ 
