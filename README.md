@@ -37,9 +37,28 @@ Each Baxter Kinect setup varies due to the the location of camera. Hence, prior 
 ```
 rosrun multiple_kinect_baxter_calibration trajectory_waypoints_recorder.py _file:=baxter.csv _limb:=right
 ```
-* Please note that the [Zero-G mode](http://sdk.rethinkrobotics.com/wiki/Zero-G_Mode) is enabled hence the arm can be moved easily to any location by grasping the cuff over its groove. 
+* Make sure to enable the [Zero-G mode](http://sdk.rethinkrobotics.com/wiki/Zero-G_Mode) so that the arm can be moved easily to any location by grasping the cuff over its groove. 
 * Press the `Baxter` button on the arm in order to record the way-point.
 * Record 20 different way-points. Press <kbd>CTRL</kbd>+<kbd>C</kbd> to stop the recording process.
+
+### Collect the data
+* Start the kinect by using following command-
+  * For iai_kinect2: `roslaunch kinect2_bridge kinect2_bridge.launch`
+  * For kinect_anywhere: `roslaunch kinect_anywhere kinect_anywhere.launch pointcloud:=true kinect_frame:=kinect2_link`
+* Start collecting the data by using following command-
+```
+roslaunch multiple_kinect_baxter_calibration calibration_data_collector.launch topic:=/kinect2/sd/points kinect2_trajectory:=/home/ravi/ros_ws/src/multiple_kinect_baxter_calibration)/files/baxter.csv
+```
+
+### Compute the calibration
+```
+roslaunch multiple_kinect_baxter_calibration calibration_compute.launch kinect:=kinect2
+```
+
+### Publish the calibration
+```
+roslaunch multiple_kinect_baxter_calibration calibration_publisher.launch calibration:="[kinect2]"
+```
 
 
 ```
