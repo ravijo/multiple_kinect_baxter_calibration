@@ -50,9 +50,9 @@ Following are the valid parameters for this script-
 ### Collect the data
 1. Start the kinect by using following command-
   * For iai_kinect2: `roslaunch kinect2_bridge kinect2_bridge.launch`
-    *  Following are the valid parameters for this script. [Check here](https://github.com/code-iai/iai_kinect2/tree/master/kinect2_bridge#usage)
+    *  Following are the valid parameters for this script. [Check here](https://github.com/code-iai/iai_kinect2/tree/master/kinect2_bridge#usage).
   * For kinect_anywhere: `roslaunch kinect_anywhere kinect_anywhere.launch pointcloud:=true kinect_frame:=kinect2_link`
-    *  Following are the valid parameters for this script. [Check here](https://github.com/ravijo/kinect_anywhere#steps-to-run)
+    *  Following are the valid parameters for this script. [Check here](https://github.com/ravijo/kinect_anywhere#steps-to-run).
 2. Start collecting the data by using following command-
 ```
 roslaunch multiple_kinect_baxter_calibration calibration_data_collector.launch topic:=/kinect2/sd/points kinect2_trajectory:=/home/ravi/ros_ws/src/multiple_kinect_baxter_calibration)/files/baxter.csv
