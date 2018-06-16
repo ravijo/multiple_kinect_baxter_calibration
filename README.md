@@ -55,7 +55,7 @@ Following are the valid parameters for this script-
     *  Following are the valid parameters for this script. [Check here](https://github.com/ravijo/kinect_anywhere#steps-to-run).
 2. Start collecting the data by using following command-
 ```
-roslaunch multiple_kinect_baxter_calibration calibration_data_collector.launch topic:=/kinect2/sd/points kinect2_trajectory:=/home/ravi/ros_ws/src/multiple_kinect_baxter_calibration)/files/baxter.csv
+roslaunch multiple_kinect_baxter_calibration calibration_data_collector.launch topic:=/kinect2/sd/points kinect2_trajectory:=/home/ravi/ros_ws/src/multiple_kinect_baxter_calibration/files/baxter.csv
 ```
 Following are the valid parameters for this script-
   * `topic:=` [type: string] rostopic for receving point cloud
@@ -65,11 +65,11 @@ Following are the valid parameters for this script-
   * `log:=` [type: string] log level parameter. It must be one of the following- Info, Debug, Warn, Error, Fatal.
     * Default value: Info
   * `kinect1_trajectory:=` [type: string] full path to the baxter arm pre-defined trajectory for kinect1
-    * Default value: $(find multiple_kinect_baxter_calibration)/files/viapoints.csv
+    * Default value: /home/ravi/ros_ws/src/multiple_kinect_baxter_calibration/files/viapoints.csv
   * `kinect2_trajectory:=` [type: string] full path to the baxter arm pre-defined trajectory for kinect2
-    * Default value: $(find multiple_kinect_baxter_calibration)/files/viapoints.csv
+    * Default value: /home/ravi/ros_ws/src/multiple_kinect_baxter_calibration/files/viapoints.csv
   * `kinect3_trajectory:=` [type: string] full path to the baxter arm pre-defined trajectory for kinect3
-    * Default value: $(find multiple_kinect_baxter_calibration)/files/viapoints.csv
+    * Default value: /home/ravi/ros_ws/src/multiple_kinect_baxter_calibration/files/viapoints.csv
   * `kinect_anywhere_trajectory:=` [type: string] full path to the baxter arm pre-defined trajectory for kinect anywhere
     * Default value: $(find multiple_kinect_baxter_calibration)/files/viapoints.csv
   * `min_hsv:=` [type: string] minimum HSV value for sphere segmentation as `min_hsv:="[40, 50, 60]"`
