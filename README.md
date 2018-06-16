@@ -33,16 +33,16 @@ We are using a green colored sphere as a marker as shown below-
 
 ### Define a trajectory of Baxter arm
 Each Baxter Kinect setup varies due to the the location of camera. Hence, prior to data collection step, we must need to define a trajectory of Baxter arm by following steps mentioned below-
-* Record way-points of the arm trajectory by executing the following script. 
+1. Record way-points of the arm trajectory by executing the following script. 
 ```
 rosrun multiple_kinect_baxter_calibration trajectory_waypoints_recorder.py _file:=baxter.csv _limb:=right
 ```
 Following are the valid parameters for this script-
   * `_file:=` [type: string] filename to store all the way-points as csv
   * `_limb:=` [type: string] name of the baxter arm, in which the marker is attached. The value of this parameter can only be `left` or `right`
-* Make sure to enable the [Zero-G mode](http://sdk.rethinkrobotics.com/wiki/Zero-G_Mode) so that the arm can be moved easily to any location by grasping the cuff over its groove. 
-* Press the `Baxter` button on the arm in order to record the way-point.
-* Record 20 different way-points. Press <kbd>CTRL</kbd>+<kbd>C</kbd> to stop the recording process.
+2. Make sure to enable the [Zero-G mode](http://sdk.rethinkrobotics.com/wiki/Zero-G_Mode) so that the arm can be moved easily to any location by grasping the cuff over its groove. 
+3. Press the `Baxter` button on the arm in order to record the way-point.
+4. Record 20 different way-points. Press <kbd>CTRL</kbd>+<kbd>C</kbd> to stop the recording process.
 
 ### Collect the data
 * Start the kinect by using following command-
