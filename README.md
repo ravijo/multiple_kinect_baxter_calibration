@@ -104,7 +104,8 @@ To view the point cloud data in real-time
 rosrun multiple_kinect_baxter_calibration view_cloud_realtime _topic:="/kinect2/sd/points"
 ```
 Following are the valid parameters for this script-
-  * `data_dir:=` 
+  * `_topic:=` [type: string] rostopic for subscribing to point cloud
+  * `_source:=` [type: string] source of the point cloud. It can be `Windows` or `linux`
   
 ### save_pcd
 To save the point cloud data in a PCD file
