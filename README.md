@@ -95,7 +95,7 @@ rosrun multiple_kinect_baxter_calibration sphere_detector_test _file:=scene.pcd
 ```
 
 ## For three Kinects running on iai_kinect2
-1. Initilize project and start all the kinects
+1. Initialize project and start all the kinects
 ```
 roslaunch multiple_kinect_baxter_calibration init.launch
 ```
