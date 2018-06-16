@@ -95,7 +95,7 @@ Following are the valid parameters for this script-
   * `epsilon:=` [type: double] angle epsilon (delta) threshold (in degree)
     * Default value: 15
   * `data_dir:=` [type: string] directory for saving tracking data
-    * Default value: $(find multiple_kinect_baxter_calibration)/files
+    * Default value: /home/ravi/ros_ws/src/multiple_kinect_baxter_calibration/files
   * `queue_size:=` [type: int] queue_size for the subscribers
     * Default value: 1
   * `wait_time:=` [type: double] wait time to stablize arm before capturing point cloud (in seconds)
@@ -115,7 +115,7 @@ roslaunch multiple_kinect_baxter_calibration calibration_compute.launch kinect:=
 ```
 Following are the valid parameters for this script-
   * `data_dir:=` [type: string] directory of baxter_trajectory and kinect_trajectory file
-    * Default value: $(find multiple_kinect_baxter_calibration)/files/
+    * Default value: /home/ravi/ros_ws/src/multiple_kinect_baxter_calibration/files/
   * `kinect:=` [type: string] name/id of the kinect as `kinect:=kinect1`
     * Default value: No value
 
@@ -125,7 +125,7 @@ roslaunch multiple_kinect_baxter_calibration calibration_publisher.launch calibr
 ```
 Following are the valid parameters for this script-
   * `data_dir:=` [type: string] directory of baxter_trajectory and kinect_trajectory file
-    * Default value: $(find multiple_kinect_baxter_calibration)/files/
+    * Default value: /home/ravi/ros_ws/src/multiple_kinect_baxter_calibration/files/
   * `calibration:=` [type: string] all the names/ids of the kinects as `calibration:="[kinect1, kinect2, kinect3]"`
     * Default value: "[kinect1, kinect2, kinect3]"
 
