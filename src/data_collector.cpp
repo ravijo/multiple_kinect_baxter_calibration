@@ -29,11 +29,16 @@
 // we are using trigger service for implementing 'move_arm_to_waypoint' service
 #include <std_srvs/Trigger.h>
 
+// for thread related support
+#include <boost/thread.hpp>
+
 // name for 'move_arm_to_waypoint' service
 #define MOVE_ARM_SERVICE "/move_arm_to_waypoint"
 
-// for thread related support
-#include <boost/thread.hpp>
+// define various ids for visualization
+#define CLOUD_ID "point_cloud"
+#define SEGMENTED_CLOUD_ID "segmented_cloud"
+#define SPHERE_ID "detected_sphere"
 
 class DataCollector
 {
@@ -236,8 +241,8 @@ bool DataCollector::processLatestData()
     utility::getPointCloudFromMsg(pc_msg, *cloud, min_z, max_z);
 
     // show the caputed point cloud
-    if (!pc_viewers.at(0)->updatePointCloud(cloud, "cloud"))
-        pc_viewers.at(0)->addPointCloud(cloud, "cloud");
+    if (!pc_viewers.at(0)->updatePointCloud(cloud, CLOUD_ID))
+        pc_viewers.at(0)->addPointCloud(cloud, CLOUD_ID);
     pc_viewers.at(0)->spinOnce();
 
     // declare the sphere coefficients consisting of position of the center
@@ -252,8 +257,8 @@ bool DataCollector::processLatestData()
     bool success = sphere_detector->segmentSphere(pc_viewers.at(0), cloud, segmented_cloud, sphere_coff);
 
     // add segmented point cloud if not added previously, update otherwise
-    if (!pc_viewers.at(1)->updatePointCloud(segmented_cloud, "segmented_cloud"))
-        pc_viewers.at(1)->addPointCloud(segmented_cloud, "segmented_cloud");
+    if (!pc_viewers.at(1)->updatePointCloud(segmented_cloud, SEGMENTED_CLOUD_ID))
+        pc_viewers.at(1)->addPointCloud(segmented_cloud, SEGMENTED_CLOUD_ID);
 
     // force the visualizer to update the view
     pc_viewers.at(1)->spinOnce();
@@ -270,8 +275,8 @@ bool DataCollector::processLatestData()
         pcl::PointXYZ detected_sphere(sphere_coff.values[0], sphere_coff.values[1], sphere_coff.values[2]);
 
         // add detected sphere if not added previously, update otherwise
-        if (!pc_viewers.at(1)->updateSphere(detected_sphere, sphere_coff.values[3], 0.2, 0.3, 1.0, "detected_sphere"))
-            pc_viewers.at(1)->addSphere(detected_sphere, sphere_coff.values[3], 0.2, 0.3, 1.0, "detected_sphere");
+        if (!pc_viewers.at(1)->updateSphere(detected_sphere, sphere_coff.values[3], 0.2, 0.3, 1.0, SPHERE_ID))
+            pc_viewers.at(1)->addSphere(detected_sphere, sphere_coff.values[3], 0.2, 0.3, 1.0, SPHERE_ID);
 
         // force the visualizer to update the view
         pc_viewers.at(1)->spinOnce();
@@ -281,7 +286,7 @@ bool DataCollector::processLatestData()
         ROS_WARN_STREAM("Sphere detection failed");
 
         // remove the previously detected sphere in case of failure
-        pc_viewers.at(1)->removeShape("detected_sphere");
+        pc_viewers.at(1)->removeShape(SPHERE_ID);
 
         /*
         std::string seg = "segme_" + utility::to_string(index) + ".pcd";
