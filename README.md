@@ -71,7 +71,7 @@ Following are the valid parameters for this script-
   * `kinect3_trajectory:=` [type: string] full path to the baxter arm pre-defined trajectory for kinect3
     * Default value: /home/ravi/ros_ws/src/multiple_kinect_baxter_calibration/files/viapoints.csv
   * `kinect_anywhere_trajectory:=` [type: string] full path to the baxter arm pre-defined trajectory for kinect anywhere
-    * Default value: $(find multiple_kinect_baxter_calibration)/files/viapoints.csv
+    * Default value: /home/ravi/ros_ws/src/multiple_kinect_baxter_calibration/files/viapoints.csv
   * `min_hsv:=` [type: string] minimum HSV value for sphere segmentation as `min_hsv:="[40, 50, 60]"`
     * Default value: "[40, 50, 60]"
   * `max_hsv:=` [type: string] maximum HSV value for sphere segmentation as `max_hsv:="[60, 200, 255]"`
