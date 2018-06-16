@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# trajectory_viapoint_recorder.py: records trajectory viapoint into csv file
+# trajectory_waypoints_recorder.py: records trajectory waypoints into csv file
 # Author: Ravi Joshi
 # Date: 2018/04/12
 
@@ -12,7 +12,7 @@ import rospkg
 import numpy as np
 from baxter_interface import Limb, Navigator
 
-class TrajectoryViapointRecorder():
+class TrajectoryWaypointsRecorder():
     def __init__(self, limb_name, file_name):
         self.limb = Limb(limb_name)
         self.trajectory = []
@@ -56,7 +56,7 @@ class TrajectoryViapointRecorder():
 
 
 if __name__ == '__main__':
-    rospy.init_node('trajectory_viapoint_recorder_node', anonymous=True)
+    rospy.init_node('trajectory_waypoints_recorder_node', anonymous=True)
     limb = rospy.get_param('~limb', 'right')
     file_name = rospy.get_param('~file', None)
 
@@ -64,4 +64,4 @@ if __name__ == '__main__':
         rospy.logerr('File name is not provided. Please use _file:=baxter.csv')
     else:
         rospy.loginfo("Limb: '%s', file name: '%s'" % (limb, file_name))
-        TrajectoryViapointRecorder(limb, file_name)
+        TrajectoryWaypointsRecorder(limb, file_name)

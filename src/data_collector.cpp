@@ -47,7 +47,7 @@ private:
     // minimum and maximum z coordinate value of point cloud w.r.t. camera
     float min_z, max_z;
 
-    // height of the title bar in point cloud visualizer window (pixel)
+    // height of the title bar in point cloud visualizer window (in pixel)
     int title_bar_height;
 
     // service for moving baxter arm to waypoint

@@ -6,7 +6,7 @@ Author: Nishanth Koganti, Ravi Joshi
 Date: 2016/6/16
 -->
 <launch>
-  <!-- define the location of baxter_trajectory and kinect_trajectory file -->
+  <!-- define the directory of baxter_trajectory and kinect_trajectory file -->
   <arg name="data_dir" default="$(find multiple_kinect_baxter_calibration)/files/"/>
   <arg name="kinect" doc="kinect:=kinect1"/>
 

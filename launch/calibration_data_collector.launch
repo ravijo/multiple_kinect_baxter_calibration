@@ -17,7 +17,7 @@ Date: 2018/02/16
   <!-- it should be one of the following- Info, Debug, Warn, Error, Fatal. -->
   <arg name="log" default="Info"/>
 
-  <!-- baxter arm pre-defined trajectory for various kinect -->
+  <!-- baxter arm pre-defined trajectory for various kinects -->
   <arg name="kinect1_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
   <arg name="kinect2_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
   <arg name="kinect3_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/viapoints.csv"/>
@@ -78,7 +78,7 @@ Date: 2018/02/16
   <!-- queue_size for the subscribers (lesser is better) -->
   <arg name="queue_size" default="1"/>
 
-  <!-- wait time to stablize arm before capturing point cloud (seconds)-->
+  <!-- wait time to stablize arm before capturing point cloud (in seconds)-->
   <arg name="wait_time" default="2"/>
 
   <!-- maximum number of samples to collect at any waypoint -->
@@ -90,7 +90,7 @@ Date: 2018/02/16
   <!-- maximum z coordinate value of point cloud w.r.t. camera -->
   <arg name="max_z" default="5.0"/>
 
-  <!-- height of the title bar in point cloud visualizer window (pixel) -->
+  <!-- height of the title bar in point cloud visualizer window (in pixel) -->
   <arg name="title_bar_height" default="10"/>
 
   <node name="data_collector" pkg="multiple_kinect_baxter_calibration" type="data_collector" output="screen">
