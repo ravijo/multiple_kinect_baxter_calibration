@@ -90,6 +90,9 @@ Date: 2018/02/16
   <!-- maximum z coordinate value of point cloud w.r.t. camera -->
   <arg name="max_z" default="5.0"/>
 
+  <!-- height of the title bar in point cloud visualizer window (pixel) -->
+  <arg name="title_bar_height" default="10"/>
+
   <node name="data_collector" pkg="multiple_kinect_baxter_calibration" type="data_collector" output="screen">
     <param name="min_hsv" value="$(arg min_hsv)"/>
     <param name="max_hsv" value="$(arg max_hsv)"/>
@@ -110,6 +113,7 @@ Date: 2018/02/16
     <param name="max_samples" value="$(arg max_samples)"/>
     <param name="min_z" value="$(arg min_z)"/>
     <param name="max_z" value="$(arg max_z)"/>
+    <param name="title_bar_height" value="$(arg title_bar_height)"/>
     <param name="log" value="$(arg log)"/>
   </node>
 </launch>

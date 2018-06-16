@@ -47,6 +47,9 @@ private:
     // minimum and maximum z coordinate value of point cloud w.r.t. camera
     float min_z, max_z;
 
+    // height of the title bar in point cloud visualizer window (pixel)
+    int title_bar_height;
+
     // service for moving baxter arm to waypoint
     ros::ServiceClient move_arm;
 
@@ -386,6 +389,9 @@ void DataCollector::init()
     nh.getParam("min_z", min_z);
     nh.getParam("max_z", max_z);
 
+    // height of the title bar in point cloud visualizer window (pixel)
+    nh.getParam("title_bar_height", title_bar_height);
+
     // get the sensor_name as the first word between two leftmost slash chacters
     std::vector<int> all_slash = utility::find_all(pc_topic, "/");
     sensor_name = pc_topic.substr(all_slash[0] + 1, all_slash[1] - 1);
@@ -524,7 +530,7 @@ void DataCollector::setWindowPosition(int index)
     if (index >= 1)
     {
         x = (index - 1) * width;
-        y = height;
+        y = height + title_bar_height;
     }
 
     // set the window width and height
