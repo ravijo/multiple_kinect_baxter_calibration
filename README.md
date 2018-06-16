@@ -37,6 +37,9 @@ Each Baxter Kinect setup varies due to the the location of camera. Hence, prior 
 ```
 rosrun multiple_kinect_baxter_calibration trajectory_waypoints_recorder.py _file:=baxter.csv _limb:=right
 ```
+Following are the valid parameters for this script-
+  * `_file:=` [type: string] filename to store all the way-points as csv
+  * `_limb:=` [type: string] name of the baxter arm, in which the marker is attached. The value of this parameter can only be `left` or `right`
 * Make sure to enable the [Zero-G mode](http://sdk.rethinkrobotics.com/wiki/Zero-G_Mode) so that the arm can be moved easily to any location by grasping the cuff over its groove. 
 * Press the `Baxter` button on the arm in order to record the way-point.
 * Record 20 different way-points. Press <kbd>CTRL</kbd>+<kbd>C</kbd> to stop the recording process.
@@ -44,7 +47,9 @@ rosrun multiple_kinect_baxter_calibration trajectory_waypoints_recorder.py _file
 ### Collect the data
 * Start the kinect by using following command-
   * For iai_kinect2: `roslaunch kinect2_bridge kinect2_bridge.launch`
+    *  Following are the valid parameters for this script. (Check here](https://github.com/code-iai/iai_kinect2/tree/master/kinect2_bridge#usage)
   * For kinect_anywhere: `roslaunch kinect_anywhere kinect_anywhere.launch pointcloud:=true kinect_frame:=kinect2_link`
+    *  Following are the valid parameters for this script. (Check here](https://github.com/ravijo/kinect_anywhere#steps-to-run)
 * Start collecting the data by using following command-
 ```
 roslaunch multiple_kinect_baxter_calibration calibration_data_collector.launch topic:=/kinect2/sd/points kinect2_trajectory:=/home/ravi/ros_ws/src/multiple_kinect_baxter_calibration)/files/baxter.csv
@@ -59,6 +64,8 @@ roslaunch multiple_kinect_baxter_calibration calibration_compute.launch kinect:=
 ```
 roslaunch multiple_kinect_baxter_calibration calibration_publisher.launch calibration:="[kinect2]"
 ```
+Following are the valid parameters for this script-
+
 
 ## Other utility files
 ### view_cloud_realtime
