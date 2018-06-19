@@ -252,7 +252,7 @@ bool DataCollector::processLatestData()
     // declare the segmented point cloud
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 
-    // segment sphere from the caputed point cloud
+    // segment sphere from the captured point cloud
     // get the segmented point cloud and the sphere coefficients
     bool success = sphere_detector->segmentSphere(pc_viewers.at(0), cloud, segmented_cloud, sphere_coff);
 
