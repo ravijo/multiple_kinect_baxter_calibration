@@ -63,7 +63,7 @@ class BaxterController():
             try:
                 self.limb.move_to_joint_positions(command)
                 response.message = 'Successfully moved arm to the following waypoint %s' % command
-            except ROSException:
+            except rospy.exceptions.ROSException:
                 response.message = 'Error while moving arm to the following waypoint %s' % command
 
             # increment the counter
