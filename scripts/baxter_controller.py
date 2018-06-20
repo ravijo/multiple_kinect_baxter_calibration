@@ -65,9 +65,9 @@ class BaxterController():
                 response.message = 'Successfully moved arm to the following waypoint %s' % command
             except rospy.exceptions.ROSException:
                 response.message = 'Error while moving arm to the following waypoint %s' % command
-
-            # increment the counter
-            self.trajectory_index += 1
+            finally:
+                # increment the counter
+                self.trajectory_index += 1
         else:
             response.message = 'Arm trajectory is finished already'
 
