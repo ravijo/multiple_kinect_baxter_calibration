@@ -91,7 +91,7 @@ Date: 2018/02/16
   <arg name="max_z" default="5.0"/>
 
   <!-- height of the title bar in point cloud visualizer window (in pixel) -->
-  <arg name="title_bar_height" default="10"/>
+  <arg name="title_bar_height" default="70"/>
 
   <node name="data_collector" pkg="multiple_kinect_baxter_calibration" type="data_collector" output="screen">
     <param name="min_hsv" value="$(arg min_hsv)"/>

@@ -12,6 +12,7 @@
 
 #include <utility.h>
 
+size_t count = 0;
 std::string package_path;
 
 void callback(const sensor_msgs::PointCloud2ConstPtr& msg)
@@ -52,10 +53,15 @@ void callback(const sensor_msgs::PointCloud2ConstPtr& msg)
     cloud->is_dense = true;
     */
 
-    std::string file_name = package_path + "/files/scene.pcd";
-    ROS_INFO_STREAM("Saving point cloud '" << file_name << "'. " << (cloud->width * cloud->height)
+    std::stringstream ss;
+    ss << package_path << "/files/scene_" << count << ".pcd";
+    std::string file_name = ss.str();
+
+    ROS_INFO_STREAM("Saving point cloud '" << file_name << "'. "
+                                           << (cloud->width * cloud->height)
                                            << " Points.");
     pcl::io::savePCDFileASCII(file_name, *cloud);
+    count++;
 }
 
 int main(int argc, char** argv)

@@ -63,18 +63,18 @@ class BaxterController():
             try:
                 self.limb.move_to_joint_positions(command)
                 response.message = 'Successfully moved arm to the following waypoint %s' % command
-            except ROSException:
+            except rospy.exceptions.ROSException:
                 response.message = 'Error while moving arm to the following waypoint %s' % command
-
-            # increment the counter
-            self.trajectory_index += 1
+            finally:
+                # increment the counter
+                self.trajectory_index += 1
         else:
             response.message = 'Arm trajectory is finished already'
 
         # set the success parameter of the response object
         response.success = trajectory_finished
 
-        # set the flag just before returning from the function so that it is 
+        # set the flag just before returning from the function so that it is
         # almost certain that the service request is returned successfully
         self.trajectory_finished = trajectory_finished
         return response
