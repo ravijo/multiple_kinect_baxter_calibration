@@ -99,7 +99,7 @@ void PointCloudSubscriber::callback(
     const sensor_msgs::PointCloud2ConstPtr &msg) {
   // pcl_ros::transformPointCloud(trans, *msg, temp_cloud);// takes 4 ms
   transformPointCloud(trans, *msg, temp_cloud); // takes 3 ms
-  // we work with temporary cloud i.e., temp_cloud
+  // we work with a temporary cloud i.e., temp_cloud
   // once temp_cloud is transformed it is
   // simply assigned to point_cloud
   point_cloud = temp_cloud;
@@ -110,8 +110,8 @@ void PointCloudSubscriber::setup(Eigen::Matrix4f transformation,
                                  std::string topic_name, int queue_size) {
   trans = transformation;
   subscriber = node_handle.subscribe<sensor_msgs::PointCloud2>(
-      topic_name, queue_size, &PointCloudSubscriber::callback, this /*,
-      ros::TransportHints().tcpNoDelay()*/);
+      topic_name, queue_size, &PointCloudSubscriber::callback, this,
+      ros::TransportHints().tcpNoDelay());
 }
 
 class MergePointClouds {
@@ -127,6 +127,7 @@ private:
                                  const sensor_msgs::PointCloud2 &cloud2,
                                  const sensor_msgs::PointCloud2 &cloud3,
                                  sensor_msgs::PointCloud2 &cloud_out);
+
 public:
   MergePointClouds();
   void run();
