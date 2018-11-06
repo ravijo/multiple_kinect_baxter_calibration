@@ -6,9 +6,9 @@ Date: 2018/02/16
 -->
 <launch>
   <!-- rostopic for receving point cloud -->
-  <arg name="pc1_topic" default="/kinect1/qhd/points"/>
-  <arg name="pc2_topic" default="/kinect2/qhd/points"/>
-  <arg name="pc3_topic" default="/kinect3/qhd/points"/>
+  <arg name="pc1_topic" default="/kinect1/sd/points"/>
+  <arg name="pc2_topic" default="/kinect2/sd/points"/>
+  <arg name="pc3_topic" default="/kinect3/sd/points"/>
 
   <arg name="pc1_frame_id" default="kinect1_link"/>
   <arg name="pc2_frame_id" default="kinect2_link"/>

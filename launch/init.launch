@@ -6,30 +6,40 @@ Author: Ravi Joshi
 Date: 2018/04/05
 -->
 <launch>
+  <!-- define name -->
   <arg name="kinect_sensor_1_name" default="kinect1"/>
   <arg name="kinect_sensor_2_name" default="kinect2"/>
   <arg name="kinect_sensor_3_name" default="kinect3"/>
 
+  <!-- define sensor id -->
   <arg name="kinect_sensor_1_id" default="510760242542"/>
   <arg name="kinect_sensor_2_id" default="510428142542"/>
   <arg name="kinect_sensor_3_id" default="510341742542"/>
 
+  <!-- define maximum depth value -->
+  <arg name="kinect_sensor_1_max_d" default="12.0"/>
+  <arg name="kinect_sensor_2_max_d" default="12.0"/>
+  <arg name="kinect_sensor_3_max_d" default="12.0"/>
+
   <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
-    <arg name="base_name" value="$(arg kinect_sensor_1_name)"/>
+    <arg name="publish_tf" value="true"/>
     <arg name="sensor" value="$(arg kinect_sensor_1_id)"/>
-    <arg name="publish_tf" value="true"/>
+    <arg name="base_name" value="$(arg kinect_sensor_1_name)"/>
+    <arg name="max_depth" value="$(arg kinect_sensor_1_max_d)"/>
   </include>
 
   <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
-    <arg name="base_name" value="$(arg kinect_sensor_2_name)"/>
+    <arg name="publish_tf" value="true"/>
     <arg name="sensor" value="$(arg kinect_sensor_2_id)"/>
-    <arg name="publish_tf" value="true"/>
+    <arg name="base_name" value="$(arg kinect_sensor_2_name)"/>
+    <arg name="max_depth" value="$(arg kinect_sensor_2_max_d)"/>
   </include>
 
   <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
-    <arg name="base_name" value="$(arg kinect_sensor_3_name)"/>
-    <arg name="sensor" value="$(arg kinect_sensor_3_id)"/>
     <arg name="publish_tf" value="true"/>
+    <arg name="sensor" value="$(arg kinect_sensor_3_id)"/>
+    <arg name="base_name" value="$(arg kinect_sensor_3_name)"/>
+    <arg name="max_depth" value="$(arg kinect_sensor_3_max_d)"/>
   </include>
 
   <arg name="publish_calibration" default="true"/>
@@ -37,10 +47,10 @@ Date: 2018/04/05
     <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch"/>
   </group>
 
-  <!-- Baxter provided utility to enable robot -->
+  <!-- baxter provided utility to enable robot -->
   <node name="enable_robot" pkg="baxter_tools" type="enable_robot.py" args="-e" output="screen"/>
 
-  <!-- Baxter provided utility to enable gripper buttons -->
+  <!-- baxter provided utility to enable gripper buttons -->
   <node name="enable_gripper_buttons" pkg="baxter_examples" type="gripper_cuff_control.py"/>
 
   <!-- change grippers for correct inverse kinematics -->
