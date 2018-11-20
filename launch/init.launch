@@ -42,9 +42,14 @@ Date: 2018/04/05
     <arg name="max_depth" value="$(arg kinect_sensor_3_max_d)"/>
   </include>
 
+  <!-- set 'ar' to true for ar marker based calibration -->
+  <arg name="ar" default="false"/>
+
   <arg name="publish_calibration" default="true"/>
   <group if="$(arg publish_calibration)">
-    <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch"/>
+    <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch">
+      <arg name="ar" value="$(arg ar)"/>
+    </include>
   </group>
 
   <!-- baxter provided utility to enable robot -->

@@ -69,8 +69,11 @@ def main():
     # get path to folder containing recorded data
     data_dir = rospy.get_param('~data_dir')
     kinect = rospy.get_param('~kinect')
+    ar = rospy.get_param('~ar')
 
-    trajectory_file = os.path.join(data_dir, 'baxter_%s_position.csv' % kinect)
+    suffix = 'ar' if ar else 'pc'
+    file_name = 'baxter_%s_position_%s.csv' % (kinect, suffix)
+    trajectory_file = os.path.join(data_dir, file_name)
 
     rospy.loginfo('Reading file:\n%s\n' % trajectory_file)
 
@@ -102,7 +105,7 @@ def main():
                    'calibration error (m)': float('%.4f' % err),
                    'created on': datetime.datetime.now().strftime('%d %B %Y %I:%M:%S %p')}
 
-    with open('%sbaxter_%s_calibration.yaml' % (data_dir, kinect), 'w') as out_file:
+    with open('%sbaxter_%s_calibration_%s.yaml' % (data_dir, kinect, suffix), 'w') as out_file:
         yaml.dump(calibration, out_file)
 
     # plot both point sets together
@@ -115,14 +118,14 @@ def main():
     ax.scatter(baxter_traj[:, 0], baxter_traj[:, 1],
                baxter_traj[:, 2], s=10, c='b', marker='^', label='Baxter')
 
-
     # add labels and title
     ax.set_xlabel('x (m)')
     ax.set_ylabel('y (m)')
     ax.set_zlabel('z (m)')
     ax.legend()
     ax.grid(True)
-    plt.title('baxter %s calibration (err: %.2f cm)' % (kinect, err_cm), y=1.1) # move title little bit up
+    plt.title('baxter %s calibration (err: %.2f cm)' %
+              (kinect, err_cm), y=1.1)  # move title little bit up
     plt.show()
 
 

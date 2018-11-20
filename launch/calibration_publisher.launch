@@ -8,11 +8,15 @@ Date: 2016/6/15
 -->
 <launch>
   <!-- define args -->
+  <!-- set 'ar' to true for ar marker based calibration -->
+  <arg name="ar" default="false"/>
   <arg name="data_dir" default="$(find multiple_kinect_baxter_calibration)/files/"/>
   <arg name="calibration" doc="calibration:='[kinect1, kinect2, kinect3]'" default="[kinect1, kinect2, kinect3]"/>
+
   <!-- publish calibration so that tf can use it -->
   <node pkg="multiple_kinect_baxter_calibration" type="calibration_publisher.py" name="calibration_publisher" output="screen">
     <param name="data_dir" value="$(arg data_dir)"/>
     <param name="calibration" value="$(arg calibration)"/>
+    <param name="ar" value="$(arg ar)"/>
   </node>
 </launch>

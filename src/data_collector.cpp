@@ -203,7 +203,8 @@ void DataCollector::pointCloudCallback(
 
 // function to save the tracking data into a csv file
 void DataCollector::saveTrackingData() {
-  std::string file_name = data_dir + "/baxter_" + sensor_name + "_position.csv";
+  std::string file_name =
+      data_dir + "/baxter_" + sensor_name + "_position_pc.csv";
   std::string header = "baxter_x,baxter_y,baxter_z,camera_x,camera_y,camera_z";
 
   std::vector<std::vector<float> > trajectory =
