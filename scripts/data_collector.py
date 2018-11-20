@@ -51,22 +51,21 @@ class DataCollector():
                    delimiter=',', fmt='%.6f', comments='')
 
     def process_latest_data(self):
-        marker_ids = self.markers.keys()
-        marker_len = len(marker_ids)
+        marker_len = len(self.markers)
 
         if marker_len < 1:
             rospy.logwarn('No marker detected.')
             return False
 
         elif marker_len > 1:
-            rospy.logwarn(
-                'Multiple markers detected. marker ids are %s' % marker_ids)
+            rospy.logwarn('Multiple markers detected')
             return False
 
         else:
-            marker_position = self.markers[marker_ids[0]]
+            marker_position = self.markers[0]
             marker_position = [marker_position.x,
-                               marker_position.y, marker_position.z]
+                               marker_position.y, 
+                               marker_position.z]
 
             # ar marker frame wrt kinect
             self.position_wrt_camera.append(marker_position)
@@ -77,8 +76,7 @@ class DataCollector():
             return True
 
     def marker_callback(self, data):
-        detected_markers = {
-            marker.id: marker.pose.pose.position for marker in data.markers if marker.id is not 255}
+        detected_markers = [marker.pose.pose.position for marker in data.markers if marker.id is not 255]
         baxter_arm_postion = self.baxter_arm.endpoint_pose()['position']
         self.markers = detected_markers
         self.baxter_arm_postion = baxter_arm_postion
@@ -135,7 +133,7 @@ class DataCollector():
             success_count = 0
             for _ in range(self.max_samples):
                 success_count += self.process_latest_data()
-                # wait for marker_callback to be called
+                # wait for 'marker_callback()' to be called
                 rospy.sleep(0.1)  # sleep for 0.1 second (100 ms)
 
             rospy.loginfo('Successfully detected ar marker %d times out of %d' % (
