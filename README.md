@@ -4,6 +4,8 @@ This repository contains code for autonomous calibration of Baxter robot and Kin
 ## Dependencies
 * [Baxter SDK](https://github.com/RethinkRobotics/baxter)
   * Steps to install Baxter SDK can be found [here](http://sdk.rethinkrobotics.com/wiki/Workstation_Setup)
+* [ar_track_alvar](http://wiki.ros.org/ar_track_alvar)
+  * Use following command to install ar_track_alvar package `sudo apt-get install ros-indigo-ar-track-alvar`
 * [iai_kinect2](https://github.com/code-iai/iai_kinect2)
   * Tools for using the Kinect v2 in ROS
 * [kinect_anywhere](https://github.com/ravijo/kinect_anywhere)
