@@ -18,7 +18,10 @@ from mpl_toolkits.mplot3d import Axes3D
 from tf.transformations import euler_from_matrix, quaternion_from_euler
 
 # matplotlib settings
-matplotlib.rcParams.update({'font.size': 10})
+# matplotlib.rcParams.update({'font.size': 10})
+style = 'seaborn-deep'
+if style in plt.style.available:
+    plt.style.use(style)
 
 
 def abs_orientation(x, y):
@@ -58,8 +61,51 @@ def abs_orientation(x, y):
     # compute transformation error
     x_out = (np.dot(R, x.T)).T + t
     errs = np.sqrt(np.sum((y - x_out)**2, axis=1))
-    err = errs.sum() / n_samples
-    return x_out, R, t, err
+    return x_out, R, t, errs
+
+
+def plot_calibration(kinect_out, baxter_traj, kinect, err_cm):
+    # plot both point sets together
+    fig = plt.figure(1)
+    ax = fig.add_subplot(111, projection='3d')
+
+    # plot the data
+    ax.scatter(kinect_out[:, 0], kinect_out[:, 1],
+               kinect_out[:, 2], s=10, c='r', marker='o', label='Kinect Points')
+    ax.scatter(baxter_traj[:, 0], baxter_traj[:, 1],
+               baxter_traj[:, 2], s=10, c='b', marker='^', label='Baxter Points')
+
+    # add labels and title
+    ax.set_xlabel('x (m)')
+    ax.set_ylabel('y (m)')
+    ax.set_zlabel('z (m)')
+    ax.legend()
+    ax.grid(True)
+    ax.set_title('baxter %s calibration (err: %.2f cm)' %
+                 (kinect, err_cm), y=1.1)  # move title little bit up
+
+
+def plot_error(err, file_name, bar_width=0.35, opacity=0.4):
+    fig, ax = plt.subplots()
+
+    err_mm = err * 1000.0  # convert to mm
+    x = np.arange(err_mm.shape[0])
+
+    # calculate average of the data
+    y_mean = [np.mean(err_mm)] * len(x)
+
+    data_line = ax.bar(x, err_mm, bar_width, alpha=opacity, color='b')
+    mean_line = ax.plot(x, y_mean, label='Mean Error: %.2f mm' % y_mean[0],
+                        linestyle='--', color='g')
+
+    ticks = np.linspace(start=x[0], stop=x[-1], num=5, dtype=np.int32)
+    ticks = (ticks / 10) * 10
+    ax.set_xlabel('Points')
+    ax.set_ylabel('Error (mm)')
+    ax.set_xticks(ticks)
+    ax.set_xlim(x[0], x[-1])
+    ax.legend()
+    ax.set_title('input file: %s' % file_name)
 
 
 def main():
@@ -86,9 +132,10 @@ def main():
     kinect_traj = trajectory[:, 3:]
 
     # compute absolute orientation
-    kinect_out, rot, trans, err = abs_orientation(kinect_traj, baxter_traj)
+    kinect_out, rot, trans, errs = abs_orientation(kinect_traj, baxter_traj)
 
     # output results
+    err = errs.sum() / trajectory.shape[0]
     err_cm = err * 100.0
     rospy.loginfo('Calibration Error: %.2f cm' % err_cm)
 
@@ -108,24 +155,8 @@ def main():
     with open('%sbaxter_%s_calibration_%s.yaml' % (data_dir, kinect, suffix), 'w') as out_file:
         yaml.dump(calibration, out_file)
 
-    # plot both point sets together
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-
-    # plot the data
-    ax.scatter(kinect_out[:, 0], kinect_out[:, 1],
-               kinect_out[:, 2], s=10, c='r', marker='o', label='Kinect')
-    ax.scatter(baxter_traj[:, 0], baxter_traj[:, 1],
-               baxter_traj[:, 2], s=10, c='b', marker='^', label='Baxter')
-
-    # add labels and title
-    ax.set_xlabel('x (m)')
-    ax.set_ylabel('y (m)')
-    ax.set_zlabel('z (m)')
-    ax.legend()
-    ax.grid(True)
-    plt.title('baxter %s calibration (err: %.2f cm)' %
-              (kinect, err_cm), y=1.1)  # move title little bit up
+    plot_calibration(kinect_out, baxter_traj, kinect, err_cm)
+    plot_error(errs, file_name)
     plt.show()
 
 

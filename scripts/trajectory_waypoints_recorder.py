@@ -26,6 +26,7 @@ class TrajectoryWaypointsRecorder():
         self.limb_nav.button2_changed.connect(self.limb_nav_button_pressed)
 
         rospy.on_shutdown(self.save_data)
+        rospy.loginfo('Press Ctrl + C to exit')
         rospy.spin()
 
     def save_data(self):

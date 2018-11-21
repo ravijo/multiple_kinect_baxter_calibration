@@ -64,7 +64,7 @@ class DataCollector():
         else:
             marker_position = self.markers[0]
             marker_position = [marker_position.x,
-                               marker_position.y, 
+                               marker_position.y,
                                marker_position.z]
 
             # ar marker frame wrt kinect
@@ -82,7 +82,6 @@ class DataCollector():
         self.baxter_arm_postion = baxter_arm_postion
 
     def collect(self):
-        rate = rospy.Rate(1.0 / self.wait_time)
         move_arm_service = '/move_arm_to_waypoint'
 
         rospy.loginfo('Waiting for service %s' % move_arm_service)
@@ -121,7 +120,7 @@ class DataCollector():
             // -------------------------------------------------------------------- //
             // wait for a while so that the baxter arm stops shaking
             '''
-            rate.sleep()
+            rospy.sleep(self.wait_time)
 
             '''
             // -------------------------------------------------------------------- //
@@ -134,7 +133,7 @@ class DataCollector():
             for _ in range(self.max_samples):
                 success_count += self.process_latest_data()
                 # wait for 'marker_callback()' to be called
-                rospy.sleep(0.1)  # sleep for 0.1 second (100 ms)
+                rospy.sleep(0.2)  # sleep for 0.2 second (200 ms)
 
             rospy.loginfo('Successfully detected ar marker %d times out of %d' % (
                 success_count, self.max_samples))

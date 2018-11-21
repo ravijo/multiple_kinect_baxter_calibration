@@ -477,6 +477,8 @@ void DataCollector::spin() {
   ROS_DEBUG_STREAM("Creating client for service " << MOVE_ARM_SERVICE);
   move_arm = nh.serviceClient<std_srvs::Trigger>(MOVE_ARM_SERVICE);
 
+  // wait for callback to be called
+  ros::Duration loop_sleep(0.2); // sleep for 0.2 second (200 ms)
   // keep running in an infinite loop
   // exit only when trajectory is finished
   while (ros::ok()) {
@@ -528,6 +530,8 @@ void DataCollector::spin() {
     for (size_t i = 0; i < max_samples; i++) {
       bool status = processLatestData();
       success_count += status; // divide by sizeof(bool)
+      // wait for callback to be called
+      loop_sleep.sleep();  // sleep for 0.2 second (200 ms)
     }
     ROS_INFO_STREAM("Successfully detected sphere "
                     << success_count << " times out of " << max_samples);
