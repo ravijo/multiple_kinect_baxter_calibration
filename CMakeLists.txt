@@ -66,17 +66,17 @@ target_link_libraries(${PROJECT_NAME}_sphere_detector
 )
 
 ## Build executables and link against libraries
-add_executable(sphere_detector_test
-  src/sphere_detector_test.cpp)
-target_link_libraries(sphere_detector_test
+add_executable(test_sphere_detector
+  src/test_sphere_detector.cpp)
+target_link_libraries(test_sphere_detector
   ${PROJECT_NAME}_sphere_detector
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
 )
 
-add_executable(pc_data_collector
-  src/pc_data_collector.cpp)
-target_link_libraries(pc_data_collector
+add_executable(data_collector_pc
+  src/data_collector_pc.cpp)
+target_link_libraries(data_collector_pc
   ${PROJECT_NAME}_sphere_detector
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}
