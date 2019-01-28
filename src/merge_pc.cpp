@@ -5,10 +5,9 @@
  */
 
 // ros headers
-#include <message_filters/subscriber.h>
-#include <message_filters/sync_policies/approximate_time.h>
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <message_filters/subscriber.h>
 
 // tf header
 #include <tf/transform_listener.h>
@@ -19,8 +18,13 @@
 // Eigen header
 #include <Eigen/Dense>
 
+// for thread related support
+#include <boost/thread.hpp>
+
 // we are using 3 kinects
 #define KINECT_COUNT 3
+
+#include <ctime>
 
 class PointCloudSubscriber
 {
@@ -84,27 +88,23 @@ PointCloudSubscriber::transformPointCloud(const Eigen::Matrix4f& transform,
      *                        *(float*)&in.data[index + 8], 1);
      */
 
-    // fill emements of the vector
-    pt_in(0) = *(float*)&in.data[index + 0];
-    pt_in(1) = *(float*)&in.data[index + 4];
-    pt_in(2) = *(float*)&in.data[index + 8];
+    // fill emements of the vector by first 3 float elements (12 bytes)
+    std::memcpy(&pt_in, &in.data[index], 12);
 
     // we don't want to make  copy of the data
     pt_out.noalias() = transform * pt_in;
 
     // copy the data into output
-    // we just want to copy first 3 float elements
+    // we just want to copy first 3 float elements (12 bytes)
     std::memcpy(&out.data[index], &pt_out[0], 12);
   }
 }
 
 void PointCloudSubscriber::callback(const sensor_msgs::PointCloud2ConstPtr& msg)
 {
-  // pcl_ros::transformPointCloud(trans, *msg, temp_cloud);// takes 4 ms
-  transformPointCloud(trans, *msg, temp_cloud);  // takes 3 ms
-  // we work with a temporary cloud i.e., temp_cloud
-  // once temp_cloud is transformed it is
-  // simply assigned to point_cloud
+  // we work with a temporary cloud i.e., temp_cloud once temp_cloud is
+  // transformed it is simply assigned to point_cloud
+  transformPointCloud(trans, *msg, temp_cloud);
   point_cloud = temp_cloud;
 }
 
@@ -125,6 +125,7 @@ private:
   std::string base_frame_id, pc1_frame_id, pc2_frame_id, pc3_frame_id;
   PointCloudSubscriber pc_sub1, pc_sub2, pc_sub3;
   ros::Publisher merged_pc_pub;
+  boost::shared_ptr<ros::AsyncSpinner> spinner;
 
   Eigen::Matrix4f* fetchTransformations(double wait_time);
 
@@ -191,7 +192,7 @@ Eigen::Matrix4f* MergePC::fetchTransformations(double wait_time)
     ros::shutdown();
   }
 
-  // create a dynamic array
+  // create the array on heap
   Eigen::Matrix4f* transformations = new Eigen::Matrix4f[KINECT_COUNT];
 
   tf::StampedTransform tf_trans[] = { t1, t2, t3 };
@@ -231,10 +232,33 @@ MergePC::MergePC()
 
   // create a publisher for publishing merged point cloud
   merged_pc_pub = nh.advertise<sensor_msgs::PointCloud2>(merge_pc_topic, 1);
+
+  // get the concurrent hardware thread count
+  const int spported_threads = boost::thread::hardware_concurrency();
+  ROS_DEBUG_STREAM("Number of heardware supported threads for this CPU is "
+                   << spported_threads);
+
+  // we need one thread for each kinect
+  const int desired_threads = KINECT_COUNT;
+
+  // show warning to user
+  if (desired_threads > spported_threads)
+    ROS_WARN_STREAM(
+        "It is suggested to upgrade the CPU for better performance");
+  else
+    ROS_DEBUG_STREAM("Initializing " << desired_threads
+                                     << " additional threads");
+
+  // lazy initialization for boost::shared_ptr
+  // source: https://stackoverflow.com/a/12997218/1175065
+  spinner.reset(new ros::AsyncSpinner(desired_threads));
 }
 
 void MergePC::run()
 {
+  // make sure we have the data. so we need to start the spinner
+  spinner->start();
+
   ros::Rate loop_rate(freq);
   sensor_msgs::PointCloud2 cloud_out;
 
@@ -248,8 +272,6 @@ void MergePC::run()
     cloud_out.header.stamp = ros::Time::now();
     merged_pc_pub.publish(cloud_out);
 
-    // invoke every callback currently in the queue
-    ros::getGlobalCallbackQueue()->callAvailable(ros::WallDuration(0.1));
     loop_rate.sleep();
   }
 }

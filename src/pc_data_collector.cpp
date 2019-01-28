@@ -10,13 +10,12 @@
 #include <utility.h>
 
 // ros headers
-#include <geometry_msgs/Pose.h>
-#include <multiple_kinect_baxter_calibration/GetEEPosition.h>
-#include <ros/callback_queue.h>
 #include <ros/ros.h>
-#include <sensor_msgs/PointCloud2.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int8.h>
+#include <ros/callback_queue.h>
+#include <geometry_msgs/Pose.h>
+#include <sensor_msgs/PointCloud2.h>
 
 // sphere_detector header
 #include <sphere_detector.h>
@@ -26,6 +25,7 @@
 
 // we are using trigger service for implementing 'move_arm_to_waypoint' service
 #include <std_srvs/Trigger.h>
+#include <multiple_kinect_baxter_calibration/GetEEPosition.h>
 
 // for thread related support
 #include <boost/thread.hpp>
@@ -565,7 +565,7 @@ DataCollector::DataCollector()
           GET_POSITION_SERVICE);
 
   // get the concurrent hardware thread count
-  unsigned int spported_threads = boost::thread::hardware_concurrency();
+  const int spported_threads = boost::thread::hardware_concurrency();
   ROS_DEBUG_STREAM("Number of heardware supported threads for this CPU is "
                    << spported_threads);
 
