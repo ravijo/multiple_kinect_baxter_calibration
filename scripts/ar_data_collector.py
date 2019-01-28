@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 
-# data_collector.py: Code to track AR marker with respect to Kinect and Baxter
+# ar_data_collector.py: Code to track AR marker with respect to Kinect and Baxter
 # Author: Ravi Joshi
 # Date: 2017/03/23
 
 import rospy
 import numpy as np
-from baxter_interface import Limb
-from ar_track_alvar_msgs.msg import AlvarMarkers
-from baxter_controller import get_sensor_name
 from std_srvs.srv import Trigger
+from baxter_interface import Limb
+from baxter_controller import get_sensor_name
+from ar_track_alvar_msgs.msg import AlvarMarkers
+from tf.transformations import quaternion_matrix
 
 
 class DataCollector():
@@ -33,6 +34,16 @@ class DataCollector():
         self.baxter_arm = Limb(limb)
         rospy.Subscriber('/ar_pose_marker', AlvarMarkers, self.marker_callback)
 
+        # define 4x4 transformation for marker wrt end-effector
+        # considering no rotation in 'marker_wrt_ee' transformation matrix
+        offset_x = 0.010  # 10 mm
+        offset_y = 0
+        offset_z = 0
+        self.marker_wrt_ee = np.eye(4)
+        self.marker_wrt_ee[0, -1] = offset_x  # in x direction
+        self.marker_wrt_ee[1, -1] = offset_y  # in y direction
+        self.marker_wrt_ee[2, -1] = offset_z  # in z direction
+
     # write to tracking data to file
     def save_data(self):
         if not self.position_wrt_camera:
@@ -40,7 +51,7 @@ class DataCollector():
             return
 
         sensor_name = get_sensor_name(self.cam_image_topic)
-        file_name = self.data_dir + "/baxter_" + sensor_name + "_position_ar.csv"
+        file_name = self.data_dir + "/baxter_" + sensor_name + "_ar.csv"
         trajectory = np.hstack(
             (np.array(self.position_wrt_baxter),  np.array(self.position_wrt_camera)))
         header = "baxter_x,baxter_y,baxter_z,camera_x,camera_y,camera_z"
@@ -72,14 +83,24 @@ class DataCollector():
 
             # ar frame wrt baxter base since
             # ar marker is attached to the end-effector
-            self.position_wrt_baxter.append(list(self.baxter_arm_postion))
+            self.position_wrt_baxter.append(self.baxter_arm_postion)
             return True
 
     def marker_callback(self, data):
-        detected_markers = [marker.pose.pose.position for marker in data.markers if marker.id is not 255]
-        baxter_arm_postion = self.baxter_arm.endpoint_pose()['position']
+        ee_pose = self.baxter_arm.endpoint_pose()
+        detected_markers = [
+            marker.pose.pose.position for marker in data.markers if marker.id is not 255]
+
+        # get rotation matrix from quaternion
+        ee_wrt_robot = quaternion_matrix(ee_pose['orientation'])
+        ee_wrt_robot[:-1, -1] = ee_pose['position']  # update the translation
+
+        # marker wrt robot = marker_wrt_ee * ee_wrt_robot
+        marker_wrt_robot = ee_wrt_robot.dot(self.marker_wrt_ee)
+
         self.markers = detected_markers
-        self.baxter_arm_postion = baxter_arm_postion
+        self.baxter_arm_postion = [marker_wrt_robot[0, -1],
+                                   marker_wrt_robot[1, -1], marker_wrt_robot[2, -1]]
 
     def collect(self):
         move_arm_service = '/move_arm_to_waypoint'

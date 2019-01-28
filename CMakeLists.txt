@@ -1,16 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(multiple_kinect_baxter_calibration)
 
-## Add support for C++11
-# add_definitions(-std=c++11)
-
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
-  pcl_conversions
-  pcl_ros
   roscpp
   rospy
+  pcl_ros
+  pcl_conversions
   tf2
   tf2_ros
   tf2_geometry_msgs
@@ -18,17 +15,32 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   cv_bridge
   cmake_modules
+  genmsg
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(PCL REQUIRED)
-find_package(Eigen REQUIRED)
 find_package(OpenCV REQUIRED)
 
-## catkin specific configuration
-catkin_package(
-  DEPENDS Eigen
+## fallback for Eigen3
+## https://github.com/ros-perception/perception_pcl/issues/106#issuecomment-134948296
+find_package(Eigen 3 QUIET)
+if(NOT Eigen_FOUND)
+  find_package(PkgConfig)
+  pkg_search_module(Eigen3 REQUIRED eigen3)
+endif()
+
+## Declare ROS service
+add_service_files(
+  FILES
+  GetEEPosition.srv
 )
+
+## Generate added service
+generate_messages(DEPENDENCIES geometry_msgs)
+
+## Declare a catkin package
+catkin_package()
 
 ## Build
 include_directories(
@@ -62,9 +74,9 @@ target_link_libraries(sphere_detector_test
   ${catkin_LIBRARIES}
 )
 
-add_executable(data_collector
-  src/data_collector.cpp)
-target_link_libraries(data_collector
+add_executable(pc_data_collector
+  src/pc_data_collector.cpp)
+target_link_libraries(pc_data_collector
   ${PROJECT_NAME}_sphere_detector
   ${PCL_LIBRARIES}
   ${catkin_LIBRARIES}

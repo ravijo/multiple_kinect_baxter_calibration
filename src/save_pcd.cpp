@@ -15,7 +15,8 @@
 size_t count = 0;
 std::string package_path;
 
-void callback(const sensor_msgs::PointCloud2ConstPtr &msg) {
+void callback(const sensor_msgs::PointCloud2ConstPtr& msg)
+{
   ROS_INFO_STREAM("Point Cloud Received.");
 
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(
@@ -66,17 +67,21 @@ void callback(const sensor_msgs::PointCloud2ConstPtr &msg) {
   count++;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
   ros::init(argc, argv, "save_pcd_node", ros::init_options::AnonymousName);
   ros::NodeHandle nh("~");
   std::string cloud_topic;
   nh.getParam("topic", cloud_topic);
 
-  if (cloud_topic.empty()) {
+  if (cloud_topic.empty())
+  {
     cloud_topic = "/kinect1/sd/points";
     ROS_WARN_STREAM("Point cloud topic is not provided. Using '"
                     << cloud_topic << "' as default point cloud topic");
-  } else {
+  }
+  else
+  {
     ROS_INFO_STREAM("Point cloud topic is '" << cloud_topic << "'");
   }
 

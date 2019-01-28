@@ -6,9 +6,13 @@ Author: Nishanth Koganti, Ravi Joshi
 Date: 2016/6/16
 -->
 <launch>
+  <arg name="manual" default="false"/>
+  <arg name="file" default=""/>
+  <arg name="save_dir" default="$(find multiple_kinect_baxter_calibration)/files/"/>
+
   <!-- define the directory of baxter_trajectory and kinect_trajectory file -->
   <arg name="data_dir" default="$(find multiple_kinect_baxter_calibration)/files/"/>
-  <arg name="kinect" doc="kinect:=kinect1"/>
+  <arg name="kinect" default="" doc="kinect:=kinect1"/>
 
   <!-- set 'ar' to true for ar marker based calibration -->
   <arg name="ar" default="false"/>
@@ -18,5 +22,8 @@ Date: 2016/6/16
     <param name="data_dir" value="$(arg data_dir)"/>
     <param name="kinect" value="$(arg kinect)"/>
     <param name="ar" value="$(arg ar)"/>
+    <param name="manual" value="$(arg manual)"/>
+    <param name="file" value="$(arg file)"/>
+    <param name="save_dir" value="$(arg save_dir)"/>
   </node>
 </launch>

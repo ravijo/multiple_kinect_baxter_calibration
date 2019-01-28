@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+ar_tracking_debug.launch: ROS launch file for priting AR marker without storing any information.
+Requirements: No requirements needed
+Author: Ravi Joshi
+Date: 2018/12/14
+-->
+<launch>
+  <!--
+  individualMarkers   /kinect2/qhd/points
+  individualMarkersNoKinect   /kinect2/qhd/image_color
+  -->
+  <arg name="marker_size" default="4.5"/>
+  <arg name="max_track_error" default="0.2"/>
+  <arg name="max_new_marker_error" default="0.08"/>
+
+  <arg name="cam_image_topic" default="/kinect2/qhd/image_color"/>
+  <arg name="cam_info_topic" default="/kinect2/qhd/camera_info"/>
+  <arg name="output_frame" default="/kinect2_link"/>
+
+  <arg name="rviz" default="true"/>
+
+  <!-- marker tracking using color image -->
+  <node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen">
+    <param name="marker_size" type="double" value="$(arg marker_size)"/>
+    <param name="max_new_marker_error" type="double" value="$(arg max_new_marker_error)"/>
+    <param name="max_track_error" type="double" value="$(arg max_track_error)"/>
+    <param name="output_frame" type="string" value="$(arg output_frame)"/>
+
+    <remap from="camera_image" to="$(arg cam_image_topic)"/>
+    <remap from="camera_info" to="$(arg cam_info_topic)"/>
+  </node>
+
+  <node name="ar_marker_echo" pkg="rostopic" type="rostopic" output="screen" args="echo /ar_pose_marker"></node>
+
+  <group if="$(arg rviz)">
+    <!-- rviz visualization -->
+    <node pkg="rviz" type="rviz" respawn="false" name="rviz" args="-d $(find multiple_kinect_baxter_calibration)/files/ar_marker_vis.rviz"/>
+  </group>
+</launch>

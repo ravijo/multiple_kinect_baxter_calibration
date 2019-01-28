@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-merge_point_clouds.launch: merge point clouds and visualize in rviz
+merge_pc.launch: merge point clouds and visualize in rviz
 Author: Ravi Joshi
 Date: 2018/05/19
 -->
@@ -26,7 +26,7 @@ Date: 2018/05/19
 
   <!-- frequency of publishing merged point cloud -->
   <arg name="freq" default="10"/>
-  <node name="merge_point_clouds" pkg="multiple_kinect_baxter_calibration" type="merge_point_clouds" output="screen">
+  <node name="merge_point_clouds" pkg="multiple_kinect_baxter_calibration" type="merge_pc" output="screen">
     <param name="pc1_topic" value="$(arg pc1_topic)"/>
     <param name="pc2_topic" value="$(arg pc2_topic)"/>
     <param name="pc3_topic" value="$(arg pc3_topic)"/>

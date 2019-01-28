@@ -25,11 +25,15 @@ class KinectsVisualization():
         self.pc3_frame_id = pc3_frame_id
 
         # colors must be given in following order '[#FF0000, #00FF00, #0000FF]'
-        kinect_colors = [self.hex_to_rgba(x.strip(' ')) for x in colors.lstrip(' [,').rstrip(']').split(', ')]
+        kinect_colors = [self.hex_to_rgba(x.strip(' ')) for x in colors.lstrip(
+            ' [,').rstrip(']').split(', ')]
 
-        kinect1 = self.create_kinect(0, kinect_colors[0], float(scale), self.pc1_frame_id)
-        kinect2 = self.create_kinect(1, kinect_colors[1], float(scale), self.pc2_frame_id)
-        kinect3 = self.create_kinect(2, kinect_colors[2], float(scale), self.pc3_frame_id)
+        kinect1 = self.create_kinect(
+            0, kinect_colors[0], float(scale), self.pc1_frame_id)
+        kinect2 = self.create_kinect(
+            1, kinect_colors[1], float(scale), self.pc2_frame_id)
+        kinect3 = self.create_kinect(
+            2, kinect_colors[2], float(scale), self.pc3_frame_id)
 
         kinect_array = MarkerArray()
         kinect_array.markers.append(kinect1)
@@ -48,7 +52,8 @@ class KinectsVisualization():
         # remove hash sign from the beginning of color code
         hex_color = hex_color.lstrip('#')
         # we need colors in 0 to 1 range
-        rgb_color = tuple(float(int(hex_color[i:i + 2], 16) / 255.0) for i in (0, 2, 4))
+        rgb_color = tuple(
+            float(int(hex_color[i:i + 2], 16) / 255.0) for i in (0, 2, 4))
         return ColorRGBA(rgb_color[0], rgb_color[1], rgb_color[2], 1)
 
     def create_kinect(self, index, color, scale, frame_id):
@@ -70,7 +75,8 @@ class KinectsVisualization():
             marker.lifetime = rospy.Duration(0)  # forever (static markers)
             return marker
 
-        kinect = create_marker(index, color, Marker.CUBE, rospy.Time.now(), frame_id)
+        kinect = create_marker(index, color, Marker.CUBE,
+                               rospy.Time.now(), frame_id)
         # kinect v2 dimensions are 66 mm width *  43 mm height * 249 mm length
         kinect.scale = Vector3(scale * 0.066, scale * 0.043, scale * 0.249)
         kinect.pose.orientation = rotate_about_y_axis()
@@ -89,4 +95,5 @@ if __name__ == '__main__':
     scale = rospy.get_param('~scale')
     freq = rospy.get_param('~freq')
 
-    KinectsVisualization(base_frame_id, pc1_frame_id, pc2_frame_id, pc3_frame_id, colors, scale, freq)
+    KinectsVisualization(base_frame_id, pc1_frame_id,
+                         pc2_frame_id, pc3_frame_id, colors, scale, freq)

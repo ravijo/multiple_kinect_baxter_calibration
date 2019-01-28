@@ -1,5 +1,5 @@
 /**
- * merge_point_clouds.cpp: class file for merging multiple point clouds into one
+ * merge_pc.cpp: class file for merging multiple point clouds into one
  * Author: Ravi Joshi
  * Date: 2018/05/14
  */
@@ -22,23 +22,24 @@
 // we are using 3 kinects
 #define KINECT_COUNT 3
 
-class PointCloudSubscriber {
+class PointCloudSubscriber
+{
 private:
   Eigen::Matrix4f trans;
   ros::Subscriber subscriber;
   sensor_msgs::PointCloud2 temp_cloud;
 
-  void callback(const sensor_msgs::PointCloud2ConstPtr &msg);
+  void callback(const sensor_msgs::PointCloud2ConstPtr& msg);
 
-  inline void transformPointCloud(const Eigen::Matrix4f &transform,
-                                  const sensor_msgs::PointCloud2 &in,
-                                  sensor_msgs::PointCloud2 &out);
+  inline void transformPointCloud(const Eigen::Matrix4f& transform,
+                                  const sensor_msgs::PointCloud2& in,
+                                  sensor_msgs::PointCloud2& out);
 
 public:
   // the latest available point cloud data
   sensor_msgs::PointCloud2 point_cloud;
 
-  void setup(Eigen::Matrix4f transformation, ros::NodeHandle &node_handle,
+  void setup(Eigen::Matrix4f transformation, ros::NodeHandle& node_handle,
              std::string topic_name, int queue_size);
 
   PointCloudSubscriber(){};
@@ -47,9 +48,10 @@ public:
 // source:
 // https://github.com/ros-perception/perception_pcl/blob/indigo-devel/pcl_ros/src/transforms.cpp#L106
 inline void
-PointCloudSubscriber::transformPointCloud(const Eigen::Matrix4f &transform,
-                                          const sensor_msgs::PointCloud2 &in,
-                                          sensor_msgs::PointCloud2 &out) {
+PointCloudSubscriber::transformPointCloud(const Eigen::Matrix4f& transform,
+                                          const sensor_msgs::PointCloud2& in,
+                                          sensor_msgs::PointCloud2& out)
+{
   size_t point_step = in.point_step;
   size_t data_size = in.data.size();
   size_t n = in.width * in.height;
@@ -70,9 +72,10 @@ PointCloudSubscriber::transformPointCloud(const Eigen::Matrix4f &transform,
 
   size_t index;
   Eigen::Vector4f pt_out;
-  Eigen::Vector4f pt_in(0, 0, 0, 1); // 4x1 vector
+  Eigen::Vector4f pt_in(0, 0, 0, 1);  // 4x1 vector
 
-  for (size_t i = 0; i < n; i++) {
+  for (size_t i = 0; i < n; i++)
+  {
     index = i * point_step;
 
     /*
@@ -82,9 +85,9 @@ PointCloudSubscriber::transformPointCloud(const Eigen::Matrix4f &transform,
      */
 
     // fill emements of the vector
-    pt_in(0) = *(float *)&in.data[index + 0];
-    pt_in(1) = *(float *)&in.data[index + 4];
-    pt_in(2) = *(float *)&in.data[index + 8];
+    pt_in(0) = *(float*)&in.data[index + 0];
+    pt_in(1) = *(float*)&in.data[index + 4];
+    pt_in(2) = *(float*)&in.data[index + 8];
 
     // we don't want to make  copy of the data
     pt_out.noalias() = transform * pt_in;
@@ -95,10 +98,10 @@ PointCloudSubscriber::transformPointCloud(const Eigen::Matrix4f &transform,
   }
 }
 
-void PointCloudSubscriber::callback(
-    const sensor_msgs::PointCloud2ConstPtr &msg) {
+void PointCloudSubscriber::callback(const sensor_msgs::PointCloud2ConstPtr& msg)
+{
   // pcl_ros::transformPointCloud(trans, *msg, temp_cloud);// takes 4 ms
-  transformPointCloud(trans, *msg, temp_cloud); // takes 3 ms
+  transformPointCloud(trans, *msg, temp_cloud);  // takes 3 ms
   // we work with a temporary cloud i.e., temp_cloud
   // once temp_cloud is transformed it is
   // simply assigned to point_cloud
@@ -106,40 +109,42 @@ void PointCloudSubscriber::callback(
 }
 
 void PointCloudSubscriber::setup(Eigen::Matrix4f transformation,
-                                 ros::NodeHandle &node_handle,
-                                 std::string topic_name, int queue_size) {
+                                 ros::NodeHandle& node_handle,
+                                 std::string topic_name, int queue_size)
+{
   trans = transformation;
   subscriber = node_handle.subscribe<sensor_msgs::PointCloud2>(
       topic_name, queue_size, &PointCloudSubscriber::callback, this,
       ros::TransportHints().tcpNoDelay());
 }
 
-class MergePointClouds {
+class MergePC
+{
 private:
   int freq;
   std::string base_frame_id, pc1_frame_id, pc2_frame_id, pc3_frame_id;
   PointCloudSubscriber pc_sub1, pc_sub2, pc_sub3;
   ros::Publisher merged_pc_pub;
 
-  Eigen::Matrix4f *fetchTransformations(double wait_time);
+  Eigen::Matrix4f* fetchTransformations(double wait_time);
 
-  inline void combinePointClouds(const sensor_msgs::PointCloud2 &cloud1,
-                                 const sensor_msgs::PointCloud2 &cloud2,
-                                 const sensor_msgs::PointCloud2 &cloud3,
-                                 sensor_msgs::PointCloud2 &cloud_out);
+  inline void combinePointClouds(const sensor_msgs::PointCloud2& cloud1,
+                                 const sensor_msgs::PointCloud2& cloud2,
+                                 const sensor_msgs::PointCloud2& cloud3,
+                                 sensor_msgs::PointCloud2& cloud_out);
 
 public:
-  MergePointClouds();
+  MergePC();
   void run();
 };
 
 // source:
 // https://github.com/ros-perception/perception_pcl/blob/118784a4dd06437847182fe5e77829003d103def/pcl_conversions/include/pcl_conversions/pcl_conversions.h#L612
-inline void
-MergePointClouds::combinePointClouds(const sensor_msgs::PointCloud2 &cloud1,
-                                     const sensor_msgs::PointCloud2 &cloud2,
-                                     const sensor_msgs::PointCloud2 &cloud3,
-                                     sensor_msgs::PointCloud2 &cloud_out) {
+inline void MergePC::combinePointClouds(const sensor_msgs::PointCloud2& cloud1,
+                                        const sensor_msgs::PointCloud2& cloud2,
+                                        const sensor_msgs::PointCloud2& cloud3,
+                                        sensor_msgs::PointCloud2& cloud_out)
+{
   // assign cloud 1 to output cloud
   cloud_out = cloud1;
 
@@ -167,26 +172,31 @@ MergePointClouds::combinePointClouds(const sensor_msgs::PointCloud2 &cloud1,
               cloud3_len);
 }
 
-Eigen::Matrix4f *MergePointClouds::fetchTransformations(double wait_time) {
+Eigen::Matrix4f* MergePC::fetchTransformations(double wait_time)
+{
   tf::TransformListener listener;
   tf::StampedTransform t1, t2, t3;
 
-  try {
+  try
+  {
     listener.waitForTransform(base_frame_id, pc1_frame_id, ros::Time(0),
                               ros::Duration(wait_time));
     listener.lookupTransform(base_frame_id, pc1_frame_id, ros::Time(0), t1);
     listener.lookupTransform(base_frame_id, pc2_frame_id, ros::Time(0), t2);
     listener.lookupTransform(base_frame_id, pc3_frame_id, ros::Time(0), t3);
-  } catch (tf::TransformException ex) {
+  }
+  catch (tf::TransformException ex)
+  {
     ROS_ERROR_STREAM("Unable to fetch static transformations. " << ex.what());
     ros::shutdown();
   }
 
   // create a dynamic array
-  Eigen::Matrix4f *transformations = new Eigen::Matrix4f[KINECT_COUNT];
+  Eigen::Matrix4f* transformations = new Eigen::Matrix4f[KINECT_COUNT];
 
-  tf::StampedTransform tf_trans[] = {t1, t2, t3};
-  for (size_t i = 0; i < KINECT_COUNT; i++) {
+  tf::StampedTransform tf_trans[] = { t1, t2, t3 };
+  for (size_t i = 0; i < KINECT_COUNT; i++)
+  {
     Eigen::Matrix4f eigen_transform;
     pcl_ros::transformAsMatrix(tf_trans[i], eigen_transform);
     transformations[i] = eigen_transform;
@@ -195,7 +205,8 @@ Eigen::Matrix4f *MergePointClouds::fetchTransformations(double wait_time) {
   return transformations;
 }
 
-MergePointClouds::MergePointClouds() {
+MergePC::MergePC()
+{
   ros::NodeHandle nh("~");
 
   std::string pc1_topic, pc2_topic, pc3_topic, merge_pc_topic;
@@ -213,7 +224,7 @@ MergePointClouds::MergePointClouds() {
   nh.getParam("wait_time", wait_time);
   nh.getParam("freq", freq);
 
-  Eigen::Matrix4f *transformations = fetchTransformations(wait_time);
+  Eigen::Matrix4f* transformations = fetchTransformations(wait_time);
   pc_sub1.setup(transformations[0], nh, pc1_topic, 1);
   pc_sub2.setup(transformations[1], nh, pc2_topic, 1);
   pc_sub2.setup(transformations[2], nh, pc3_topic, 1);
@@ -222,11 +233,13 @@ MergePointClouds::MergePointClouds() {
   merged_pc_pub = nh.advertise<sensor_msgs::PointCloud2>(merge_pc_topic, 1);
 }
 
-void MergePointClouds::run() {
+void MergePC::run()
+{
   ros::Rate loop_rate(freq);
   sensor_msgs::PointCloud2 cloud_out;
 
-  while (ros::ok()) {
+  while (ros::ok())
+  {
     combinePointClouds(pc_sub1.point_cloud, pc_sub2.point_cloud,
                        pc_sub3.point_cloud, cloud_out);
 
@@ -241,11 +254,12 @@ void MergePointClouds::run() {
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
   ros::init(argc, argv, "merge_point_clouds_node",
             ros::init_options::AnonymousName);
 
-  MergePointClouds merge_point_clouds;
+  MergePC merge_point_clouds;
   merge_point_clouds.run();
 
   return 0;

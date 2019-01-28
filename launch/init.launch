@@ -6,46 +6,56 @@ Author: Ravi Joshi
 Date: 2018/04/05
 -->
 <launch>
-  <!-- define name -->
+  <arg name="kinect_1" default="true"/>
+  <arg name="kinect_2" default="true"/>
+  <arg name="kinect_3" default="true"/>
+  
+  <!-- set 'ar' to true for ar marker based calibration -->
+  <arg name="ar" default="false"/>
+  <arg name="publish_calibration" default="true"/>
+
+  <!-- define names -->
   <arg name="kinect_sensor_1_name" default="kinect1"/>
   <arg name="kinect_sensor_2_name" default="kinect2"/>
   <arg name="kinect_sensor_3_name" default="kinect3"/>
 
-  <!-- define sensor id -->
+  <!-- define sensor ids -->
   <arg name="kinect_sensor_1_id" default="510760242542"/>
   <arg name="kinect_sensor_2_id" default="510428142542"/>
   <arg name="kinect_sensor_3_id" default="510341742542"/>
 
-  <!-- define maximum depth value -->
+  <!-- define maximum depth values -->
   <arg name="kinect_sensor_1_max_d" default="12.0"/>
   <arg name="kinect_sensor_2_max_d" default="12.0"/>
   <arg name="kinect_sensor_3_max_d" default="12.0"/>
 
-  <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
-    <arg name="publish_tf" value="true"/>
-    <arg name="sensor" value="$(arg kinect_sensor_1_id)"/>
-    <arg name="base_name" value="$(arg kinect_sensor_1_name)"/>
-    <arg name="max_depth" value="$(arg kinect_sensor_1_max_d)"/>
-  </include>
+  <group if="$(arg kinect_1)">
+    <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
+      <arg name="publish_tf" value="true"/>
+      <arg name="sensor" value="$(arg kinect_sensor_1_id)"/>
+      <arg name="base_name" value="$(arg kinect_sensor_1_name)"/>
+      <arg name="max_depth" value="$(arg kinect_sensor_1_max_d)"/>
+    </include>
+  </group>
 
-  <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
-    <arg name="publish_tf" value="true"/>
-    <arg name="sensor" value="$(arg kinect_sensor_2_id)"/>
-    <arg name="base_name" value="$(arg kinect_sensor_2_name)"/>
-    <arg name="max_depth" value="$(arg kinect_sensor_2_max_d)"/>
-  </include>
+  <group if="$(arg kinect_2)">
+    <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
+      <arg name="publish_tf" value="true"/>
+      <arg name="sensor" value="$(arg kinect_sensor_2_id)"/>
+      <arg name="base_name" value="$(arg kinect_sensor_2_name)"/>
+      <arg name="max_depth" value="$(arg kinect_sensor_2_max_d)"/>
+    </include>
+  </group>
 
-  <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
-    <arg name="publish_tf" value="true"/>
-    <arg name="sensor" value="$(arg kinect_sensor_3_id)"/>
-    <arg name="base_name" value="$(arg kinect_sensor_3_name)"/>
-    <arg name="max_depth" value="$(arg kinect_sensor_3_max_d)"/>
-  </include>
+  <group if="$(arg kinect_3)">
+    <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
+      <arg name="publish_tf" value="true"/>
+      <arg name="sensor" value="$(arg kinect_sensor_3_id)"/>
+      <arg name="base_name" value="$(arg kinect_sensor_3_name)"/>
+      <arg name="max_depth" value="$(arg kinect_sensor_3_max_d)"/>
+    </include>
+  </group>
 
-  <!-- set 'ar' to true for ar marker based calibration -->
-  <arg name="ar" default="false"/>
-
-  <arg name="publish_calibration" default="true"/>
   <group if="$(arg publish_calibration)">
     <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch">
       <arg name="ar" value="$(arg ar)"/>

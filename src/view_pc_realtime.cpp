@@ -1,5 +1,5 @@
 /**
- * view_cloud_realtime.cpp: utility to view point cloud data in realtime
+ * view_pc_realtime.cpp: utility to view point cloud data in realtime
  * Author: Ravi Joshi
  * Date: 2018/02/20
  */
@@ -15,12 +15,12 @@
 // pcl header
 #include <pcl/visualization/pcl_visualizer.h>
 
-
 pcl::visualization::PCLVisualizer viewer("Realtime Cloud Viewer");
 
 void callback(const sensor_msgs::PointCloud2ConstPtr& msg)
 {
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(
+      new pcl::PointCloud<pcl::PointXYZRGB>);
   utility::getPointCloudFromMsg(*msg, *cloud);
 
   if (!viewer.updatePointCloud(cloud, "cloud"))
@@ -29,9 +29,10 @@ void callback(const sensor_msgs::PointCloud2ConstPtr& msg)
   viewer.spinOnce();
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "view_cloud_realtime_node", ros::init_options::AnonymousName);
+  ros::init(argc, argv, "view_cloud_realtime_node",
+            ros::init_options::AnonymousName);
 
   ros::NodeHandle nh("~");
   std::string cloud_topic;
@@ -40,18 +41,21 @@ int main(int argc, char **argv)
   if (cloud_topic.empty())
   {
     cloud_topic = "/kinect1/sd/points";
-    ROS_WARN_STREAM("Point cloud topic is not provided. Using '" << cloud_topic << "' as default point cloud topic");
+    ROS_WARN_STREAM("Point cloud topic is not provided. Using '"
+                    << cloud_topic << "' as default point cloud topic");
   }
   else
   {
     ROS_INFO_STREAM("Point cloud topic is '" << cloud_topic << "'");
   }
 
-  std::string package_path = ros::package::getPath("multiple_kinect_baxter_calibration");
+  std::string package_path =
+      ros::package::getPath("multiple_kinect_baxter_calibration");
 
   std::string cam_file;
   std::string source;
-  if (nh.getParam("source", source) && boost::starts_with(boost::algorithm::to_lower_copy(source), "w"))
+  if (nh.getParam("source", source) &&
+      boost::starts_with(boost::algorithm::to_lower_copy(source), "w"))
   {
     // if source is 'Windows'
     cam_file = package_path + "/files/kinect_anywhere.cam";

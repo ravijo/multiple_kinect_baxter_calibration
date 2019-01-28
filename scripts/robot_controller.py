@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# baxter_controller.py: baxter arm  motion controller for calibration
+# robot_controller.py: Baxter arm motion controller for calibration
 # Author: Ravi Joshi
 # Date: 2018/04/12
 
@@ -9,12 +9,13 @@
 import rospy
 import numpy as np
 from baxter_interface import Limb
+from tf.transformations import quaternion_matrix
 from std_srvs.srv import Trigger, TriggerRequest, TriggerResponse
-from multiple_kinect_baxter_calibration.srv import GetEEPose, GetEEPoseRequest, GetEEPoseResponse
+from multiple_kinect_baxter_calibration.srv import GetEEPosition, GetEEPositionRequest, GetEEPositionResponse
 
 
 class BaxterController():
-    def __init__(self, limb_name, trajectory):
+    def __init__(self, limb_name, trajectory, offset, radius):
         # crate a limb instance control the baxter arm
         self.limb = Limb(limb_name)
 
@@ -34,12 +35,17 @@ class BaxterController():
                                                           self.handle_move_arm_to_waypoint)
 
         # define another service called 'get_ee_pose'
-        self.get_ee_pose_service = rospy.Service('get_ee_pose',
-                                                 GetEEPose,
-                                                 self.handle_get_ee_pose_service)
+        self.get_ee_position_service = rospy.Service('get_ee_position',
+                                                     GetEEPosition,
+                                                     self.handle_get_ee_position_service)
 
         # flag to set when trajectory is finished
         self.trajectory_finished = False
+
+        # define 4x4 transformation for marker wrt end-effector
+        # considering no rotation in 'marker_wrt_ee' transformation matrix
+        self.marker_wrt_ee = np.eye(4)
+        self.marker_wrt_ee[2, -1] = offset + radius  # in z direction only
 
     def spin(self):
         # let the ros stay awake and serve the request
@@ -49,17 +55,25 @@ class BaxterController():
 
         # wait some time before stopping the node so that the service request returns if any
         rospy.sleep(1)
-        self.get_ee_pose_service.shutdown()
+        self.get_ee_position_service.shutdown()
         self.move_arm_to_waypoint_service.shutdown()
         rospy.logdebug('Shutting down the baxter controller node')
         rospy.signal_shutdown('User requested')
 
-    def handle_get_ee_pose_service(self, request):
+    def handle_get_ee_position_service(self, request):
         # create a response object for the 'GetEEPose' service
         ee_pose = self.limb.endpoint_pose()
-        response = GetEEPoseResponse()
-        response.pose.position = ee_pose['position']
-        response.pose.orientation = ee_pose['orientation']
+
+        # get rotation matrix from quaternion
+        ee_wrt_robot = quaternion_matrix(ee_pose['orientation'])
+        ee_wrt_robot[:-1, -1] = ee_pose['position']  # update the translation
+
+        # marker wrt robot = marker_wrt_ee * ee_wrt_robot
+        marker_wrt_robot = ee_wrt_robot.dot(self.marker_wrt_ee)
+        response = GetEEPositionResponse()
+        response.position.x = marker_wrt_robot[0, -1]
+        response.position.y = marker_wrt_robot[1, -1]
+        response.position.z = marker_wrt_robot[2, -1]
         return response
 
     def handle_move_arm_to_waypoint(self, request):
@@ -132,6 +146,9 @@ if __name__ == '__main__':
     limb = rospy.get_param('~limb')
     topic = rospy.get_param('~topic')
     file_name = rospy.get_param('~%s_trajectory' % get_sensor_name(topic))
+    offset = rospy.get_param('~offset')
+    radius = rospy.get_param('~radius')
+
     trajectory, header = read_csv(file_name)
 
     # check if wrong trajectory file is provided
@@ -139,5 +156,5 @@ if __name__ == '__main__':
         rospy.logerr("Provided limb '%s' doesn't match with trajectory file. Trajectory file: \n'%s'" % (
             limb, file_name))
     else:
-        controller = BaxterController(limb, trajectory)
+        controller = BaxterController(limb, trajectory, offset, radius)
         controller.spin()

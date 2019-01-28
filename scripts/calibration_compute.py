@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# calibration_compute.py: Code to compute absolute orientation from collected points
-# Author: Nishanth Koganti, Ravi Joshi
-# Date: 2016/06/16
+# calibration_compute.py: Code to compute absolute orientation from collected points in corrospondence
+# Author: Ravi Joshi
+# Date: 2018/12/15
 # Source: http://math.stackexchange.com/questions/745234/calculate-rotation-translation-matrix-to-match-measurement-points-to-nominal-poi
 
 # import modules
@@ -105,22 +105,46 @@ def plot_error(err, file_name, bar_width=0.35, opacity=0.4):
     ax.set_xticks(ticks)
     ax.set_xlim(x[0], x[-1])
     ax.legend()
-    ax.set_title('input file: %s' % file_name)
+    ax.set_title('Calibration file: %s' % file_name)
+
+
+def get_kinect_name(file_name):
+    tokens = file_name.split('_')
+    kinect_name = tokens[1]
+    if tokens[2] == 'anywhere':
+        kinect_name = '%s_anywhere' % kinect_name
+    return kinect_name
 
 
 def main():
     # initialize ros node
     rospy.init_node('compute_calibration', anonymous=True)
 
-    # get path to folder containing recorded data
-    data_dir = rospy.get_param('~data_dir')
-    kinect = rospy.get_param('~kinect')
-    ar = rospy.get_param('~ar')
+    manual = rospy.get_param('~manual')
+    save_dir = rospy.get_param('~save_dir')
 
-    suffix = 'ar' if ar else 'pc'
-    file_name = 'baxter_%s_position_%s.csv' % (kinect, suffix)
-    trajectory_file = os.path.join(data_dir, file_name)
+    if manual is True:
+        in_file_name = rospy.get_param('~file')
+        save_file_name = os.path.basename(in_file_name)
+        save_file_name = '%s.yaml' % os.path.splitext(save_file_name)[0]
+        trajectory_file = in_file_name
+        kinect = get_kinect_name(save_file_name)
+    else:
+        kinect = rospy.get_param('~kinect')
+        if not kinect:
+            rospy.logerr(
+                "Input parameter 'kinect' is not provided. Launch it with 'kinect:=kinect1'")
+            return
 
+        ar = rospy.get_param('~ar')
+        suffix = 'ar' if ar else 'pc'
+        in_file_name = 'baxter_%s_%s.csv' % (kinect, suffix)
+        save_file_name = 'baxter_%s_%s.yaml' % (kinect, suffix)
+        # get path to folder containing recorded data
+        data_dir = rospy.get_param('~data_dir')
+        trajectory_file = os.path.join(data_dir, in_file_name)
+
+    save_file_path = os.path.join(save_dir, save_file_name)
     rospy.loginfo('Reading file:\n%s\n' % trajectory_file)
 
     # load trajectories
@@ -152,11 +176,12 @@ def main():
                    'calibration error (m)': float('%.4f' % err),
                    'created on': datetime.datetime.now().strftime('%d %B %Y %I:%M:%S %p')}
 
-    with open('%sbaxter_%s_calibration_%s.yaml' % (data_dir, kinect, suffix), 'w') as out_file:
+    with open(save_file_path, 'w') as out_file:
         yaml.dump(calibration, out_file)
 
+    rospy.loginfo('Saved calibration file:\n%s\n' % save_file_path)
     plot_calibration(kinect_out, baxter_traj, kinect, err_cm)
-    plot_error(errs, file_name)
+    plot_error(errs, save_file_name)
     plt.show()
 
 
