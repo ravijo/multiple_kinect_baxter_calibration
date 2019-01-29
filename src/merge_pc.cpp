@@ -24,8 +24,6 @@
 // we are using 3 kinects
 #define KINECT_COUNT 3
 
-#include <ctime>
-
 class PointCloudSubscriber
 {
 private:
@@ -56,9 +54,9 @@ PointCloudSubscriber::transformPointCloud(const Eigen::Matrix4f& transform,
                                           const sensor_msgs::PointCloud2& in,
                                           sensor_msgs::PointCloud2& out)
 {
-  size_t point_step = in.point_step;
-  size_t data_size = in.data.size();
-  size_t n = in.width * in.height;
+  const size_t point_step = in.point_step;
+  const size_t data_size = in.data.size();
+  const size_t n = in.width * in.height;
 
   // copy the other data
   out.header = in.header;
@@ -77,7 +75,6 @@ PointCloudSubscriber::transformPointCloud(const Eigen::Matrix4f& transform,
   size_t index;
   Eigen::Vector4f pt_out;
   Eigen::Vector4f pt_in(0, 0, 0, 1);  // 4x1 vector
-
   for (size_t i = 0; i < n; i++)
   {
     index = i * point_step;
@@ -91,7 +88,8 @@ PointCloudSubscriber::transformPointCloud(const Eigen::Matrix4f& transform,
     // fill emements of the vector by first 3 float elements (12 bytes)
     std::memcpy(&pt_in, &in.data[index], 12);
 
-    // we don't want to make  copy of the data
+    // perform the transformation here
+    // we don't want to make  copy of the data hence using noalias()
     pt_out.noalias() = transform * pt_in;
 
     // copy the data into output
