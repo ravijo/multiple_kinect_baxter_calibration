@@ -8,7 +8,7 @@ import rospy
 import numpy as np
 from std_srvs.srv import Trigger
 from baxter_interface import Limb
-from baxter_controller import get_sensor_name
+from robot_controller import get_sensor_name
 from ar_track_alvar_msgs.msg import AlvarMarkers
 from tf.transformations import quaternion_matrix
 
