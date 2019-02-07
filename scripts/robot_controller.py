@@ -64,7 +64,8 @@ class BaxterController():
         # create a response object for the 'GetEEPose' service
         ee_pose = self.limb.endpoint_pose()
 
-        # get rotation matrix from quaternion
+        # get rotation matrix from quaternion. 'quaternion_matrix'
+        # returns 4x4 HTM with translation set to sero
         ee_wrt_robot = quaternion_matrix(ee_pose['orientation'])
         ee_wrt_robot[:-1, -1] = ee_pose['position']  # update the translation
 
