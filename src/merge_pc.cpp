@@ -21,6 +21,7 @@
 // for thread related support
 #include <boost/thread.hpp>
 
+// for locking using mutex
 #include <pthread.h>
 
 // we are using 3 kinects
