@@ -27,7 +27,8 @@
 // we are using 3 kinects
 #define KINECT_COUNT 3
 
-pthread_mutex_t my_mutex;
+// mutex for locking and unlocking point cloud
+static pthread_mutex_t my_mutex;
 
 class PointCloudSubscriber
 {
