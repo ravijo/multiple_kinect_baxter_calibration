@@ -57,13 +57,13 @@ Date: 2018/04/05
     </include>
   </group>
 
-  <group if="$(arg publish_calibration)">
-    <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch">
-      <arg name="ar" value="$(arg ar)"/>
-    </include>
-  </group>
-
   <group if="$(arg use_baxter)">
+    <group if="$(arg publish_calibration)">
+      <include file="$(find multiple_kinect_baxter_calibration)/launch/calibration_publisher.launch">
+        <arg name="ar" value="$(arg ar)"/>
+      </include>
+    </group>
+
     <!-- baxter provided utility to enable robot -->
     <node name="enable_robot" pkg="baxter_tools" type="enable_robot.py" args="-e" output="screen"/>
 

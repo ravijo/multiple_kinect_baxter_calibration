@@ -21,8 +21,12 @@
 // for thread related support
 #include <boost/thread.hpp>
 
+#include <pthread.h>
+
 // we are using 3 kinects
 #define KINECT_COUNT 3
+
+pthread_mutex_t my_mutex;
 
 class PointCloudSubscriber
 {
@@ -78,7 +82,6 @@ PointCloudSubscriber::transformPointCloud(const Eigen::Matrix4f& transform,
   for (size_t i = 0; i < n; i++)
   {
     index = i * point_step;
-
     /*
      * Eigen::Vector4f pt_in (*(float*)&in.data[index + 0],
      *                        *(float*)&in.data[index + 4],
@@ -103,7 +106,12 @@ void PointCloudSubscriber::callback(const sensor_msgs::PointCloud2ConstPtr& msg)
   // we work with a temporary cloud i.e., temp_cloud once temp_cloud is
   // transformed it is simply assigned to point_cloud
   transformPointCloud(trans, *msg, temp_cloud);
+
+  // make sure that other threads cannot access the point cloud while we are
+  // assigning it
+  pthread_mutex_lock(&my_mutex);
   point_cloud = temp_cloud;
+  pthread_mutex_unlock(&my_mutex);
 }
 
 void PointCloudSubscriber::setup(Eigen::Matrix4f transformation,
