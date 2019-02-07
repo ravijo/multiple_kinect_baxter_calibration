@@ -1,5 +1,5 @@
 # multiple_kinect_baxter_calibration
-This repository contains code for autonomous calibration of Baxter robot and Kinect camera. It supports multiple Kinect sensors.
+This repository contains code for calibration of Baxter robot and Kinect camera. It supports multiple Kinect sensors. It can be used (after minor modification) in other ROS supported robots as well.
 
 ## Dependencies
 * [Baxter SDK](https://github.com/RethinkRobotics/baxter)
