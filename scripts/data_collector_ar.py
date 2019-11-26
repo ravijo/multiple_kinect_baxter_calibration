@@ -23,6 +23,7 @@ class DataCollector():
         self.wait_time = rospy.get_param('~wait_time')
         self.data_dir = rospy.get_param('~data_dir')
         self.cam_image_topic = rospy.get_param('~cam_image_topic')
+        self.marker_id = int(rospy.get_param('~marker_id'))
 
         self.markers = None
         self.baxter_arm_postion = None
@@ -68,28 +69,22 @@ class DataCollector():
             rospy.logwarn('No marker detected.')
             return False
 
-        elif marker_len > 1:
-            rospy.logwarn('Multiple markers detected')
-            return False
+        marker_position = self.markers[0]
+        marker_position = [marker_position.x,
+                           marker_position.y,
+                           marker_position.z]
 
-        else:
-            marker_position = self.markers[0]
-            marker_position = [marker_position.x,
-                               marker_position.y,
-                               marker_position.z]
+        # ar marker frame wrt kinect
+        self.position_wrt_camera.append(marker_position)
 
-            # ar marker frame wrt kinect
-            self.position_wrt_camera.append(marker_position)
-
-            # ar frame wrt baxter base since
-            # ar marker is attached to the end-effector
-            self.position_wrt_baxter.append(self.baxter_arm_postion)
-            return True
+        # ar frame wrt baxter base since
+        # ar marker is attached to the end-effector
+        self.position_wrt_baxter.append(self.baxter_arm_postion)
+        return True
 
     def marker_callback(self, data):
         ee_pose = self.baxter_arm.endpoint_pose()
-        detected_markers = [
-            marker.pose.pose.position for marker in data.markers if marker.id is not 255]
+        detected_marker = [marker.pose.pose.position for marker in data.markers if marker.id == self.marker_id]
 
         # get rotation matrix from quaternion
         ee_wrt_robot = quaternion_matrix(ee_pose['orientation'])
@@ -98,7 +93,7 @@ class DataCollector():
         # marker wrt robot = marker_wrt_ee * ee_wrt_robot
         marker_wrt_robot = ee_wrt_robot.dot(self.marker_wrt_ee)
 
-        self.markers = detected_markers
+        self.markers = detected_marker
         self.baxter_arm_postion = [marker_wrt_robot[0, -1],
                                    marker_wrt_robot[1, -1], marker_wrt_robot[2, -1]]
 

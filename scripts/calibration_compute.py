@@ -111,7 +111,7 @@ def plot_error(err, file_name, bar_width=0.35, opacity=0.4):
 def get_kinect_name(file_name):
     tokens = file_name.split('_')
     kinect_name = tokens[1]
-    if tokens[2] == 'anywhere':
+    if len(tokens) > 2 and tokens[2] == 'anywhere':
         kinect_name = '%s_anywhere' % kinect_name
     return kinect_name
 
@@ -147,8 +147,8 @@ def main():
     save_file_path = os.path.join(save_dir, save_file_name)
     rospy.loginfo('Reading file:\n%s\n' % trajectory_file)
 
-    # load trajectories
-    trajectory = np.loadtxt(trajectory_file, delimiter=',', skiprows=1)
+    # load trajectories (read only first 6 columns)
+    trajectory = np.loadtxt(trajectory_file, delimiter=',', skiprows=1, usecols=range(6))
 
     # first three columns belong to baxter trajectories and
     # remaining three columns belong to kinect trajectories

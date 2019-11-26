@@ -14,9 +14,9 @@ Date: 2018/12/14
   <arg name="max_track_error" default="0.2"/>
   <arg name="max_new_marker_error" default="0.08"/>
 
-  <arg name="cam_image_topic" default="/kinect2/qhd/image_color"/>
-  <arg name="cam_info_topic" default="/kinect2/qhd/camera_info"/>
-  <arg name="output_frame" default="/kinect2_link"/>
+  <arg name="cam_image_topic" default="/kinect_anywhere/color_frame/image"/>
+  <arg name="cam_info_topic" default="/kinect_anywhere/color_frame/camera_info"/>
+  <arg name="output_frame" default="/kinect1_link"/>
 
   <arg name="rviz" default="true"/>
 

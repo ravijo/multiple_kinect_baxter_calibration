@@ -87,7 +87,9 @@ int main(int argc, char** argv)
   {
     pcd_file = package_path + "/files/scene.pcd";
     ROS_WARN_STREAM("PCD file is not provided. Using '"
-                    << pcd_file << "' as default PCD file");
+                    << pcd_file << "' as default PCD file.\n"
+                    << "Alternatively use the following way-\n"
+                    << "_file:=/home/ravi/Desktop/scene.pcd");
   }
 
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(

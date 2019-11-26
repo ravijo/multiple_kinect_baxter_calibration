@@ -8,17 +8,18 @@ Date: 2018/02/16
   <!-- set 'ar' to true for ar marker based calibration -->
   <arg name="ar" default="false"/>
   <arg name="marker_size" default="4.5"/>
+  <arg name="marker_id" default="9"/>
   <arg name="max_track_error" default="0.2"/>
   <arg name="max_new_marker_error" default="0.08"/>
-  <arg name="cam_image_topic" default="/kinect2/qhd/image_color"/>
-  <arg name="cam_info_topic" default="/kinect2/qhd/camera_info"/>
+  <arg name="cam_image_topic" default="/kinect_anywhere/color_frame/image"/>
+  <arg name="cam_info_topic" default="/kinect_anywhere/color_frame/camera_info"/>
 
   <!-- rostopic for receving point cloud -->
   <!-- libfreenect topic = /kinect2/sd/points -->
   <!-- kinect_anywhere topic = /kinect_anywhere/point_cloud/points2 -->
   <arg name="topic" doc="topic:=/kinect2/sd/points"/>
 
-  <arg name="kinect_frame" default="/kinect2_link"/>
+  <arg name="kinect_frame" default="/kinect1_link"/>
 
   <!-- limb used in calibration process -->
   <arg name="limb" default="right"/>
@@ -28,15 +29,20 @@ Date: 2018/02/16
   <arg name="log" default="Debug"/>
 
   <!-- baxter arm pre-defined trajectory for various kinects -->
-  <arg name="kinect1_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/short.csv"/>
-  <arg name="kinect2_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/short.csv"/>
-  <arg name="kinect3_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/short.csv"/>
-  <arg name="kinect_anywhere_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/short.csv"/>
+  <arg name="kinect1_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/long.csv"/>
+  <arg name="kinect2_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/long.csv"/>
+  <arg name="kinect3_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/long.csv"/>
+  <arg name="kinect_anywhere_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/long.csv"/>
+  <arg name="camera_trajectory" default="$(find multiple_kinect_baxter_calibration)/files/long.csv"/>
 
   <!-- minimum and maximum HSV values for sphere segmentation -->
   <!-- polystyrene green ball parameters -->
+  <!-- the commented hsv values work most of the times
   <arg name="min_hsv" default="[40, 50, 60]"/>
   <arg name="max_hsv" default="[60, 200, 255]"/>
+  -->
+  <arg name="min_hsv" default="[40, 50, 60]"/>
+  <arg name="max_hsv" default="[80, 200, 255]"/>
 
   <!--
   ###################################################################
@@ -103,6 +109,7 @@ Date: 2018/02/16
     <param name="kinect2_trajectory" value="$(arg kinect2_trajectory)"/>
     <param name="kinect3_trajectory" value="$(arg kinect3_trajectory)"/>
     <param name="kinect_anywhere_trajectory" value="$(arg kinect_anywhere_trajectory)"/>
+    <param name="camera_trajectory" value="$(arg camera_trajectory)"/>
     <param name="radius" value="$(arg radius)"/>
     <param name="offset" value="$(arg offset)"/>
     <param name="limb" value="$(arg limb)"/>
@@ -110,7 +117,7 @@ Date: 2018/02/16
 
   <!-- point cloud based calibration -->
   <group unless="$(arg ar)">
-    <node name="pc_data_collector" pkg="multiple_kinect_baxter_calibration" type="pc_data_collector" output="screen" >
+    <node name="pc_data_collector" pkg="multiple_kinect_baxter_calibration" type="data_collector_pc" output="screen">
       <param name="min_hsv" value="$(arg min_hsv)"/>
       <param name="max_hsv" value="$(arg max_hsv)"/>
       <param name="radius" value="$(arg radius)"/>
@@ -151,8 +158,9 @@ Date: 2018/02/16
     <node pkg="rviz" type="rviz" respawn="false" name="rviz" args="-d $(find multiple_kinect_baxter_calibration)/files/ar_marker_vis.rviz"/>
 
     <!-- calibration using ar marker -->
-    <node pkg="multiple_kinect_baxter_calibration" type="ar_data_collector.py" name="ar_data_collector" output="screen">
+    <node pkg="multiple_kinect_baxter_calibration" type="data_collector_ar.py" name="data_collector_ar" output="screen">
       <param name="cam_image_topic" value="$(arg cam_image_topic)"/>
+      <param name="marker_id" type="double" value="$(arg marker_id)"/>
       <param name="limb" value="$(arg limb)"/>
       <param name="data_dir" value="$(arg data_dir)"/>
       <param name="wait_time" value="$(arg wait_time)"/>

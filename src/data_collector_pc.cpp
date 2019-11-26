@@ -38,6 +38,7 @@
 #define CLOUD_ID "point_cloud"
 #define SEGMENTED_CLOUD_ID "segmented_cloud"
 #define SPHERE_ID "detected_sphere"
+#define BLUE_COLOR 0.2, 0.3, 1.0
 
 class DataCollector
 {
@@ -98,6 +99,19 @@ private:
   // latest available point cloud and ee data pointers
   sensor_msgs::PointCloud2ConstPtr pc_msg_ptr;
   geometry_msgs::PoseConstPtr ee_pose_ptr;
+
+  // the point cloud from iai_kinect2 (kinect camera) was found misleading
+  // it says that the point cloud is 'rgb', but in reality it is 'rgba'.
+  // hence we made utility::getPointCloudFromMsg function to take care of it
+  // however the point cloud from realsense-ros (realsense camera) is also
+  // giving wrong information. Due to that PCL throws the following error
+  // Failed to find match for field 'rgb'.
+  // The workaround is give at the following URL
+  // https://github.com/IntelRealSense/realsense-ros/issues/680#issuecomment-543492819
+  // Make sure to follow the above URL.
+  // Due to these complications for now we are treating realsense camera
+  // separately
+  bool is_realsense_camera;
 
   // function to save the tracking data into a csv file
   void saveTrackingData();
@@ -223,7 +237,11 @@ bool DataCollector::processLatestData()
   // convert sensor_msgs::PointCloud2 to pcl::PointCloud
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(
       new pcl::PointCloud<pcl::PointXYZRGB>);
-  utility::getPointCloudFromMsg(pc_msg, *cloud, min_z, max_z);
+
+  if (is_realsense_camera)
+    pcl::fromROSMsg(pc_msg, *cloud);
+  else
+    utility::getPointCloudFromMsg(pc_msg, *cloud, min_z, max_z);
 
   // show the caputed point cloud
   if (!pc_viewers.at(0)->updatePointCloud(cloud, CLOUD_ID))
@@ -264,19 +282,19 @@ bool DataCollector::processLatestData()
 
     // add detected sphere if not added previously, update otherwise
     if (!pc_viewers.at(1)->updateSphere(detected_sphere, sphere_coff.values[3],
-                                        0.2, 0.3, 1.0, SPHERE_ID))
-      pc_viewers.at(1)->addSphere(detected_sphere, sphere_coff.values[3], 0.2,
-                                  0.3, 1.0, SPHERE_ID);
+                                        BLUE_COLOR, SPHERE_ID))
+      pc_viewers.at(1)->addSphere(detected_sphere, sphere_coff.values[3],
+                                  BLUE_COLOR, SPHERE_ID);
 
     // force the visualizer to update the view
-    pc_viewers.at(1)->spinOnce();
+    // pc_viewers.at(1)->spinOnce();
   }
   else
   {
     ROS_WARN_STREAM("Sphere detection failed");
 
     // remove the previously detected sphere in case of failure
-    pc_viewers.at(1)->removeShape(SPHERE_ID);
+    // pc_viewers.at(1)->removeShape(SPHERE_ID);
 
     /*
     std::string seg = "segme_" + utility::to_string(index) + ".pcd";
@@ -286,6 +304,8 @@ bool DataCollector::processLatestData()
     pcl::io::savePCDFileASCII(clo, *cloud);
     */
   }
+  // force the visualizer to update the view
+  pc_viewers.at(1)->spinOnce();
 
   return success;
 }
@@ -391,6 +411,8 @@ void DataCollector::init()
   // get the sensor_name as the first word between two leftmost slash chacters
   std::vector<int> all_slash = utility::find_all(pc_topic, "/");
   sensor_name = pc_topic.substr(all_slash[0] + 1, all_slash[1] - 1);
+
+  is_realsense_camera = boost::starts_with(sensor_name, "camera");
 
   // we used string to declare an array
   // now we need to convert it and get the integers

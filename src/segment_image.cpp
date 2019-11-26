@@ -79,6 +79,10 @@ int main(int argc, char** argv)
   std::string image_file;
   nh.getParam("file", image_file);
 
+  if (image_file.empty())
+    std::cerr << "Image is not provided. Kindly use the following way-\n"
+              << "_file:=/home/ravi/Desktop/image.png" << std::endl;
+
   cv::namedWindow(window_text, CV_WINDOW_AUTOSIZE);
   src_image = cv::imread(image_file, CV_LOAD_IMAGE_COLOR);
   if (!src_image.data)  // check for invalid input
@@ -88,9 +92,7 @@ int main(int argc, char** argv)
     return -1;
   }
   else
-  {
     std::cout << "Loading '" << image_file << "'" << std::endl;
-  }
 
   // create windows
   cv::namedWindow(window_text, CV_WINDOW_AUTOSIZE);

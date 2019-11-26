@@ -80,11 +80,15 @@ namespace utility
   std::vector<std::vector<T> > hstack(const std::vector<std::vector<T> >& a,
                                       const std::vector<std::vector<T> >& b)
   {
-    // check if the number of rows are equal in both arrays
-    assert(a.size() != b.size() &&
-           "Error, number of rows must be equal in both arrays.");
-
     std::vector<std::vector<T> > c;
+
+    // check if the number of rows are equal in both arrays
+    if (a.size() != b.size())
+    {
+      std::cerr << "Error, number of rows must be equal in both arrays."
+                << std::endl;
+      return c;
+    }
 
     // for each row
     for (size_t i = 0; i < a.size(); i++)
@@ -200,7 +204,7 @@ namespace utility
 
     /*
      * It was found that even though point cloud ros message field says that
-     * libfreenect2 point cloud is 'rgb', it is 'rgba'. Hence the code below
+     * iai_kinect2 point cloud is 'rgb', it is 'rgba'. Hence the code below
      * assumes that incoming point cloud is 'rgba' and it converts it to 'rgb'
      * to further use
      */
