@@ -244,9 +244,20 @@ bool DataCollector::processLatestData()
     utility::getPointCloudFromMsg(pc_msg, *cloud, min_z, max_z);
 
   // show the caputed point cloud
-  if (!pc_viewers.at(0)->updatePointCloud(cloud, CLOUD_ID))
-    pc_viewers.at(0)->addPointCloud(cloud, CLOUD_ID);
-  pc_viewers.at(0)->spinOnce();
+  //if (!pc_viewers.at(0)->updatePointCloud(cloud, CLOUD_ID))
+  //  pc_viewers.at(0)->addPointCloud(cloud, CLOUD_ID);
+  //pc_viewers.at(0)->spinOnce();
+
+  // clear the view
+  // we could use update method but it seems buggy in PCL 1.7.2
+  for (size_t i = 0; i < 2; i++)
+  {
+    pc_viewers.at(i)->removeAllShapes();
+    pc_viewers.at(i)->removeAllPointClouds();
+  }
+
+  // show the caputed point cloud
+  pc_viewers.at(0)->addPointCloud(cloud, CLOUD_ID);
 
   // declare the sphere coefficients consisting of position of the center
   // and radius of the sphere
@@ -262,8 +273,8 @@ bool DataCollector::processLatestData()
                                                 segmented_cloud, sphere_coff);
 
   // add segmented point cloud if not added previously, update otherwise
-  if (!pc_viewers.at(1)->updatePointCloud(segmented_cloud, SEGMENTED_CLOUD_ID))
-    pc_viewers.at(1)->addPointCloud(segmented_cloud, SEGMENTED_CLOUD_ID);
+  //if (!pc_viewers.at(1)->updatePointCloud(segmented_cloud, SEGMENTED_CLOUD_ID))
+  pc_viewers.at(1)->addPointCloud(segmented_cloud, SEGMENTED_CLOUD_ID);
 
   // force the visualizer to update the view
   pc_viewers.at(1)->spinOnce();
@@ -281,13 +292,13 @@ bool DataCollector::processLatestData()
                                   sphere_coff.values[2]);
 
     // add detected sphere if not added previously, update otherwise
-    if (!pc_viewers.at(1)->updateSphere(detected_sphere, sphere_coff.values[3],
-                                        BLUE_COLOR, SPHERE_ID))
-      pc_viewers.at(1)->addSphere(detected_sphere, sphere_coff.values[3],
-                                  BLUE_COLOR, SPHERE_ID);
-
+    //if (!pc_viewers.at(1)->updateSphere(detected_sphere, sphere_coff.values[3],
+    //                                    BLUE_COLOR, SPHERE_ID))
+    pc_viewers.at(1)->addSphere(detected_sphere, sphere_coff.values[3],
+                                BLUE_COLOR, SPHERE_ID);
     // force the visualizer to update the view
-    // pc_viewers.at(1)->spinOnce();
+    //pc_viewers.at(1)->spinOnce(1, true);
+    pc_viewers.at(1)->spinOnce();
   }
   else
   {
@@ -304,8 +315,6 @@ bool DataCollector::processLatestData()
     pcl::io::savePCDFileASCII(clo, *cloud);
     */
   }
-  // force the visualizer to update the view
-  pc_viewers.at(1)->spinOnce();
 
   return success;
 }
