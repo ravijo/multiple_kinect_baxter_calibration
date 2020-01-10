@@ -85,7 +85,7 @@ int main(int argc, char** argv)
   }
   else
   {
-    pcd_file = package_path + "/files/scene.pcd";
+    pcd_file = package_path + "/files/scene_0.pcd";
     ROS_WARN_STREAM("PCD file is not provided. Using '"
                     << pcd_file << "' as default PCD file.\n"
                     << "Alternatively use the following way-\n"
