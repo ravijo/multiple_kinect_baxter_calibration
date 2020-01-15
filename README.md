@@ -238,4 +238,6 @@ Open calibration file and modify child to `kinect1_link`
 roslaunch multiple_kinect_baxter_calibration calibration_publisher.launch calibration:="[kinect_anywhere]"
 ```
 
+## Issues (or Error Reporting)
+Please check [here](https://github.com/ravijo/multiple_kinect_baxter_calibration/issues) and create issues accordingly.
  
