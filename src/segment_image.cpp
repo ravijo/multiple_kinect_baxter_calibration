@@ -14,24 +14,27 @@
 
 using namespace cv;
 
-/// global variables
-const int slider_max = 255;
-int min_h = 0, min_s = 0, min_v = 0;
-int max_h = slider_max, max_s = slider_max, max_v = slider_max;
+// For HSV, hue range is [0, 179], 
+// saturation and value range is [0, 255]
+// https://docs.opencv.org/4.x/df/d9d/tutorial_py_colorspaces.html
+const int opencv_max_h = 179;
+const int opencv_max_sv = 255;
 
+// global variables
+int min_h = 0, min_s = 0, min_v = 0;
+int max_h = opencv_max_h, max_s = opencv_max_sv, max_v = opencv_max_sv;
 cv::Mat src_image;
 std::string window_text = "Find HSV range (Press 'q' to exit)";
 
 inline void segment_image()
 {
   cv::Mat image = src_image.clone();
+  if (image.channels() == 4)
+      cv::cvtColor(image, image, cv::COLOR_BGRA2BGR, 3);  // remove alpha channel
 
   cv::GaussianBlur(image, image, cv::Size(5, 5), 0, 0);
-  cv::Mat bgr_image, hsv_image, binary_image;
-  cv::cvtColor(image, bgr_image, cv::COLOR_BGRA2BGR,
-               3);  // remove alpha channel
-  cv::cvtColor(bgr_image, hsv_image, cv::COLOR_BGR2HSV);  // convert to hsv
-  bgr_image.release();  // remove bgr_image from memory
+  cv::Mat hsv_image, binary_image;
+  cv::cvtColor(image, hsv_image, cv::COLOR_BGR2HSV);  // convert to hsv
 
   cv::inRange(hsv_image, cv::Scalar(min_h, min_s, min_v),
               cv::Scalar(max_h, max_s, max_v), binary_image);
@@ -98,17 +101,17 @@ int main(int argc, char** argv)
   cv::namedWindow(window_text, CV_WINDOW_AUTOSIZE);
 
   // create trackbars
-  createTrackbar("Minimum Hue", window_text, &min_h, slider_max,
+  createTrackbar("Minimum Hue", window_text, &min_h, opencv_max_h,
                  on_min_h_trackbar);
-  createTrackbar("Minimum Saturation", window_text, &min_s, slider_max,
+  createTrackbar("Minimum Saturation", window_text, &min_s, opencv_max_sv,
                  on_min_s_trackbar);
-  createTrackbar("Minimum Value", window_text, &min_v, slider_max,
+  createTrackbar("Minimum Value", window_text, &min_v, opencv_max_sv,
                  on_min_v_trackbar);
-  createTrackbar("Maximum Hue", window_text, &max_h, slider_max,
+  createTrackbar("Maximum Hue", window_text, &max_h, opencv_max_h,
                  on_max_h_trackbar);
-  createTrackbar("Maximum Saturation", window_text, &max_s, slider_max,
+  createTrackbar("Maximum Saturation", window_text, &max_s, opencv_max_sv,
                  on_max_s_trackbar);
-  createTrackbar("Maximum Value", window_text, &max_v, slider_max,
+  createTrackbar("Maximum Value", window_text, &max_v, opencv_max_sv,
                  on_max_v_trackbar);
 
   /// show some stuff
